@@ -1,7 +1,7 @@
-import glob, os, json, sys, json, re, getopt
+import glob, json, sys, json, re, getopt
 from tempfile import mkstemp
 from shutil import move, copymode, copy
-from os import fdopen
+from os import fdopen, path as ospath
 
 def scrape_hex_values_from_file(file, silent):
     hex_list = []
@@ -94,7 +94,7 @@ def generate_hex_list_from_files(files_grabbed, path, silent):
 
     # iterate over the files and scrape the hex values into a single file
     for file in files_grabbed:
-        full_hex_list = full_hex_list + scrape_hex_values_from_file(os.path.join(path, ''.join(file)), silent)
+        full_hex_list = full_hex_list + scrape_hex_values_from_file(ospath.join(path, ''.join(file)), silent)
     
     return full_hex_list
 
@@ -105,7 +105,7 @@ def get_files(path):
 
     for files in types:
         # Strip path so we scrap new hex values in other path
-        files_grabbed.extend(os.path.basename(x) for x in glob.glob(os.path.join(path, ''.join(files))))
+        files_grabbed.extend(ospath.basename(x) for x in glob.glob(ospath.join(path, ''.join(files))))
 
     print(files_grabbed)
     return files_grabbed
@@ -150,7 +150,7 @@ def main(argv):
     backup = True
 
     help_info = """
-        hex_script.py -m <mode> <options>
+        hex_updater.py -m <mode> <options>
 
         Modes:
             generate: Creates a hex table for updating hex values
@@ -164,12 +164,12 @@ def main(argv):
                     -p, --path: Path of the old hex values, will be used as a reference (use full path)
                     -n, --path2: Path of the new hex values, will become the value of the old key (use full path)
                     -g, --starfield: Starfield game version, will be used in the filename
-                    -c, --commit: commit ID of a mod tool not to be names :?, will be used in the filename
+                    -c, --commit: commit ID of a mod tool not to be named :?, will be used in the filename
                     -s, --silent: hides any caught exceptions
                 update:
                     -p, --path: Path to the folder of files to be updated, files will be backed up by default (use full path)
                     -d, --dictfile: dictionary to be used for updating hex values (use full path)
-                    -b, --backup: Option to prevent backup
+                    -b, --backup: Option to prevent backup files
     """
 
     #try:
@@ -214,7 +214,7 @@ def main(argv):
 
         print("backup", backup)
         for file in files:
-            update(os.path.join(path, ''.join(file)), hex_dict, backup)
+            update(ospath.join(path, ''.join(file)), hex_dict, backup)
 
     elif mode == modes[1]:
         if path == '' or path2 == '':
