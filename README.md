@@ -1,7 +1,9 @@
 # Starfield Hex Updater
 
 ## Requirements
-I've tried to keep it as simple as possible, I've used only build-in imports. Using the below version of python, I'm sure anyhting python 3.x would work, but if you have trouble use the one I mentioned.
+I've tried to keep it as simple as possible, I've used only build-in imports. Using the below version of python, I'm sure any version above python 3.x would work, but if you have any trouble use the one I mentioned.
+
+Be vigilant of the hex table name `hex_table_{game_version}_{commit_id}.json`, it consists of important data, so if you're having issues after running the update be sure you're trying to update with the correct hex table.
 
 > Python 3.11 
 
