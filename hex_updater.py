@@ -180,6 +180,13 @@ def patch(path, silent, backup):
                                 new_line = "//{}".format(old_line)
                                 lines.insert(idx, new_line)
 
+                            if idx == 440:
+                                new_line = line.replace(
+                                    convert([83, 116, 101, 97, 109]), 
+                                    convert([87, 105, 110, 83, 116, 111, 114, 101])
+                                    )
+                                lines.insert(440, new_line)
+
                             elif idx >= 449 and idx <= 455:
                                 old_line = lines.pop(idx)
                                 new_line = "//{}".format(old_line)
@@ -191,7 +198,7 @@ def patch(path, silent, backup):
 
 def main(argv):
     modes = ["update", "generate", "patch"]
-    version = "0.1.0"
+    version = "0.1.1"
 
     mode= ''
     path = ''
