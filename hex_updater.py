@@ -180,9 +180,13 @@ def patch(path, silent, backup):
                                 new_line = "//{}".format(old_line)
                                 lines.insert(idx, new_line)
 
+                            elif idx >= 449 and idx <= 455:
+                                old_line = lines.pop(idx)
+                                new_line = "//{}".format(old_line)
+                                lines.insert(idx, new_line)
+                                
+
                 new_file.writelines(lines)
-
-
         move_file(get_full_path(path, file), abs_path, backup)
 
 def main(argv):
