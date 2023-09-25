@@ -13,6 +13,7 @@ Be vigilant of the hex table name `hex_table_{game_version}_{commit_id}.json`, i
         Modes:
             generate: Creates a hex table for updating hex values
             update: Updates hex values using a hex dictionary
+            patch: Patches out the error message preventing program from running
 
         <Options>
             -h, --help
@@ -23,8 +24,11 @@ Be vigilant of the hex table name `hex_table_{game_version}_{commit_id}.json`, i
                     -n, --path2: Path of the new hex values, will become the value of the old key (use full path)
                     -g, --starfield: Starfield game version, will be used in the filename
                     -c, --commit: commit ID of a mod tool not to be named :?, will be used in the filename
-                    -s, --silent: hides any caught exceptions / print()
+                    -s, --silent: hides any caught exceptions
                 update:
                     -p, --path: Path to the folder of files to be updated, files will be backed up by default (use full path)
                     -d, --dictfile: dictionary to be used for updating hex values (use full path)
+                    -b, --backup: Option to prevent backup files
+                patch:
+                    -p, --path: Path to the folder of files to be patched, files will be backed up by default (use full path)
                     -b, --backup: Option to prevent backup files

@@ -203,7 +203,7 @@ def main(argv):
         Modes:
             generate: Creates a hex table for updating hex values
             update: Updates hex values using a hex dictionary
-            patch: Patches out the error message preverting program from running
+            patch: Patches out the error message preventing program from running
 
         <Options>
             -h, --help
