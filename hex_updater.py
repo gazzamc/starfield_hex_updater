@@ -20,9 +20,9 @@ def convert(list):
 def get_full_path(path, filename):
     return ospath.join(path, ''.join(filename))
 
-def move_file(old_file, new_file, backup):
+def move_file(old_file, new_file, backup, patched):
     copymode(old_file, new_file)
-    if backup:
+    if backup and patched:
         copy(old_file, "{}.bak".format(old_file))
     move(new_file, old_file)
 
@@ -34,11 +34,10 @@ def scrape_hex_values_from_file(file, silent):
         for line in file.readlines():
             #check if valid hex before appending
             try:
-                regex = '(0[xX][0-9a-fA-F]+)'
+                regex = '(0[xX][0-9a-fA-F]{7,})'
                 pattern = re.findall(regex, line)
 
-    	        # unlikely to have two on one line, will change if needed
-                if len(pattern) == 1:
+                if len(pattern) >= 1:
                     hex_list.append(pattern[0])
             except ValueError:
                 if not silent:
@@ -61,7 +60,8 @@ def create_combined_dictionary(lookup_file, value_file):
 
 
 def update(file_with_path, dictionary, backup):
-    regex = '(0[xX][0-9a-fA-F]+)'
+    regex = '(0[xX][0-9a-fA-F]{7,})'
+    patched = False
 
     #Create temp file
     fh, abs_path = mkstemp()
@@ -80,6 +80,7 @@ def update(file_with_path, dictionary, backup):
                         new_file.write(line)
                     else:
                         new_file.write(line.replace(old_hex, new_hex))
+                        patched = True
 
                 elif len(pattern) > 1:
                     # iterate through hex values and replace them
@@ -91,13 +92,14 @@ def update(file_with_path, dictionary, backup):
                         # no hex, leave it alone
                         if new_hex is not None:
                             new_line = new_line.replace(old_hex, new_hex)
+                            patched = True
 
                     new_file.write(new_line)
                 else:  
                     # keep old line if nothing found  
                     new_file.write(line)
 
-    move_file(file_with_path, abs_path, backup)
+    move_file(file_with_path, abs_path, backup, patched)
 
 def generate_hex_list_from_files(files_grabbed, path, silent):
     full_hex_list = []
@@ -149,6 +151,8 @@ def patch(path, silent, backup):
     files = get_files(path, ('*.cpp',))
 
     for file in files:
+        patched = False
+
         fh, abs_path = mkstemp()
         with fdopen(fh,'r+') as new_file:
             with open(get_full_path(path, file), "r+") as old_file:
@@ -163,6 +167,8 @@ def patch(path, silent, backup):
                                 convert([87, 105, 110, 83, 116, 111, 114, 101])
                                 )
                             lines.insert(244, new_line)
+                    
+                    patched = True
 
                 elif line_count == 284:
                     if not silent:
@@ -187,18 +193,21 @@ def patch(path, silent, backup):
                                     )
                                 lines.insert(440, new_line)
 
-                            elif idx >= 449 and idx <= 455:
+                            elif idx >= 450 and idx <= 456:
                                 old_line = lines.pop(idx)
                                 new_line = "//{}".format(old_line)
                                 lines.insert(idx, new_line)
+
+                    patched = True
                                 
 
                 new_file.writelines(lines)
-        move_file(get_full_path(path, file), abs_path, backup)
+
+        move_file(get_full_path(path, file), abs_path, backup, patched)
 
 def main(argv):
     modes = ["update", "generate", "patch"]
-    version = "0.1.1"
+    version = "0.1.2"
 
     mode= ''
     path = ''
