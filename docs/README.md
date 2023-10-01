@@ -2,12 +2,12 @@
 
 I understand that for someone without any dev experience this might seems a bit daunting, but I've made it as simple as possible. Once you follow this guide you will see just how simple it is to build SFSE that works on Gamepass/Windows version of Starfield.
 
-Bare in mind that not all SFSE mods will work, many require a patch as they don't use SFSE directly but as an injector. I've patched many and have them available to download on github, you can see the list [here](#supported-mods). If the source is available and it open source I can patch it. I'm hoping that in the future and with the introduction of the address library I won't need to patch these mods and they'll work out of the box.
+:warning: Bare in mind that not all SFSE mods will work, many require a patch as they don't use SFSE directly but as an injector. I've patched many and have them available to download on github, you can see the list [here](#supported-mods). If the source is available and it's open source I can patch it. I'm hoping that in the future with the introduction of the address library I won't need to patch these mods and they'll work out of the box.
 
 
 # Table of Contents
 
-- [Prerequisites](#Prerequisites)
+- [Prerequisites](#prerequisites)
 - [Backing up save files](#backing-up-save-files)
 - [Removing Permissions](#removing-permissions)
 - [Running the script](#running-the-script)
@@ -21,17 +21,19 @@ Bare in mind that not all SFSE mods will work, many require a patch as they don'
 
 
 ## Prerequisites
-Going on the assumption that you have clean windows install with absolutely no tools installed, this is what you will need to complete this guide.
+Going on the assumption that you have a clean windows install with absolutely no tools installed, this is what you will need to complete this guide.
 
 - [Python 3.11](https://www.python.org/ftp/python/3.11.0/python-3.11.0-amd64.exe)
 - [Git](https://github.com/git-for-windows/git/releases/download/v2.42.0.windows.2/Git-2.42.0.2-64-bit.exe)
 - [CMake](https://github.com/Kitware/CMake/releases/download/v3.27.6/cmake-3.27.6-windows-x86_64.msi)
+- [Windows Visual Studio Community](https://visualstudio.microsoft.com/downloads/)
+    - Select `Desktop development with C++` on installation, no need for the others (about 10GB space needed)
 
 <i>Be sure to add these to windows path if the option is available</i>
 
 ## Backing up save files
 
-<span style="color:yellow;">Caution: I highly recommend you backup your save files!</span>
+:warning: I highly recommend you backup your save files!
 
 - Windows Key + R:
 - Type into the input box
@@ -52,9 +54,9 @@ You have two options:
 1. [Copy Files](#copy-files)
 2. [Hardlink](#hardlink)
 
-<span style="color:yellow;">Note: The Hardlink script won't work across separate drives</span>
+:warning: The Hardlink script won't work across separate drives
 
-### Copy Files
+#### Copy Files
 
 If you have the space to do so, I would highly recommend just copying the files to another folder, this prevents the mods breaking when the game updates. I can still play `v1.7.29` as of right now, if it changes in the future I'll add a note.
 
@@ -62,9 +64,9 @@ If you have the space to do so, I would highly recommend just copying the files 
 2. Right-Click `Copy`
 3. Right-click `Paste` into target folder
 
-<span style="color:yellow;">Be sure to copy the files to a directory where you have full permissions eg. Desktop</span>
+:bulb: Be sure to copy the files to a directory where you have full permissions eg. Desktop
 
-### Hardlink
+#### Hardlink
 
 Hardlinking will save some space, at least with my script, it will create a new version of the files in the root of the game folder but will create a junction of the data folders. I haven't used this method but it may break when the game updates as the folders will be modified via the original game folder.
 
@@ -84,14 +86,14 @@ Get-ChildItem | ForEach-Object {
 pause #Not really needed unless you want to check for errors
 ```
 
-1. Create file `copy-files.ps1` <span style='font-size:10px'>*name doesn't matter</span>
+1. Create file `copy-files.ps1` :grey_exclamation: <sup>name doesn't matter</sup>
 2. Move file to the `content` folder
 2. Edit and paste the above script into it
 2. Right-Click > `Run with Powershell`
 
 The files will be added to the new folder you specified.
 
-### Can't move exe?
+#### Can't move exe?
 
 You'll probably get an error when trying to move `Starfield.exe`, if this happens, do the following:
 
@@ -105,10 +107,10 @@ You will notice that the icon of the exe will change to the starfield logo, this
 
 Now we get to the bones of the guide.
 
-In most cases the script will lack behind the latest commit of SFSE (Not necessarily the version available), so when we pull the repo we need to checkout the correct commit or the script won't work as intended.
+In most cases the script will lag behind the latest commit of SFSE (Not necessarily the version available), so when we pull the repo we need to checkout the correct commit or the script may not work as intended.
 
 - Open Command Prompt *
-- `CD` to the folder you want to downlaod the source
+- `CD` to the folder where you want to download the source
 
 ```
     cd /folder/you/will/like/to/keep/the/repo
@@ -135,7 +137,7 @@ In most cases the script will lack behind the latest commit of SFSE (Not necessa
 It's almost identical the above without the checkout part.
 
 - Open Command Prompt
-- `CD` to the folder you want to downlaod the source
+- `CD` to the folder where you want to download the source
 
 ```
     cd /folder/you/will/like/to/keep/the/repo
@@ -167,7 +169,7 @@ Patching the exe is incredibly simple :)
 
 *Optionally you can prevent the backup of files touches with `-b false`
 
-**Be sure the path is pointing the folder specified in `-p`, the script expects this folder
+**Be sure the path is pointing to the folder specified in `-p`, the script expects this folder
 
 ### Updating Addresses
 
@@ -187,7 +189,7 @@ Very similar to the last step
 
 *Optionally you can prevent the backup of files touches with `-b false`
 
-**Be sure the path is pointing the folder specified in `-p`, the script expects this folder
+**Be sure the path is pointing to the folder specified in `-p`, the script expects this folder
 
 ### Building
 
