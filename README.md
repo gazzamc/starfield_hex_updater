@@ -7,6 +7,9 @@ Be vigilant of the hex table name `hex_table_{game_version}_{commit_id}.json`, i
 
 > Python 3.11 
 
+## Notes
+As of v0.1.3 the script can patch without providing the path, if placed in the root of the SFSE repo folder.
+
 ## Usage
         hex_script.py -m <mode> <options>
 
@@ -24,11 +27,11 @@ Be vigilant of the hex table name `hex_table_{game_version}_{commit_id}.json`, i
                     -n, --path2: Path of the new hex values, will become the value of the old key (use full path)
                     -g, --starfield: Starfield game version, will be used in the filename
                     -c, --commit: commit ID of a mod tool not to be named :?, will be used in the filename
-                    -s, --silent: hides any caught exceptions
+                    -s, --silent: hides any caught exceptions [Optional]
                 update:
                     -p, --path: Path to the folder of files to be updated, files will be backed up by default (use full path)
                     -d, --dictfile: dictionary to be used for updating hex values (use full path)
-                    -b, --backup: Option to prevent backup files
+                    -b, --backup: Option to prevent backup files [Optional]
                 patch:
-                    -p, --path: Path to the folder of files to be patched, files will be backed up by default (use full path)
-                    -b, --backup: Option to prevent backup files
+                    -p, --path: Path to the folder of files to be patched, files will be backed up by default (use full path) [Optional]
+                    -b, --backup: Option to prevent backup files [Optional]

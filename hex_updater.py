@@ -1,14 +1,21 @@
 import glob, json, sys, json, re, getopt
 from tempfile import mkstemp
 from shutil import move, copymode, copy
-from os import fdopen, path as ospath
+from os import fdopen, getcwd, path as ospath
+
+
+def warning_msg(msg):
+    print("\033[93m {}\033[00m\n".format(msg))
+
+def error_msg(msg):
+    print("\033[91m {}\033[00m\n".format(msg))
 
 def get_replacement_hex(hex_to_find, dictionary):
     try:
         new_hex = dictionary[hex_to_find]
         return new_hex
     except KeyError as e:
-        print("No replacement found for {}, leaving it in place. Be Sure to check you have the correct hex table for this version".format(e))
+        warning_msg("No replacement found for {}, leaving it in place. Be Sure to check you have the correct hex table for this version".format(e))
 
 def convert(list):
     string = ''
@@ -41,7 +48,7 @@ def scrape_hex_values_from_file(file, silent):
                     hex_list.append(pattern[0])
             except ValueError:
                 if not silent:
-                    print("Invalid hex, won't be added to the list: ", line)
+                    warning_msg("Invalid hex, won't be added to the list: ", line)
     return hex_list
 
 
@@ -51,7 +58,8 @@ def create_combined_dictionary(lookup_file, value_file):
 
     #compare list size and throw error if differnt
     if len(old_list) != len(new_list):
-       sys.exit('The two files do not have the same length of lines, please check')
+       error_msg('The two files do not have the same length of lines, please check')
+       sys.exit()
     else:
         #create the dictionary of hex values from files
         dictionary = {"{}".format(old_list[i]): new_list[i] for i in range(len(old_list))}
@@ -148,66 +156,137 @@ def generate_hex_dict_for_dir(path1, path2, filename, silent):
         f.close()
 
 def patch(path, silent, backup):
-    files = get_files(path, ('*.cpp',))
+    files_to_patch = [
+        convert([
+            80, 108, 117, 103, 
+            105, 110, 77, 97, 
+            110, 97, 103, 101, 
+            114, 46, 99, 112, 112]), 
+        convert([
+            73, 100, 101, 110, 116, 
+            105, 102, 121, 69, 88, 
+            69, 46, 99, 112, 112
+            ]),
+        convert([
+            109, 97, 105, 110, 
+            46, 99, 112, 112
+        ])
+    ]
+    dirs = [
+        convert([115, 102, 115, 101]), 
+        convert([
+            115, 102, 115, 101, 95,
+            108, 111, 97, 100, 101, 
+            114])
+    ]
 
-    for file in files:
-        patched = False
+    if path == '':
+        path = getcwd()
 
-        fh, abs_path = mkstemp()
-        with fdopen(fh,'r+') as new_file:
-            with open(get_full_path(path, file), "r+") as old_file:
-                lines = old_file.readlines()
-                line_count = len(lines)
+    for dir in dirs:
+        for file in files_to_patch:
+            path_to_file = get_full_path(ospath.join(path, dir), file)
+            if ospath.exists(path_to_file):
+                
+                fh, abs_path = mkstemp()
+                with fdopen(fh,'r+') as new_file:
+                    with open(path_to_file, "r+") as old_file:
+                        lines = old_file.readlines()
+                        line_count = len(lines)
+                        already_patched = False
 
-                if line_count == 283:
-                    for idx, line in enumerate(lines):
-                        if idx == 243:
-                            new_line = line.replace(
-                                convert([83, 116, 101, 97, 109]), 
-                                convert([87, 105, 110, 83, 116, 111, 114, 101])
-                                )
-                            lines.insert(244, new_line)
-                    
-                    patched = True
+                        if file == files_to_patch[2]:
+                            # Check if already patched
+                            if line_count != 283:
+                                    already_patched = True
+                            else:
+                                for idx, line in enumerate(lines):
+                                    if idx == 243:
+                                        new_line = line.replace(
+                                            convert([83, 116, 101, 97, 109]), 
+                                            convert([
+                                                87, 105, 110, 83, 
+                                                116, 111, 114, 101
+                                            ])
+                                            )
+                                        lines.insert(244, new_line)
 
-                elif line_count == 284:
-                    if not silent:
-                        print("{} already patched".format(file))
+                        if file == files_to_patch[1]:
+                            # Check if already patched
+                            if line_count != 470:
+                                if str(lines[318]).startswith('//'):
+                                    already_patched = True
+                            else:
+                                for idx, line in enumerate(lines):
+                                    if idx >= 317 and idx <= 321:
+                                        old_line = lines.pop(idx)
+                                        new_line = "//{}".format(old_line)
+                                        lines.insert(idx, new_line)
 
-                elif line_count == 470:
-                    if str(lines[318]).startswith('//'):
-                        if not silent:
-                            print("{} already patched".format(file))
-                    
-                    else:
-                        for idx, line in enumerate(lines):
-                            if idx >= 317 and idx <= 321:
-                                old_line = lines.pop(idx)
-                                new_line = "//{}".format(old_line)
-                                lines.insert(idx, new_line)
+                                    if idx == 440:
+                                        new_line = line.replace(
+                                            convert([83, 116, 101, 97, 109]), 
+                                            convert([
+                                                87, 105, 110, 83, 
+                                                116, 111, 114, 101
+                                            ])
+                                            )
+                                        lines.insert(440, new_line)
 
-                            if idx == 440:
-                                new_line = line.replace(
-                                    convert([83, 116, 101, 97, 109]), 
-                                    convert([87, 105, 110, 83, 116, 111, 114, 101])
-                                    )
-                                lines.insert(440, new_line)
+                                    elif idx >= 450 and idx <= 456:
+                                        old_line = lines.pop(idx)
+                                        new_line = "//{}".format(old_line)
+                                        lines.insert(idx, new_line)
 
-                            elif idx >= 450 and idx <= 456:
-                                old_line = lines.pop(idx)
-                                new_line = "//{}".format(old_line)
-                                lines.insert(idx, new_line)
+                        if file == files_to_patch[0]:
+                            # Check if already patched
+                            if str(lines[387]).startswith('//'):
+                                already_patched = True
+                            else:
+                                for idx, line in enumerate(lines):
+                                    if idx == 386:
+                                        old_line = lines.pop(idx)
+                                        new_line = "//{}".format(old_line)
+                                        lines.insert(idx, new_line)
 
-                    patched = True
-                                
+                                    if idx == 389:
+                                        old_line = lines.pop(idx)
+                                        new_line = line.replace(
+                                            convert([
+                                                45, 37, 100, 45, 
+                                                37, 100, 45, 37, 
+                                                100, 45, 37, 100, 
+                                                37, 115
+                                                ]), 
+                                            convert([
+                                                45, 37, 100, 45, 37, 
+                                                100, 45, 37, 100, 45, 
+                                                37, 100, 45, 37, 100
+                                            ])
+                                            )
+                                        lines.insert(idx, new_line)
 
-                new_file.writelines(lines)
+                                    elif idx == 393:
+                                        old_line = lines.pop(idx)
+                                        new_line = line.replace(
+                                            convert([
+                                                98, 117, 105, 108, 100, 
+                                                84, 121, 112, 101
+                                                ]), 
+                                            convert([49])
+                                            )
+                                        lines.insert(idx, new_line)
 
-        move_file(get_full_path(path, file), abs_path, backup, patched)
+                        if not silent and already_patched:
+                            warning_msg("{} already patched".format(file))            
+
+                        new_file.writelines(lines)
+
+                move_file(path_to_file, abs_path, backup, True)
 
 def main(argv):
     modes = ["update", "generate", "patch"]
-    version = "0.1.2"
+    version = "0.1.3"
 
     mode= ''
     path = ''
@@ -273,7 +352,7 @@ def main(argv):
 
     if mode == modes[0]:
         if dict_file_name == '' or path == '':
-            print("No paths provided for generating hex table")
+            error_msg("No paths provided for generating hex table")
             sys.exit()
 
         # Get files to update
@@ -281,7 +360,7 @@ def main(argv):
         hex_dict = get_dict(dict_file_name)
 
         if len(files) == 0 or hex_dict is None:
-            print("No files to update, or dictionary not found")
+            error_msg("No files to update, or dictionary not found")
             sys.exit()
 
         for file in files:
@@ -289,20 +368,22 @@ def main(argv):
 
     elif mode == modes[1]:
         if path == '' or path2 == '':
-            print("No paths provided for generating hex table")
+            error_msg("No paths provided for generating hex table")
             sys.exit()
         
         hex_file_name = "hex_table_{0}_{1}.json".format(game_version, commit)
         generate_hex_dict_for_dir(path, path2, hex_file_name, silent)
 
     elif mode == modes[2]:
-        if path == '':
-            print("No path provided for patching files")
+        currDirName = ospath.basename(getcwd())
+        if path == '' and currDirName != convert([115, 102, 115, 101]):
+            # Check if we're in the correct directory
+            error_msg("Be sure to either run the script within the repo folder or point to the folder using [-p, --path] arguments")
             sys.exit()
         
         patch(path, silent, backup)
     else:
-        print("No mode selected, use -h, --help for usage")
+        warning_msg("No mode selected, use -h, --help for usage")
 
 if __name__ == "__main__":
    main(sys.argv[1:])
