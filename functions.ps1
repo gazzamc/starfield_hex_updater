@@ -1,9 +1,4 @@
 # A PS script to patch/install Gamepass SFSE in one click
-# Pre-flight checklist
-param (
-    [switch]$bypassChecks = $false
-)
-
 
 $ErrorActionPreference = "Stop"
 $vsWhereURL = "https://github.com/microsoft/vswhere/releases/download/3.1.7/vswhere.exe"
