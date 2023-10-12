@@ -7,6 +7,8 @@ I understand that for someone without any dev experience this might seems a bit 
 
 # Table of Contents
 
+- [Auto Installer GUI](#autoinstaller-gui)
+- [Manual Process](#manual)
 - [Prerequisites](#prerequisites)
 - [Backing up save files](#backing-up-save-files)
 - [Removing Permissions](#removing-permissions)
@@ -19,6 +21,24 @@ I understand that for someone without any dev experience this might seems a bit 
 - [Did it work?](#did-it-work)
 - [Supported Mods](#supported-mods)
 
+## Auto Installer GUI
+If you're not as technical or just can't be bothered following the instructions below, you can use the Auto Installer `installer.ps1` to do the following:
+
+    Check Dependencies
+    Install Missing Dependencies
+    Pull SFSE repo
+    Patch Repo
+    Build Repo
+    Move Files to game folder
+
+    To be added later:
+    * Hardlink/Copy game files to remove permissions
+
+In order to install some dependencies you may need to set `Set-ExecutionPolicy` to unrestricted (can be changed back after install), this can also be done from the GUI in the `Options` menu.
+
+
+# Manual Process
+For those who like to get their hands dirty, follow the guide below.
 
 ## Prerequisites
 Going on the assumption that you have a clean windows install with absolutely no tools installed, this is what you will need to complete this guide.
