@@ -7,8 +7,8 @@ I understand that for someone without any dev experience this might seems a bit 
 
 # Table of Contents
 
-- [Auto Installer GUI](#autoinstaller-gui)
-- [Manual Process](#manual)
+- [Auto Installer GUI](#auto-installer-gui)
+- [Manual Process](#manual-process)
 - [Prerequisites](#prerequisites)
 - [Backing up save files](#backing-up-save-files)
 - [Removing Permissions](#removing-permissions)
