@@ -1,6 +1,6 @@
 # Starfield Hex Updater
 
-Install/build instructions can be found [HERE](https://github.com/gazzamc/starfield_hex_updater/tree/main/docs), you have the option of a powershell autoInstaller script or you can do the process manually.
+Install/build instructions can be found [HERE](https://github.com/gazzamc/starfield_hex_updater/tree/main/docs), you have the option of a powershell Auto Installer script or you can do the process manually.
 
 ## Requirements
 I've tried to keep it as simple as possible, I've used only built-in imports. Using the below version of python, I'm sure any version above python 3.x would work, but if you have any trouble use the one I mentioned.
@@ -11,6 +11,7 @@ Be vigilant of the hex table name `hex_table_{game_version}_{commit_id}.json`, i
 
 ## Notes
 As of v0.1.3 the script can patch without providing the path, if placed in the root of the SFSE repo folder.
+
 Added a script to auto generate the hex table using the Address Libraries
 
 ## Usage

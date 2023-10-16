@@ -262,4 +262,4 @@ Also if the game is launching and it's crashing, please be sure you're using one
 
 ### Supported Mods
 
-If the mod has implemented the Address Library there's a good chance it will work. I haven't extensively tested mods since the change, so If you find a mod that's not working, reach out to me and I'll add it below.
+If the mod has implemented the Address Library ([Nexus Mods](https://www.nexusmods.com/starfield/mods/3256?tab=files)) there's a good chance it will work. I haven't extensively tested mods since the change, so If you find a mod that's not working, reach out to me and I'll add it below.
