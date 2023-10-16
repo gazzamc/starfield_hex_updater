@@ -11,6 +11,7 @@ Be vigilant of the hex table name `hex_table_{game_version}_{commit_id}.json`, i
 
 ## Notes
 As of v0.1.3 the script can patch without providing the path, if placed in the root of the SFSE repo folder.
+Added a script to auto generate the hex table using the Address Libraries
 
 ## Usage
         hex_script.py -m <mode> <options>
