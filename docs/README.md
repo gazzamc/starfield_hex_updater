@@ -262,14 +262,4 @@ Also if the game is launching and it's crashing, please be sure you're using one
 
 ### Supported Mods
 
-The following is a list of mods that I have personally tested and patched for the latest supported version of this script. You won't need to build these, as I have them available to download on Github. I won't go through the trouble of putting these on nexus mods, perhaps the authors of said mods may do so themselves, or even support GP version in the future. As mentioned before if I can get the Address library working on this version of SFSE then patching mods (that have implemented it) won't be needed.
-
-If you find a mod that's working and not in this list, reach out to me or create a PR and I'll add it.
-
-### Patched
-- [BakaQuickFullSaves](https://github.com/gazzamc/BakaQuickFullSaves/releases) - Official Nexus Mods [link](https://www.nexusmods.com/starfield/mods/1750) 
-- [BakaQuitGameFix](https://github.com/gazzamc/BakaQuitGameFix/releases) - Official Nexus Mods [link](hhttps://www.nexusmods.com/starfield/mods/1662) 
-- [BakaKillMyGames](https://github.com/gazzamc/BakaKillMyGames/releases) - Official Nexus Mods [link](https://www.nexusmods.com/starfield/mods/1599) 
-- [AchievementEnablerSFSE](https://github.com/gazzamc/AchievementEnablerSFSE/releases) - Official Nexus Mods [link](https://www.nexusmods.com/starfield/mods/658)
-- [HoldToEquipExtended](https://github.com/gazzamc/HoldToEquipExtended/releases) - Official Nexus Mods [link](https://www.nexusmods.com/starfield/mods/1956)
-- [GravityAffectsCarryWeight](https://github.com/gazzamc/GravityAffectsCarryWeight/releases) - Official Nexus Mods [link](https://www.nexusmods.com/starfield/mods/3048)
+If the mod has implemented the Address Library there's a good chance it will work. I haven't extensively tested mods since the change, so If you find a mod that's not working, reach out to me and I'll add it below.
