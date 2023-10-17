@@ -125,10 +125,10 @@ function askAndDownload() {
         [Parameter(Mandatory = $true)] [String] $question, 
         [Parameter(Mandatory = $true)] [String] $downloadURL, 
         [Parameter(Mandatory = $true)] [String] $fileName, 
-        [Parameter(Mandatory = $true)] [String] $bypass
+        [Parameter(Mandatory = $false)] [String] $bypass = $true
     )
 
-    if (!$bypassChecks) {
+    if (!$bypass) {
         # Ask user for permission to download
         $confirmation = Read-Host $question
         while ($confirmation -ne "y") {
@@ -172,6 +172,8 @@ function preFlightCheck() {
     writeToConsole ("Git [https://git-scm.com/] ...." + (& { if (isInstalled "git") { "Installed" } else { "Not Found"; $progsToInstall.Add("Git") } }))
 
     writeToConsole ("Visual Studio 2022 [https://visualstudio.microsoft.com/vs/] ...." + (& { if (checkVsCodeInstalled) { "Installed" } else { "Not Found"; $progsToInstall.Add("VS2022") } }))
+
+    Start-Sleep -Seconds 2
 }
 
 function installMissing() {
@@ -202,13 +204,13 @@ function installMissing() {
 function getLatestCommitId() {
     $files = Get-ChildItem -Path (getFullPath 'hex_tables') -filter *.json -file | Sort-Object -Property Name -Descending
     $highestVersion = $files[0].toString().Split('_')[3]
-    return $commit = $highestVersion.substring(0, $highestVersion.length - 0 - 5)
+    return $highestVersion.substring(0, $highestVersion.length - 0 - 5)
 }
 
 function getGameVersion() {
     $files = Get-ChildItem -Path (getFullPath 'hex_tables') -filter *.json -file | Sort-Object -Property Name -Descending
     $highestVersion = $files[0].toString().Split('_')[2].Split('.') -join '_'
-    return $commit = $highestVersion
+    return $highestVersion
 }
 
 function getLatestDictFileName() {
@@ -325,9 +327,96 @@ function patchFiles() {
     }
 }
 
+function checkSpaceReq() {
+    param (
+        [string]$gamePath,
+        [string]$newPath
+    )
+
+    $driveLetter = (Get-Item $newPath).PSDrive.Name + ":"
+    $drives = Get-CimInstance -ClassName Win32_LogicalDisk | Select-Object -Property DeviceID,FreeSpace
+    
+    if($drives.DeviceID -contains $driveLetter){
+        # Get free space of drive
+        $idx = $drives.DeviceID.IndexOf($driveLetter)
+        $space = ($drives[$idx].FreeSpace)
+
+        # Get current size of game folder
+        $folderSize = (Get-ChildItem -Path $gamePath -Recurse | Measure-Object -Property Length -Sum).sum
+
+        if($folderSize -gt $space){
+            writeToConsole "
+            Not enough space on drive to copy the game: 
+
+                Space Required: $([Math]::Round($folderSize / 1Gb, 2)) Gb
+                Free Disk Space ($driveLetter): $([Math]::Round($space / 1Gb, 2)) Gb
+            "
+            exit
+        }
+    }
+    
+}
+
+function removeFilePermissions() {
+    $type = Read-Host -Prompt "
+    1. Copy Files 
+    2. Hardlink Files (Does not work across drives)
+    q. Return
+
+    Choose the type of operation"
+
+    # Return to menu
+    if ($type -eq 'q'){
+        return
+    }
+
+    if ($type -eq "" -or ($type -gt 2 -or $type -lt 1)) {
+        writeToConsole("Invalid Option, exiting!")
+        exit 
+    }
+    
+    # Get path of game install and new location for files
+    $currPath = Read-Host -Prompt "Enter current game folder path: "
+    $newGamePath = Read-Host -Prompt "Enter new game folder path: "
+
+    if ($currPath -eq "" -or $newGamePath -eq "") {
+        writeToConsole("One or more paths are empty")
+        exit 
+    }
+    
+    # Check paths exist or error out
+    if (!(Test-Path -Path $currPath) -or !(Test-Path -Path $newGamePath)) {
+        writeToConsole("One of the paths inputted does not exists, please check them!")
+        exit 
+    }
+
+    if($type -eq 1){
+        # Check that we have enough space if copying
+        checkSpaceReq $currPath $newGamePath
+        writeToConsole("Copying files to new location!")
+
+        # Copy over files using native windows progress bar
+        $FOF_CREATEPROGRESSDLG = "&H0&"
+        $objShell = New-Object -ComObject "Shell.Application"
+        $objFolder = $objShell.NameSpace($newGamePath) 
+        $objFolder.CopyHere($currPath, $FOF_CREATEPROGRESSDLG)
+
+    } elseif ($type -eq 2) {
+        writeToConsole("Hardlinking files in new location!")
+
+        Get-ChildItem -Path $currPath | ForEach-Object { 
+            if ($_.PSIsContainer){
+                New-Item -ItemType Junction -Path "$($newGamePath)\$($_.Name)" -Value $_.FullName 
+            } else{ 
+                New-Item -ItemType HardLink -Path "$($newGamePath)\$($_.Name)" -Value $_.FullName 
+            }
+        }
+    }
+}
+
 
 function autoInstall() {
-    #  If starting script via right-click, as about prompts
+    #  If starting script via right-click, ask about prompts
     if (!$bypassChecks) {
         $question = "Would you like to bypass all confirmation prompts? [y/n]"
         $confirmation = Read-Host $question
@@ -338,7 +427,7 @@ function autoInstall() {
             }
 
             if ($confirmation -eq 'n') { 
-                exit 
+                break
             }
 
             $confirmation = Read-Host $question

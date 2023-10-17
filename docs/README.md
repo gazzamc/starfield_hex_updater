@@ -30,9 +30,7 @@ If you're not as technical or just can't be bothered following the instructions 
     Patch Repo
     Build Repo
     Move Files to game folder
-
-    To be added later:
-    * Hardlink/Copy game files to remove permissions
+    Hardlink/Copy game files to remove permissions
 
 In order to install some dependencies you may need to set `Set-ExecutionPolicy` to unrestricted (can be changed back after install), this can also be done from the GUI in the `Options` menu.
 

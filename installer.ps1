@@ -63,6 +63,11 @@ Do{
         }
         5 { 
             Clear-Host
+            removeFilePermissions
+            break
+        }
+        6 { 
+            Clear-Host
             Do{
                 switch ($subOption2) {
                     1 { 
@@ -113,7 +118,8 @@ Do{
         2. Check Installed Dependencies
         3. Install Dependencies
         4. SFSE
-        5. Options
+        5. Copy/Hardlink Game Folder (remove permissions)
+        6. Options
         q. Quit
     "
 
