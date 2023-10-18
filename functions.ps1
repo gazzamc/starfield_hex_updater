@@ -422,19 +422,8 @@ function moveGameFiles() {
         checkSpaceReq $gamePath $newGamePath
         writeToConsole("Copying files to new location!")
 
-        # Copy over files excluding exe (done later)
-        $childItems = Get-ChildItem $gamePath
-        $childItems | ForEach-Object -Begin { $x = 1 } -Process {
-            $perc=[math]::round($x/$childItems.count)
-
-            if ($_.Name -ne "Starfield") {
-                Copy-Item -Path $_.FullName -Destination $newGamePath -Recurse -PassThru | 
-                Write-Progress -Activity 'Copying Game Files..' -Status $_ -PercentComplete $perc
-            }
-
-            $x++
-        }
-
+        # Copy over files
+        ROBOCOPY $gamePath $newGamePath /E /XF (Join-Path $gamePath "Starfield.exe")
     }
     elseif ($type -eq 2) {
         writeToConsole("Hardlinking files to new location!")
@@ -443,7 +432,7 @@ function moveGameFiles() {
                 New-Item -ItemType Junction -Path "$($newGamePath)\$($_.Name)" -Value $_.FullName 
             }
             else { 
-                if ($_.Name -ne "Starfield") {
+                if ($_.Name -ne "Starfield.exe") {
                     New-Item -ItemType HardLink -Path "$($newGamePath)\$($_.Name)" -Value $_.FullName 
                 }
             }
