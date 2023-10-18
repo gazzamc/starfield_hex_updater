@@ -63,7 +63,17 @@ Do{
         }
         5 { 
             Clear-Host
-            removeFilePermissions
+            Write-Host 
+                
+            "
+                Due to security permissions SFSE cannot be injected into the Starfield.exe from within it's original installation folder, 
+                to bypass this issue we need to link/copy the game files to a place that gives the user full control.
+
+                Copy Files - Additional space required, but will not break when the game updates.
+                Hardlink - Saves space, but certain files will be modified when the game updates.
+            "
+
+            moveGameFiles
             break
         }
         6 { 
@@ -118,7 +128,7 @@ Do{
         2. Check Installed Dependencies
         3. Install Dependencies
         4. SFSE
-        5. Copy/Hardlink Game Folder (remove permissions)
+        5. Copy/Hardlink Game Folder
         6. Options
         q. Quit
     "

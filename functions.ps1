@@ -1,7 +1,10 @@
 # A PS script to patch/install Gamepass SFSE in one click
 
-$ErrorActionPreference = "Stop"
+#URLs for tools needed
 $vsWhereURL = "https://github.com/microsoft/vswhere/releases/download/3.1.7/vswhere.exe"
+$pstools = "https://download.sysinternals.com/files/PSTools.zip"
+
+$ErrorActionPreference = "Stop"
 $currentPath = Get-Location
 $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
 $allDepsInstalled = $false;
@@ -94,12 +97,13 @@ function isInstalled() {
 
 function fileExists() {
     param (
+        [Parameter(Mandatory = $true)] [String] $path,
         [Parameter(Mandatory = $true)] [String] $fileName
     )
 
     $exists = $false
 
-    if (Test-Path -Path (getFullPath $fileName )) {
+    if (Test-Path -Path (Join-Path $path $fileName )) {
         $exists = $true
     }
 
@@ -137,7 +141,7 @@ function askAndDownload() {
         }
     }
     # Check if folder exists, create if not
-    if (!(fileExists "tools" )) {
+    if (!(fileExists $currentPath "tools" )) {
         mkdir (getFullPath "tools" )
     }
 
@@ -148,7 +152,7 @@ function askAndDownload() {
 
 function checkVsCodeInstalled() {
     #Check if we already downloaded it
-    if (!(fileExists "tools/vswhere.exe")) {
+    if (!(fileExists $currentPath "tools/vswhere.exe")) {
         askAndDownload "Do you want to download the tool to check if vs studio is installed? [y/n]" $vsWhereURL "vswhere.exe" $bypassChecks
     }
 
@@ -245,14 +249,14 @@ function buildRepo() {
 
     try {
         # Lets be sure were in the root of the script
-        if (!(fileExists "AutoInstall.ps1")) {
+        if (!(fileExists $currentPath "AutoInstall.ps1")) {
             cd ..
         }
 
         cmake -B sfse/build -S sfse
         cmake --build sfse/build --config Release
 
-        if (fileExists "sfse\build") {
+        if (fileExists $currentPath "sfse\build") {
             writeToConsole('Successfully built')
         }
     }
@@ -334,9 +338,9 @@ function checkSpaceReq() {
     )
 
     $driveLetter = (Get-Item $newPath).PSDrive.Name + ":"
-    $drives = Get-CimInstance -ClassName Win32_LogicalDisk | Select-Object -Property DeviceID,FreeSpace
+    $drives = Get-CimInstance -ClassName Win32_LogicalDisk | Select-Object -Property DeviceID, FreeSpace
     
-    if($drives.DeviceID -contains $driveLetter){
+    if ($drives.DeviceID -contains $driveLetter) {
         # Get free space of drive
         $idx = $drives.DeviceID.IndexOf($driveLetter)
         $space = ($drives[$idx].FreeSpace)
@@ -344,20 +348,21 @@ function checkSpaceReq() {
         # Get current size of game folder
         $folderSize = (Get-ChildItem -Path $gamePath -Recurse | Measure-Object -Property Length -Sum).sum
 
-        if($folderSize -gt $space){
+        if ($folderSize -gt $space) {
             writeToConsole "
             Not enough space on drive to copy the game: 
 
                 Space Required: $([Math]::Round($folderSize / 1Gb, 2)) Gb
                 Free Disk Space ($driveLetter): $([Math]::Round($space / 1Gb, 2)) Gb
             "
+            pause
             exit
         }
     }
     
 }
 
-function removeFilePermissions() {
+function moveGameFiles() {
     $type = Read-Host -Prompt "
     1. Copy Files 
     2. Hardlink Files (Does not work across drives)
@@ -366,7 +371,7 @@ function removeFilePermissions() {
     Choose the type of operation"
 
     # Return to menu
-    if ($type -eq 'q'){
+    if ($type -eq 'q') {
         return
     }
 
@@ -374,46 +379,95 @@ function removeFilePermissions() {
         writeToConsole("Invalid Option, exiting!")
         exit 
     }
+
+    if (!(fileExists $currentPath "tools/PSTools/PsExec.exe")) {
+        try {
+            $question = "In order to move the secured game exe we need to use PSTools, download? [y/n]"
+            askAndDownload $question $pstools "pstools.zip" $bypassChecks
+    
+            if (fileExists $currentPath "tools/PSTools.zip") {
+                #Extract to folder
+                Expand-Archive -LiteralPath (getFullPath 'tools/PSTools.zip') -DestinationPath (getFullPath 'tools/PSTools')
+    
+                #Clean up zip
+                Remove-Item (getFullPath 'tools/PSTools.zip')
+            }
+    
+        }
+        catch {
+            writeToConsole("Failed to download PSTools, exiting!")
+            exit 
+        }
+    }
     
     # Get path of game install and new location for files
-    $currPath = Read-Host -Prompt "Enter current game folder path: "
-    $newGamePath = Read-Host -Prompt "Enter new game folder path: "
+    Clear-Host
+    $gamePath = Read-Host -Prompt "Enter current game folder path"
+    Clear-Host
+    $newGamePath = Read-Host -Prompt "Enter new game folder path"
 
-    if ($currPath -eq "" -or $newGamePath -eq "") {
+    if ($gamePath -eq "" -or $newGamePath -eq "") {
         writeToConsole("One or more paths are empty")
         exit 
     }
     
     # Check paths exist or error out
-    if (!(Test-Path -Path $currPath) -or !(Test-Path -Path $newGamePath)) {
+    if (!(Test-Path -Path $gamePath) -or !(Test-Path -Path $newGamePath)) {
         writeToConsole("One of the paths inputted does not exists, please check them!")
         exit 
     }
 
-    if($type -eq 1){
+    if ($type -eq 1) {
         # Check that we have enough space if copying
-        checkSpaceReq $currPath $newGamePath
+        checkSpaceReq $gamePath $newGamePath
         writeToConsole("Copying files to new location!")
 
-        # Copy over files using native windows progress bar
-        $FOF_CREATEPROGRESSDLG = "&H0&"
-        $objShell = New-Object -ComObject "Shell.Application"
-        $objFolder = $objShell.NameSpace($newGamePath) 
-        $objFolder.CopyHere($currPath, $FOF_CREATEPROGRESSDLG)
+        # Copy over files excluding exe (done later)
+        $childItems = Get-ChildItem $gamePath
+        $childItems | ForEach-Object -Begin { $x = 1 } -Process {
+            $perc=[math]::round($x/$childItems.count)
 
-    } elseif ($type -eq 2) {
-        writeToConsole("Hardlinking files in new location!")
+            if ($_.Name -ne "Starfield") {
+                Copy-Item -Path $_.FullName -Destination $newGamePath -Recurse -PassThru | 
+                Write-Progress -Activity 'Copying Game Files..' -Status $_ -PercentComplete $perc
+            }
 
-        Get-ChildItem -Path $currPath | ForEach-Object { 
-            if ($_.PSIsContainer){
+            $x++
+        }
+
+    }
+    elseif ($type -eq 2) {
+        writeToConsole("Hardlinking files to new location!")
+        Get-ChildItem -Path $gamePath | ForEach-Object { 
+            if ($_.PSIsContainer) {
                 New-Item -ItemType Junction -Path "$($newGamePath)\$($_.Name)" -Value $_.FullName 
-            } else{ 
-                New-Item -ItemType HardLink -Path "$($newGamePath)\$($_.Name)" -Value $_.FullName 
+            }
+            else { 
+                if ($_.Name -ne "Starfield") {
+                    New-Item -ItemType HardLink -Path "$($newGamePath)\$($_.Name)" -Value $_.FullName 
+                }
             }
         }
     }
-}
 
+    try {
+        # We can't copy directly from game folder so we need to move and copy back
+        if (fileExists $gamePath 'Starfield.exe') {
+            writeToConsole("Copying Starfield.exe to new game folder!")
+            Start-Process -Verb RunAs tools/PSTools/psexec.exe "-s -i -nobanner powershell Move-Item (Join-Path $gamePath 'Starfield.exe') -Destination (Join-Path $newGamePath 'Starfield.exe')"
+            Start-Sleep -Seconds 5
+        }
+
+        if (fileExists $newGamePath 'Starfield.exe') {
+            Copy-Item (Join-Path $newGamePath 'Starfield.exe') -Destination (Join-Path $gamePath 'Starfield.exe')
+            writeToConsole("Starfield.exe Copied back successfully!")
+            Start-Sleep -Seconds 5
+        }
+    }
+    catch {
+        writeToConsole("Failed to copy Starfield.exe, try running as admin or manually copy the exe. (CTRL + X | CTRL + V)")
+    }
+}
 
 function autoInstall() {
     #  If starting script via right-click, ask about prompts
