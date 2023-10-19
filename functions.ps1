@@ -266,7 +266,7 @@ function buildRepo() {
     }
 }
 
-function moveFiles() {
+function moveSFSEFiles() {
     # Reset path
     cd $PSScriptRoot
 
@@ -493,7 +493,8 @@ function autoInstall() {
         cloneRepo
         patchFiles
         buildRepo
-        moveFiles
+        moveGameFiles
+        moveSFSEFiles
     }
     else {
         Clear-Host

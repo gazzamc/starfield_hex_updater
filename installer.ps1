@@ -39,7 +39,7 @@ Do{
                     }
                     4 { 
                         Clear-Host
-                        moveFiles
+                        moveSFSEFiles
                         break
                     }
                     Default {
