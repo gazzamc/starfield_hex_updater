@@ -2,7 +2,7 @@
 
 Install/build instructions can be found [HERE](https://github.com/gazzamc/starfield_hex_updater/tree/main/docs), you have the option of a powershell Auto Installer script or you can do the process manually.
 
-Compatible/Incompatible mods can be found [Here](https://github.com/gazzamc/starfield_hex_updater/tree/main/compatibility).
+Compatible/Incompatible mods can be found [Here](https://github.com/gazzamc/starfield_hex_updater/blob/main/docs/compatibility/README.md).
 
 ## Requirements
 I've tried to keep it as simple as possible, I've used only built-in imports. Using the below version of python, I'm sure any version above python 3.x would work, but if you have any trouble use the one I mentioned.
