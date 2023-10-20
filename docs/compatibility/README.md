@@ -35,36 +35,36 @@ Incompatible Info:
 #### A
 #### B
 
-[Baka Achievement Enabler](https://www.nexusmods.com/starfield/mods/658)
+* [Baka Achievement Enabler](https://www.nexusmods.com/starfield/mods/658)
 
-[Baka Quick Full Saves](https://www.nexusmods.com/starfield/mods/1750)
+* [Baka Quick Full Saves](https://www.nexusmods.com/starfield/mods/1750)
 
 #### C
 
-\* [Console Command Runner](https://www.nexusmods.com/starfield/mods/2740) - **[Download Here](https://github.com/gazzamc/Console-Command-Runner-SF/releases)**
+* \* [Console Command Runner](https://www.nexusmods.com/starfield/mods/2740) - **[Download Here](https://github.com/gazzamc/Console-Command-Runner-SF/releases)**
 
 
 #### D
 #### E
 
-\* [Enemy Friendly Fire](https://www.nexusmods.com/starfield/mods/614) - **[Download Here](https://github.com/gazzamc/EnemyFriendlyFireSFSE/releases)**
+* \* [Enemy Friendly Fire](https://www.nexusmods.com/starfield/mods/614) - **[Download Here](https://github.com/gazzamc/EnemyFriendlyFireSFSE/releases)**
 
 #### F
 #### G
 
-\* [Gravity Affects Weight](https://www.nexusmods.com/starfield/mods/3048) - **[Download Here](https://github.com/gazzamc/GravityAffectsCarryWeight/releases)**
+* \* [Gravity Affects Weight](https://www.nexusmods.com/starfield/mods/3048) - **[Download Here](https://github.com/gazzamc/GravityAffectsCarryWeight/releases)**
 
 #### H
 
-[Height Randomizer](https://www.nexusmods.com/starfield/mods/2525)
+* [Height Randomizer](https://www.nexusmods.com/starfield/mods/2525)
 
-\* [Hold To Equip Extended](https://www.nexusmods.com/starfield/mods/1956) - **[Download Here](https://github.com/gazzamc/HoldToEquipExtended/releases)**
+* \* [Hold To Equip Extended](https://www.nexusmods.com/starfield/mods/1956) - **[Download Here](https://github.com/gazzamc/HoldToEquipExtended/releases)**
 
 #### I
 #### J
 #### K
 
-[KiLoader for Starfield](https://www.nexusmods.com/starfield/mods/3298)
+* [KiLoader for Starfield](https://www.nexusmods.com/starfield/mods/3298)
 
 #### L
 #### M
@@ -75,18 +75,18 @@ Incompatible Info:
 #### R
 #### S
 
-[Simple Offence Suppression](https://www.nexusmods.com/starfield/mods/4456)
+* [Simple Offence Suppression](https://www.nexusmods.com/starfield/mods/4456)
 
-\* [Smart Aiming](https://www.nexusmods.com/starfield/mods/1302) - **[Download Here](https://github.com/gazzamc/SmartAimingSFSE/releases)**
+* \* [Smart Aiming](https://www.nexusmods.com/starfield/mods/1302) - **[Download Here](https://github.com/gazzamc/SmartAimingSFSE/releases)**
 
-[Sprint Stuttering Fix](https://www.nexusmods.com/starfield/mods/884)
+* [Sprint Stuttering Fix](https://www.nexusmods.com/starfield/mods/884)
 
 #### T
 #### U
 #### V
 #### W
 
-\* [Weapon Swap Stuttering Fix](https://www.nexusmods.com/starfield/mods/2830) - **[Download Here](https://github.com/gazzamc/Weapon-Swap-Stuttering-Fix/releases)**
+* \* [Weapon Swap Stuttering Fix](https://www.nexusmods.com/starfield/mods/2830) - **[Download Here](https://github.com/gazzamc/Weapon-Swap-Stuttering-Fix/releases)**
 
 #### X
 #### Y
@@ -96,23 +96,23 @@ Incompatible Info:
 
 #### A
 
-** [ADS FOV Removed](https://www.nexusmods.com/starfield/mods/2192)
+* ** [ADS FOV Removed](https://www.nexusmods.com/starfield/mods/2192)
 
-\* [Auto Recent Save Load](https://www.nexusmods.com/starfield/mods/2962)
+* \* [Auto Recent Save Load](https://www.nexusmods.com/starfield/mods/2962)
 
 #### B
 
-**** [Baka Disable My Games Folder](https://www.nexusmods.com/starfield/mods/1599)
+* **** [Baka Disable My Games Folder](https://www.nexusmods.com/starfield/mods/1599)
 
 #### C
 
-*** | \* [Console Output To File](https://www.nexusmods.com/starfield/mods/3142)
+* *** | \* [Console Output To File](https://www.nexusmods.com/starfield/mods/3142)
 
 #### D
 #### E
 #### F
 
-\* [Fast Travel Restrictions](https://www.nexusmods.com/starfield/mods/3220)
+* \* [Fast Travel Restrictions](https://www.nexusmods.com/starfield/mods/3220)
 
 #### G
 #### H
@@ -125,15 +125,15 @@ Incompatible Info:
 #### O
 #### P
 
-\* [powerofthree's Tweaks](https://www.nexusmods.com/starfield/mods/3621)
+* \* [powerofthree's Tweaks](https://www.nexusmods.com/starfield/mods/3621)
 
 #### Q
 #### R
 #### S
 
-** [SlowerThanLight - Fly in a star system](https://www.nexusmods.com/starfield/mods/3541)
+* ** [SlowerThanLight - Fly in a star system](https://www.nexusmods.com/starfield/mods/3541)
 
-*** | ** [Streamline Native (Frame Gen - DLSS - Reflex Integration)](https://www.nexusmods.com/starfield/mods/2751)
+* *** | ** [Streamline Native (Frame Gen - DLSS - Reflex Integration)](https://www.nexusmods.com/starfield/mods/2751)
 
 #### T
 #### U
