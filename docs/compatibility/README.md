@@ -2,7 +2,7 @@
 
     Any SFSE Mod utilizing the Address Library should work on this version of SFSE. 
     As long it was compiled with a newer version of `CommonLibSF (Oct 2023 +)`. 
-    
+
     If the mods has updated for Starfield `v1.7.36 +` then it should be good, 
     otherwise get in contact with me and I'll add it to the incompatible list below.
 
@@ -63,6 +63,9 @@ Incompatible Info:
 #### I
 #### J
 #### K
+
+[KiLoader for Starfield](https://www.nexusmods.com/starfield/mods/3298)
+
 #### L
 #### M
 #### N
@@ -74,10 +77,17 @@ Incompatible Info:
 
 [Simple Offence Suppression](https://www.nexusmods.com/starfield/mods/4456)
 
+\* [Smart Aiming](https://www.nexusmods.com/starfield/mods/1302) - **[Download Here](https://github.com/gazzamc/SmartAimingSFSE/releases)**
+
+[Sprint Stuttering Fix](https://www.nexusmods.com/starfield/mods/884)
+
 #### T
 #### U
 #### V
 #### W
+
+\* [Weapon Swap Stuttering Fix](https://www.nexusmods.com/starfield/mods/2830) - **[Download Here](https://github.com/gazzamc/Weapon-Swap-Stuttering-Fix/releases)**
+
 #### X
 #### Y
 #### Z
@@ -122,8 +132,6 @@ Incompatible Info:
 #### S
 
 ** [SlowerThanLight - Fly in a star system](https://www.nexusmods.com/starfield/mods/3541)
-
-\* [Smart Aiming](https://www.nexusmods.com/starfield/mods/1302)
 
 *** | ** [Streamline Native (Frame Gen - DLSS - Reflex Integration)](https://www.nexusmods.com/starfield/mods/2751)
 
