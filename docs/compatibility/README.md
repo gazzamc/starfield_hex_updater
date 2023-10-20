@@ -1,11 +1,16 @@
 # Compatible Mods SFSE GamePass
 
-    Any SFSE Mod utilizing the Address Library should work on this version of SFSE. As long it was compiled with a newer version of `CommonLibSF (Oct 2023 +)`. 
-    If the mods has updated for Starfield `v1.7.36 +` then it should be good, otherwise get in contact with me and I'll add it to the incompatible list below.
+    Any SFSE Mod utilizing the Address Library should work on this version of SFSE. 
+    As long it was compiled with a newer version of `CommonLibSF (Oct 2023 +)`. 
+    If the mods has updated for Starfield `v1.7.36 +` then it should be good, 
+    otherwise get in contact with me and I'll add it to the incompatible list below.
 
 ### Testing
 
-    As I don't have time to extensively test each and every SFSE mod, I'll mark a mod `compatible` if it boots and doesn't crash the game after loading a save. For any game that isn't compatible due to an outdated `CommonLibSF` I'll recompile the DLL and make it available on the release section of the fork of the mods source code.
+    As I don't have time to extensively test each and every SFSE mod, 
+    I'll mark a mod `compatible` if it boots and doesn't crash the game after loading a save. 
+    For any game that isn't compatible due to an outdated `CommonLibSF` 
+    I'll recompile the DLL and make it available on the release section of the fork of the mods source code.
 
 #
 
