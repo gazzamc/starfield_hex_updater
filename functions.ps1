@@ -17,27 +17,22 @@ function installProg() {
     Switch ($name) {
         "git" {
             writeToConsole "Installing Git..."
-            choco install git
+            Start-Process -Wait -Verb RunAs powershell -ArgumentList "-noexit", '-command choco install git -y'
             Break
         }
         "cmake" {
             writeToConsole "Installing CMake..."
-            choco install cmake
+            Start-Process -Wait -Verb RunAs powershell -ArgumentList "-noexit", "-command choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y"
             Break
         }
         "python" {
             writeToConsole "Installing Python 3..."
-            choco install python311
+            Start-Process -Wait -Verb RunAs powershell -ArgumentList "-noexit", '-command choco install python311 -y'
             Break
         }
         "vs" {
             writeToConsole "Installing Visual Studio 2022 and Build Tools..."
-            choco install visualstudio2022community --package-parameters "--add Microsoft.VisualStudio.Product.BuildTools --includeRecommended --passive"
-            Break
-        }
-        "notepadplusplus" {
-            writeToConsole "Installing notepadplusplus..."
-            choco install notepadplusplus.install
+            Start-Process -Wait -Verb RunAs powershell -ArgumentList "-noexit", '-command choco install visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Product.BuildTools --includeRecommended"'
             Break
         }
         "chocolatey" {
@@ -61,7 +56,7 @@ function checkCommand() {
     $isCommand = $true
 
     try {
-        if ($command.Contains("vswhere.exe")) {
+        if (!$command.Contains("vswhere.exe")) {
             $result = [string](Get-Command $command | Select-Object).version
 
             if ($command -eq "python" -and $result -eq "0.0.0.0") {
@@ -72,9 +67,11 @@ function checkCommand() {
             $command | Out-Null
         }
     }
-    catch [System.Management.Automation.CommandNotFoundException] {
-        # Catch exception to prevent script failure
-        $isCommand = $false
+    catch {
+        # vscode command should return true if it finds an install
+        if($command -ne 'True'){
+            $isCommand = $false
+        }
     }
 
     return $isCommand
@@ -204,6 +201,7 @@ function installMissing() {
             installProg $prog
         }
 
+        refreshenv
         writeToConsole "Re-checking dependencies"
         preFlightCheck
 
