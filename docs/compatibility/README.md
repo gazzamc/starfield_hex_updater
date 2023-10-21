@@ -73,6 +73,9 @@ Incompatible Info:
 #### N
 #### O
 #### P
+
+* \* [powerofthree's Tweaks](https://www.nexusmods.com/starfield/mods/3621) - **[Download Here](https://github.com/gazzamc/po3-Tweaks-SFSE/releases/tag/1.1.1)**
+
 #### Q
 #### R
 #### S
@@ -126,9 +129,6 @@ Incompatible Info:
 #### N
 #### O
 #### P
-
-* \* [powerofthree's Tweaks](https://www.nexusmods.com/starfield/mods/3621)
-
 #### Q
 #### R
 #### S
