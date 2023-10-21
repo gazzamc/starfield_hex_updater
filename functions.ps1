@@ -58,14 +58,23 @@ function checkCommand() {
         [Parameter(Mandatory = $true )] [String] $command
     )
     # Used for quickly determining if software is installed
-    $isCommand = $false
+    $isCommand = $true
 
     try {
-        $command | Out-Null
-        $isCommand = $true
+        if ($command.Contains("vswhere.exe")) {
+            $result = [string](Get-Command $command | Select-Object).version
+
+            if ($command -eq "python" -and $result -eq "0.0.0.0") {
+                $isCommand = $false
+            }
+        }
+        else {
+            $command | Out-Null
+        }
     }
     catch [System.Management.Automation.CommandNotFoundException] {
         # Catch exception to prevent script failure
+        $isCommand = $false
     }
 
     return $isCommand
@@ -83,7 +92,7 @@ function isInstalled() {
             return checkCommand cmake 
         }
         "python" {
-            return checkCommand (python -VV)
+            return checkCommand python
         }
         "vs" {
             return checkCommand ((./tools/vswhere.exe -products Microsoft.VisualStudio.Product.Community -format json | 
@@ -159,7 +168,6 @@ function checkVsCodeInstalled() {
     #Check if already installed
     if (isInstalled "vs") {
         writeToConsole "> Visual studio was found, but this check doesn't look for C++ build tools, please ensure it's installed"
-        pause
         return $true
     }
 }
@@ -178,7 +186,7 @@ function preFlightCheck() {
 
     writeToConsole ("Visual Studio 2022 [https://visualstudio.microsoft.com/vs/] ...." + (& { if (checkVsCodeInstalled) { "Installed" } else { "Not Found"; $progsToInstall.Add("VS2022") } }))
 
-    Start-Sleep -Seconds 2
+    pause
 }
 
 function installMissing() {
