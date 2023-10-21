@@ -39,6 +39,8 @@ Incompatible Info:
 
 * [Baka Quick Full Saves](https://www.nexusmods.com/starfield/mods/1750)
 
+* **** [Baka Quit Game Fix](https://www.nexusmods.com/starfield/mods/2962) - **[Download Here](https://github.com/gazzamc/BakaQuitGameFix/releases/tag/2.0.0)**
+
 #### C
 
 * \* [Console Command Runner](https://www.nexusmods.com/starfield/mods/2740) - **[Download Here](https://github.com/gazzamc/Console-Command-Runner-SF/releases)**
