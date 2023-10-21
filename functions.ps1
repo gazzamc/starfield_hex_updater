@@ -159,6 +159,7 @@ function checkVsCodeInstalled() {
     #Check if already installed
     if (isInstalled "vs") {
         writeToConsole "> Visual studio was found, but this check doesn't look for C++ build tools, please ensure it's installed"
+        pause
         return $true
     }
 }
@@ -227,12 +228,12 @@ function getLatestDictFileName() {
 
 function cloneRepo() {
     # Reset path
-    cd $PSScriptRoot
+    Set-Location $PSScriptRoot
 
     $commit = getLatestCommitId
     try {
         git clone https://github.com/gazzamc/sfse.git
-        cd (getFullPath 'sfse')
+        Set-Location (getFullPath 'sfse')
         git checkout $commit
     }
     catch {
@@ -242,15 +243,12 @@ function cloneRepo() {
 }
 
 function buildRepo() {
-    # Reset path
-    cd $PSScriptRoot
-
     writeToConsole('Building SFSE')
 
     try {
         # Lets be sure were in the root of the script
         if (!(fileExists $currentPath "AutoInstall.ps1")) {
-            cd ..
+            Set-Location $PSScriptRoot
         }
 
         cmake -B sfse/build -S sfse
@@ -258,21 +256,35 @@ function buildRepo() {
 
         if (fileExists $currentPath "sfse\build") {
             writeToConsole('Successfully built')
+            writeToConsole('Check out the compatible mods here: https://github.com/gazzamc/starfield_hex_updater/blob/main/docs/compatibility')
+            if (!$bypassChecks) {
+                pause
+            }
         }
     }
     catch {
         # Catch exception to prevent script failure
-        writeToConsole('Error')
+        writeToConsole('Error Building SFSE, check that you have C++ dev tools installed!')
+        pause
     }
 }
 
 function moveSFSEFiles() {
     # Reset path
-    cd $PSScriptRoot
+    Clear-Host
+    Set-Location $PSScriptRoot
 
-    writeToConsole('Moving Files..')
+    if (!$bypassChecks) {
+        $type = Read-Host -Prompt "Would you like to move the SFSE files to your game folder? [y/n]"
+        # Return to menu
+        if ($type -eq 'n') {
+            return
+        }
+    }
 
-    $gamePath = Read-Host "Enter full path to Starfield game files eg. C:/path/to/Starfield/content"
+    writeToConsole('Moving SFSE Files.. ')
+
+    $gamePath = Read-Host "`n`tEnter full path to Starfield game files eg. C:/path/to/Starfield/content"
 
     while ($gamePath -ne "") {
         if (!(fileExists $gamePath)) {
@@ -298,17 +310,21 @@ function moveSFSEFiles() {
         foreach ($file in $filesToCopy) {
             if (Test-Path -Path $gamePath -Filter $file) {
                 writeToConsole("$file moved")
+                if (!$bypassChecks) {
+                    pause
+                }
             }
         }
     }
     catch {
         writeToConsole("An Error occured during the copying of files")
+        pause
     }
 }
 
 function patchFiles() {
     # Reset path
-    cd $PSScriptRoot
+    Set-Location $PSScriptRoot
     writeToConsole('Patching SFSE')
 
     # Get latest dictFile
@@ -323,11 +339,15 @@ function patchFiles() {
     # Check if bak files were created
     $backFiles = Get-ChildItem -Path (getFullPath "sfse/") -Filter *.bak -Recurse -File -Name
 
-    if ($backFiles.length -eq 25) {
+    if ($backFiles.length -eq 30) {
         writeToConsole('Successfully Patched SFSE')
+        if (!$bypassChecks) {
+            pause
+        }
     }
     else {
         writeToConsole('Unsuccessfully Patched SFSE')
+        pause
     }
 }
 
@@ -363,6 +383,9 @@ function checkSpaceReq() {
 }
 
 function moveGameFiles() {
+    Clear-Host
+    writeToConsole "Move/Hardlink Game Files.."
+
     $type = Read-Host -Prompt "
     1. Copy Files 
     2. Hardlink Files (Does not work across drives)
