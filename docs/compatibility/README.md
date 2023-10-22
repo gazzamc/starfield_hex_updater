@@ -33,6 +33,9 @@ Incompatible Info:
 
 
 #### A
+
+* [Auto Unlock SFSE](https://www.nexusmods.com/starfield/mods/5571)
+
 #### B
 
 * [Baka Achievement Enabler](https://www.nexusmods.com/starfield/mods/658)
@@ -80,6 +83,8 @@ Incompatible Info:
 #### R
 #### S
 
+* [SFSE ASI Loader](https://www.nexusmods.com/starfield/mods/857)
+
 * [Simple Offence Suppression](https://www.nexusmods.com/starfield/mods/4456)
 
 * \* [Smart Aiming](https://www.nexusmods.com/starfield/mods/1302) - **[Download Here](https://github.com/gazzamc/SmartAimingSFSE/releases)**
@@ -96,6 +101,8 @@ Incompatible Info:
 #### X
 #### Y
 #### Z
+
+* [Zero Weight](https://www.nexusmods.com/starfield/mods/3475)
 
 # Incompatible
 

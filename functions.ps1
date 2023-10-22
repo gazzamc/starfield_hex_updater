@@ -201,7 +201,6 @@ function installMissing() {
             installProg $prog
         }
 
-        refreshenv
         writeToConsole "Re-checking dependencies"
         preFlightCheck
 
@@ -252,13 +251,10 @@ function buildRepo() {
     writeToConsole('Building SFSE')
 
     try {
-        # Lets be sure were in the root of the script
-        if (!(fileExists $currentPath "AutoInstall.ps1")) {
-            Set-Location $PSScriptRoot
-        }
-
-        cmake -B sfse/build -S sfse
-        cmake --build sfse/build --config Release
+        Start-Process -Wait -Verb RunAs powershell "
+        Set-Location $PSScriptRoot | 
+        cmake -B sfse/build -S sfse | 
+        cmake --build sfse/build --config Release"
 
         if (fileExists $currentPath "sfse\build") {
             writeToConsole('Successfully built')
@@ -513,6 +509,10 @@ function autoInstall() {
     # If any dependencies are missing try to install them
     if ($progsToInstall.length) {
         installMissing
+
+        # Need to refresh env to pick up new installs
+        Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
+        refreshenv
     }
     else {
         $allDepsInstalled = $true;
