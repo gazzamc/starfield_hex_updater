@@ -7,7 +7,6 @@ $pstools = "https://download.sysinternals.com/files/PSTools.zip"
 $ErrorActionPreference = "Stop"
 $currentPath = Get-Location
 $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
-$allDepsInstalled = $false;
 
 function installProg() {
     param (
@@ -17,31 +16,34 @@ function installProg() {
     Switch ($name) {
         "git" {
             writeToConsole "Installing Git..."
-            Start-Process -Wait -Verb RunAs powershell -ArgumentList "-noexit", '-command choco install git -y'
+            Start-Process -Wait -WindowStyle Hidden -Verb RunAs powershell -ArgumentList '-command choco install git -y'
             Break
         }
         "cmake" {
             writeToConsole "Installing CMake..."
-            Start-Process -Wait -Verb RunAs powershell -ArgumentList "-noexit", "-command choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y"
+            Start-Process -Wait -WindowStyle Hidden -Verb RunAs powershell -ArgumentList "-command choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y"
             Break
         }
         "python" {
             writeToConsole "Installing Python 3..."
-            Start-Process -Wait -Verb RunAs powershell -ArgumentList "-noexit", '-command choco install python311 -y'
+            Start-Process -Wait -WindowStyle Hidden -Verb RunAs powershell -ArgumentList '-command choco install python311 -y'
             Break
         }
         "vs" {
-            writeToConsole "Installing Visual Studio 2022 and Build Tools..."
-            Start-Process -Wait -Verb RunAs powershell -ArgumentList "-noexit", '-command choco install visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Product.BuildTools --includeRecommended"'
+            writeToConsole "Installing C++ Build Tools, This might take a while.."
+            Start-Process -Wait -WindowStyle Hidden -Verb RunAs powershell -ArgumentList '-command choco install visualstudio2019-workload-vctools --passive -y'
             Break
         }
         "chocolatey" {
             writeToConsole "Installing chocolatey..."
 
+            # Choco requires admin rights to install properly
+            Start-Process -Wait -WindowStyle Hidden -Verb RunAs powershell -ArgumentList "-command 
+
             Set-ExecutionPolicy Bypass -Scope Process -Force; 
             [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; 
             Invoke-Expression (
-                (New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+                (New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))"
 
             Break
         }
@@ -75,6 +77,26 @@ function checkCommand() {
     }
 
     return $isCommand
+}
+
+function checkForCompiler() {
+    # Check if we have a c++ compiler installed/configured
+    # Requires CMake
+    
+    try{
+        $output = (cmake --system-information 2>$null | Where-Object {$_ -match "CMAKE_CXX_COMPILER ==" }).Split('==').Trim()
+
+        if($output[2] -ne ""){
+            return $True
+        }
+    } catch {
+        # Clean-up left over files from check if failed
+        if(fileExists $currentPath '__cmake_systeminformation'){
+            Remove-Item '__cmake_systeminformation' -Recurse
+        }
+
+        return $False
+    }
 }
 
 function isInstalled() {
@@ -162,14 +184,25 @@ function checkVsCodeInstalled() {
         askAndDownload "Do you want to download the tool to check if vs studio is installed? [y/n]" $vsWhereURL "vswhere.exe" $bypassChecks
     }
 
+    writeToConsole "`t> Checking for Compiler and/or VS2022, this might take a sec..."
+
     #Check if already installed
-    if (isInstalled "vs") {
-        writeToConsole "> Visual studio was found, but this check doesn't look for C++ build tools, please ensure it's installed"
+    if ((isInstalled "vs") -and !(checkForCompiler)) {
+        writeToConsole "> Visual studio was found, but check for compiler was not successful"
+        return $true
+    } elseif (isInstalled "vs"){
+        writeToConsole "> Visual studio and C++ compiler found"
+        return $true
+    } elseif(checkForCompiler){
+        writeToConsole "> C++ compiler found"
         return $true
     }
 }
 
 function preFlightCheck() {
+    # Reset progsToInstall before checking again
+    $progsToInstall.Clear()
+
     "`nChecking to ensure all prerequisites are met..."
     "Click the links for more info on each software"
 
@@ -181,12 +214,16 @@ function preFlightCheck() {
 
     writeToConsole ("Git [https://git-scm.com/] ...." + (& { if (isInstalled "git") { "Installed" } else { "Not Found"; $progsToInstall.Add("Git") } }))
 
-    writeToConsole ("Visual Studio 2022 [https://visualstudio.microsoft.com/vs/] ...." + (& { if (checkVsCodeInstalled) { "Installed" } else { "Not Found"; $progsToInstall.Add("VS2022") } }))
+    writeToConsole ("Visual Studio 2022 [https://visualstudio.microsoft.com/vs/] / C++ Build Tools ...." + (& { if (checkVsCodeInstalled) { "Installed" } else { "Not Found"; $progsToInstall.Add("vs") } }))
 
-    pause
+    if(!$bypassChecks){
+        pause
+    }
 }
 
 function installMissing() {
+    Clear-Host
+
     if ($progsToInstall.ToArray().Count -eq 0) {
         writeToConsole "Nothing to install, continuing..."
     }
@@ -201,12 +238,14 @@ function installMissing() {
             installProg $prog
         }
 
+        writeToConsole "Refreshing Environment"
+        Start-Sleep 2
+
+        # We need to refresh the env to detect new installs
+        $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+
         writeToConsole "Re-checking dependencies"
         preFlightCheck
-
-        if ($progsToInstall.ToArray().Count -eq 0) {
-            $allDepsInstalled = $true;
-        }
     }
 }
 
@@ -237,13 +276,14 @@ function cloneRepo() {
 
     $commit = getLatestCommitId
     try {
+        writeToConsole('Cloning SFSE and Checking out CommitID!')
+
         git clone https://github.com/gazzamc/sfse.git
         Set-Location (getFullPath 'sfse')
         git checkout $commit
-    }
-    catch {
+    } catch {
         # Catch exception to prevent script failure
-        writeToConsole('Error')
+        writeToConsole("Failed trying to checkout SFSE")
     }
 }
 
@@ -251,10 +291,12 @@ function buildRepo() {
     writeToConsole('Building SFSE')
 
     try {
-        Start-Process -Wait -Verb RunAs powershell "
+        Start-Process -Wait -WindowStyle Hidden -Verb RunAs powershell "
         Set-Location $PSScriptRoot | 
         cmake -B sfse/build -S sfse | 
         cmake --build sfse/build --config Release"
+
+        writeToConsole('Build finished, verifying!')
 
         if (fileExists $currentPath "sfse\build") {
             writeToConsole('Successfully built')
@@ -333,10 +375,10 @@ function patchFiles() {
     $dictFile = getFullPath ('/hex_tables/' + (getLatestDictFileName))
 
     # Update hex values
-    python hex_updater.py -m update -p (getFullPath 'sfse/sfse') -d "$dictFile"
+    python hex_updater.py -m update -p (getFullPath 'sfse/sfse') -d "$dictFile"  | Out-Null
 
     # Patch loader
-    python hex_updater.py -m patch -p (getFullPath 'sfse')
+    python hex_updater.py -m patch -p (getFullPath 'sfse')  | Out-Null
 
     # Check if bak files were created
     $backFiles = Get-ChildItem -Path (getFullPath "sfse/") -Filter *.bak -Recurse -File -Name
@@ -507,18 +549,12 @@ function autoInstall() {
     preFlightCheck
 
     # If any dependencies are missing try to install them
-    if ($progsToInstall.length) {
+    if ($progsToInstall.ToArray().Count -gt 0) {
         installMissing
-
-        # Need to refresh env to pick up new installs
-        Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
-        refreshenv
-    }
-    else {
-        $allDepsInstalled = $true;
     }
 
-    if ($allDepsInstalled) {
+    # Check condition again in case missing deps were installed in last step
+    if ($progsToInstall.ToArray().Count -eq 0) {
         cloneRepo
         patchFiles
         buildRepo
@@ -526,8 +562,7 @@ function autoInstall() {
         moveSFSEFiles
     }
     else {
-        Clear-Host
-        writeToConsole "Failed to install all dependencies, exiting!"
+        writeToConsole "Failed to install dependencies: [$progsToInstall], exiting!"
         exit
     }
 }
