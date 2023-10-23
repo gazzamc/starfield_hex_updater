@@ -288,6 +288,7 @@ function cloneRepo() {
 }
 
 function buildRepo() {
+    Clear-Host
     writeToConsole('Building SFSE')
 
     try {
@@ -296,7 +297,9 @@ function buildRepo() {
         cmake -B sfse/build -S sfse | 
         cmake --build sfse/build --config Release"
 
+        # Adding a sleep here as sometimes it checks before completion
         writeToConsole('Build finished, verifying!')
+        Start-Sleep 10
 
         if (fileExists $currentPath "sfse\build") {
             writeToConsole('Successfully built')
@@ -304,6 +307,8 @@ function buildRepo() {
             if (!$bypassChecks) {
                 pause
             }
+        } else {
+            writeToConsole('Could not verify build, check manually!')
         }
     }
     catch {

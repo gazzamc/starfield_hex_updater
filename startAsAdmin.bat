@@ -1,0 +1,1 @@
+powershell -NoExit -command " Start-Process PowerShell -Verb RunAs \""-Command `\""cd '%cd%'; & '.\installer.ps1';`\""\""   "
