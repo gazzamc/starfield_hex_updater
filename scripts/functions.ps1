@@ -5,7 +5,7 @@ $vsWhereURL = "https://github.com/microsoft/vswhere/releases/download/3.1.7/vswh
 $pstools = "https://download.sysinternals.com/files/PSTools.zip"
 
 $ErrorActionPreference = "Stop"
-$currentPath = Get-Location
+$rootPath = $PSScriptRoot | Split-Path # Root
 $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
 
 function installProg() {
@@ -91,7 +91,7 @@ function checkForCompiler() {
         }
     } catch {
         # Clean-up left over files from check if failed
-        if(fileExists $currentPath '__cmake_systeminformation'){
+        if(fileExists $PSScriptRoot '__cmake_systeminformation'){
             Remove-Item '__cmake_systeminformation' -Recurse
         }
 
@@ -114,7 +114,7 @@ function isInstalled() {
             return checkCommand python
         }
         "vs" {
-            return checkCommand ((./tools/vswhere.exe -products Microsoft.VisualStudio.Product.Community -format json | 
+            return checkCommand ((../tools/vswhere.exe -products Microsoft.VisualStudio.Product.Community -format json | 
                     ConvertFrom-Json).productId -eq "Microsoft.VisualStudio.Product.Community")
         }
         "chocolatey" {
@@ -149,7 +149,7 @@ function getFullPath() {
     param (
         [Parameter(Mandatory = $true)] [String] $file
     )
-    return (Join-Path $currentPath $file)
+    return (Join-Path $rootPath $file)
 }
 
 function askAndDownload() {
@@ -169,7 +169,7 @@ function askAndDownload() {
         }
     }
     # Check if folder exists, create if not
-    if (!(fileExists $currentPath "tools" )) {
+    if (!(fileExists $rootPath "tools" )) {
         mkdir (getFullPath "tools" )
     }
 
@@ -180,7 +180,9 @@ function askAndDownload() {
 
 function checkVsCodeInstalled() {
     #Check if we already downloaded it
-    if (!(fileExists $currentPath "tools/vswhere.exe")) {
+    writeToConsole $rootPath
+
+    if (!(fileExists $rootPath "tools/vswhere.exe")) {
         askAndDownload "Do you want to download the tool to check if vs studio is installed? [y/n]" $vsWhereURL "vswhere.exe" $bypassChecks
     }
 
@@ -272,14 +274,14 @@ function getLatestDictFileName() {
 
 function cloneRepo() {
     # Reset path
-    Set-Location $PSScriptRoot
+    Set-Location $rootPath
 
     $commit = getLatestCommitId
     try {
         writeToConsole('Cloning SFSE and Checking out CommitID!')
 
         git clone https://github.com/gazzamc/sfse.git
-        Set-Location (getFullPath 'sfse')
+        Set-Location 'sfse'
         git checkout $commit
     } catch {
         # Catch exception to prevent script failure
@@ -293,7 +295,7 @@ function buildRepo() {
 
     try {
         Start-Process -Wait -WindowStyle Hidden -Verb RunAs powershell "
-        Set-Location $PSScriptRoot | 
+        Set-Location $rootPath | 
         cmake -B sfse/build -S sfse | 
         cmake --build sfse/build --config Release"
 
@@ -301,7 +303,7 @@ function buildRepo() {
         writeToConsole('Build finished, verifying!')
         Start-Sleep 10
 
-        if (fileExists $currentPath "sfse\build") {
+        if (fileExists $rootPath "sfse\build") {
             writeToConsole('Successfully built')
             writeToConsole('Check out the compatible mods here: https://github.com/gazzamc/starfield_hex_updater/blob/main/docs/compatibility')
             if (!$bypassChecks) {
@@ -321,7 +323,7 @@ function buildRepo() {
 function moveSFSEFiles() {
     # Reset path
     Clear-Host
-    Set-Location $PSScriptRoot
+    Set-Location $rootPath
 
     if (!$bypassChecks) {
         $type = Read-Host -Prompt "Would you like to move the SFSE files to your game folder? [y/n]"
@@ -373,7 +375,7 @@ function moveSFSEFiles() {
 
 function patchFiles() {
     # Reset path
-    Set-Location $PSScriptRoot
+    Set-Location $rootPath
     writeToConsole('Patching SFSE')
 
     # Get latest dictFile
@@ -452,12 +454,12 @@ function moveGameFiles() {
         exit 
     }
 
-    if (!(fileExists $currentPath "tools/PSTools/PsExec.exe")) {
+    if (!(fileExists $rootPath "tools/PSTools/PsExec.exe")) {
         try {
             $question = "In order to move the secured game exe we need to use PSTools, download? [y/n]"
             askAndDownload $question $pstools "pstools.zip" $bypassChecks
     
-            if (fileExists $currentPath "tools/PSTools.zip") {
+            if (fileExists $rootPath "tools/PSTools.zip") {
                 #Extract to folder
                 Expand-Archive -LiteralPath (getFullPath 'tools/PSTools.zip') -DestinationPath (getFullPath 'tools/PSTools')
     
@@ -531,24 +533,7 @@ function moveGameFiles() {
 }
 
 function autoInstall() {
-    #  If starting script via right-click, ask about prompts
-    if (!$bypassChecks) {
-        $question = "Would you like to bypass all confirmation prompts? [y/n]"
-        $confirmation = Read-Host $question
-        Do {
-            if ($confirmation -eq 'y') {
-                $bypassChecks = $true
-                break
-            }
-
-            if ($confirmation -eq 'n') { 
-                break
-            }
-
-            $confirmation = Read-Host $question
-        }
-        while ($Confirmation -ne "y")
-    }
+    $bypassChecks = $true
 
     # Check for all dependencies
     preFlightCheck
@@ -570,4 +555,6 @@ function autoInstall() {
         writeToConsole "Failed to install dependencies: [$progsToInstall], exiting!"
         exit
     }
+
+    $bypassChecks = $false
 }

@@ -1,0 +1,1 @@
+powershell -command " Start-Process PowerShell -Verb RunAs \""-Command `\""cd '%cd%\scripts'; & '.\cli.ps1';`\""\""   "
