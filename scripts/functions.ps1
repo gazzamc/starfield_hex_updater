@@ -7,6 +7,16 @@ $pstools = "https://download.sysinternals.com/files/PSTools.zip"
 $ErrorActionPreference = "Stop"
 $rootPath = $PSScriptRoot | Split-Path # Root
 $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
+$dateNow = $((Get-Date).ToString('yyyy.MM.dd_hh.mm.ss'))
+$logfileName = "logfile_script_$dateNow.log"
+
+# Check if log folder exist
+if(!(Test-Path (Join-Path $rootPath 'logs'))){
+    mkdir (Join-Path $rootPath "logs" )
+}
+
+# Start Logging session
+Start-Transcript -Path (Join-Path $rootPath "logs/$($logfileName)")
 
 function installProg() {
     param (
@@ -126,7 +136,7 @@ function isInstalled() {
 function fileExists() {
     param (
         [Parameter(Mandatory = $true)] [String] $path,
-        [Parameter(Mandatory = $true)] [String] $fileName
+        [Parameter(Mandatory = $false)] [String] $fileName
     )
 
     $exists = $false
@@ -292,14 +302,16 @@ function buildRepo() {
     writeToConsole('Building SFSE')
 
     try {
-        Start-Process -Wait -WindowStyle Hidden -Verb RunAs powershell "
-        Set-Location $rootPath | 
-        cmake -B sfse/build -S sfse | 
-        cmake --build sfse/build --config Release"
+        Start-Process -Wait -WindowStyle Hidden -Verb RunAs powershell -ArgumentList "-command
+        Start-Transcript -Path (Join-Path $rootPath `"logs\logfile_build_$($dateNow).log`");
+        Set-Location $rootPath;
+        cmake -B sfse/build -S sfse;
+        cmake --build sfse/build --config Release;
+        Stop-Transcript;"
 
         # Adding a sleep here as sometimes it checks before completion
         writeToConsole('Build finished, verifying!')
-        Start-Sleep 10
+        Start-Sleep 5
 
         if (fileExists $rootPath "sfse\build") {
             writeToConsole('Successfully built')
@@ -330,10 +342,7 @@ function moveSFSEFiles() {
             return
         }
     }
-
-    writeToConsole('Moving SFSE Files.. ')
-
-    $gamePath = Read-Host "`n`tEnter full path to Starfield game files eg. C:/path/to/Starfield/content"
+    $gamePath = Read-Host "`n`tEnter full path to the unrestricted game files"
 
     while ($gamePath -ne "") {
         if (!(fileExists $gamePath)) {
@@ -348,6 +357,8 @@ function moveSFSEFiles() {
 
     $gameVersion = getGameVersion
     $filesToCopy = "sfse_loader.exe", "sfse_$gameVersion.dll"
+
+    writeToConsole('Moving SFSE Files.. ')
 
     try {
         # Find files in build folder and copy to user provided path
@@ -364,6 +375,8 @@ function moveSFSEFiles() {
                 }
             }
         }
+
+        Start-Sleep 5
     }
     catch {
         writeToConsole("An Error occured during the copying of files")
@@ -515,7 +528,7 @@ function moveGameFiles() {
         # We can't copy directly from game folder so we need to move and copy back
         if (fileExists $gamePath 'Starfield.exe') {
             writeToConsole("Copying Starfield.exe to new game folder!")
-            Start-Process -Verb RunAs ../tools/PSTools/psexec.exe "-s -i -nobanner powershell Move-Item (Join-Path $gamePath 'Starfield.exe') -Destination (Join-Path $newGamePath 'Starfield.exe')"
+            Start-Process -Wait -WindowStyle Hidden -Verb RunAs $rootPath/tools/PSTools/psexec.exe "-s -i -nobanner powershell Move-Item (Join-Path $gamePath 'Starfield.exe') -Destination (Join-Path $newGamePath 'Starfield.exe')"
             Start-Sleep -Seconds 5
         }
 
