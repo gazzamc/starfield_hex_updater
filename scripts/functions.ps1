@@ -180,8 +180,6 @@ function askAndDownload() {
 
 function checkVsCodeInstalled() {
     #Check if we already downloaded it
-    writeToConsole $rootPath
-
     if (!(fileExists $rootPath "tools/vswhere.exe")) {
         askAndDownload "Do you want to download the tool to check if vs studio is installed? [y/n]" $vsWhereURL "vswhere.exe" $bypassChecks
     }
@@ -517,7 +515,7 @@ function moveGameFiles() {
         # We can't copy directly from game folder so we need to move and copy back
         if (fileExists $gamePath 'Starfield.exe') {
             writeToConsole("Copying Starfield.exe to new game folder!")
-            Start-Process -Verb RunAs tools/PSTools/psexec.exe "-s -i -nobanner powershell Move-Item (Join-Path $gamePath 'Starfield.exe') -Destination (Join-Path $newGamePath 'Starfield.exe')"
+            Start-Process -Verb RunAs ../tools/PSTools/psexec.exe "-s -i -nobanner powershell Move-Item (Join-Path $gamePath 'Starfield.exe') -Destination (Join-Path $newGamePath 'Starfield.exe')"
             Start-Sleep -Seconds 5
         }
 
