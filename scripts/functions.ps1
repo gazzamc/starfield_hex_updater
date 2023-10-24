@@ -302,7 +302,7 @@ function buildRepo() {
     writeToConsole('Building SFSE')
 
     try {
-        Start-Process -Wait -WindowStyle Hidden -Verb RunAs powershell -ArgumentList "-command
+        Start-Process -WindowStyle Hidden -Verb RunAs powershell -ArgumentList "-command
         Start-Transcript -Path (Join-Path $rootPath `"logs\logfile_build_$($dateNow).log`");
         Set-Location $rootPath;
         cmake -B sfse/build -S sfse;
@@ -393,10 +393,10 @@ function patchFiles() {
     $dictFile = getFullPath ('/hex_tables/' + (getLatestDictFileName))
 
     # Update hex values
-    python hex_updater.py -m update -p (getFullPath 'sfse/sfse') -d "$dictFile"  | Out-Null
+    python hex_updater.py -m update -p (getFullPath 'sfse/sfse') -d "$dictFile"
 
     # Patch loader
-    python hex_updater.py -m patch -p (getFullPath 'sfse')  | Out-Null
+    python hex_updater.py -m patch -p (getFullPath 'sfse')
 
     # Check if bak files were created
     $backFiles = Get-ChildItem -Path (getFullPath "sfse/") -Filter *.bak -Recurse -File -Name
@@ -528,7 +528,7 @@ function moveGameFiles() {
         # We can't copy directly from game folder so we need to move and copy back
         if (fileExists $gamePath 'Starfield.exe') {
             writeToConsole("Copying Starfield.exe to new game folder!")
-            Start-Process -Wait -WindowStyle Hidden -Verb RunAs $rootPath/tools/PSTools/psexec.exe "-s -i -nobanner powershell Move-Item (Join-Path $gamePath 'Starfield.exe') -Destination (Join-Path $newGamePath 'Starfield.exe')"
+            Start-Process -WindowStyle Hidden -Verb RunAs $rootPath/tools/PSTools/psexec.exe "-s -i -nobanner powershell Move-Item (Join-Path $gamePath 'Starfield.exe') -Destination (Join-Path $newGamePath 'Starfield.exe')"
             Start-Sleep -Seconds 5
         }
 
