@@ -32,8 +32,24 @@ If you're not as technical or just can't be bothered following the instructions 
     Move Files to game folder
     Hardlink/Copy game files to remove permissions
 
-In order to install some dependencies you may need to set `Set-ExecutionPolicy` to unrestricted (can be changed back after install), this can also be done from the GUI in the `Options` menu.
+If you have not ran Powershell scripts before you will need to change the Execution Policy to Unrestricted in order to lauch the script `cli.ps1` or `run.bat`, you can do so by doing the following:
 
+1. Search for Powershell (Win Key)
+2. Select "Run as Administrator"
+3. Run the following command
+
+```
+    Set-ExecutionPolicy Unrestricted    
+```
+
+4. Select 'Yes'
+5. Run `run.bat`
+
+You can re-enable the restricion by running the command:
+
+```
+    Set-ExecutionPolicy Restricted    
+```
 
 # Manual Process
 For those who like to get their hands dirty, follow the guide below.
@@ -45,7 +61,7 @@ Going on the assumption that you have a clean windows install with absolutely no
 - [Git](https://github.com/git-for-windows/git/releases/download/v2.42.0.windows.2/Git-2.42.0.2-64-bit.exe)
 - [CMake](https://github.com/Kitware/CMake/releases/download/v3.27.6/cmake-3.27.6-windows-x86_64.msi)
 - [Windows Visual Studio Community](https://visualstudio.microsoft.com/downloads/)
-    - Select `Desktop development with C++` on installation, no need for the others (about 10GB space needed)
+    - Select `Desktop development with C++` on installation, no need for the others
 
 <i>Be sure to add these to windows path if the option is available</i>
 
