@@ -1,6 +1,6 @@
 . .\functions.ps1
 
-Do{
+Do {
     switch ($mainOption) {
         1 { 
             Clear-Host
@@ -9,18 +9,18 @@ Do{
         }
         2 { 
             Clear-Host
-            preFlightCheck
+            checkDependencies
             break
         }
         3 { 
-            preFlightCheck
+            checkDependencies
             Clear-Host
             installMissing
             break
         }
         4 { 
             Clear-Host
-            Do{
+            Do {
                 switch ($subOption) {
                     1 { 
                         Clear-Host
@@ -77,40 +77,39 @@ Do{
             break
         }
         6 { 
-            Clear-Host
-            Do{
+            Do {
                 switch ($subOption2) {
                     1 { 
                         Clear-Host
-                        Get-ExecutionPolicy
+                        setGamePaths
                         break
                     }
                     2 { 
                         Clear-Host
-                        Set-ExecutionPolicy Unrestricted
-                        break
-                    }
-                    3 { 
-                        Clear-Host
-                        Set-ExecutionPolicy Restricted
+                        setBypassChoice
                         break
                     }
                     Default {
                     }
                 }
-            
-                Write-Host 
-                
-                "
-                    If you're having difficulties running the script,
-                    You can set the execution policy below.
 
-                    1. Check Execution Policy
-                    2. Set Execution Policy to Unrestricted
-                    3. Set Execution Policy to Restricted
+                # Display current config set
+                Clear-Host
+                Write-Host "`n`t Config"
+                Write-Host "`t---------"
+                Write-Host "`tGame Path: $(getConfigProperty "gamePath")"
+                Write-Host "`t"
+                Write-Host "`tCopied/Hardlinked Path: $(getConfigProperty "newGamePath" )"
+                Write-Host "`t"
+                Write-Host "`tBypass Prompts: $(getConfigProperty "bypassPrompts" )"
+                Write-Host "`t"
+
+                Write-Host 
+                "
+                    1. Set Paths
+                    2. Set Bypass Choice
                     q. Return
                 "
-            
                 $subOption2 = Read-Host "Choose an option"
             }
             while ($subOption2 -ne "q")
@@ -118,6 +117,11 @@ Do{
         }
         Default {
         }
+    }
+
+    # Check paths were set, or exit
+    if (!(getConfigProperty "gamePath") -or !(getConfigProperty "newGamePath")) {
+        exit
     }
 
     Clear-Host
