@@ -11,7 +11,7 @@ $rootPath = $PSScriptRoot | Split-Path # Root
 $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
 $dateNow = $((Get-Date).ToString('yyyy.MM.dd_hh.mm.ss'))
 $logfileName = "logfile_script_$dateNow.log"
-$version = "1.0.0"
+$version = "1.1.0"
 
 # Check if log folder exist
 if (!(testPath (Join-Path $rootPath 'logs'))) {
@@ -395,6 +395,30 @@ function checkSpaceReq() {
     
 }
 
+function moveGameEXE() {
+    $gamePath = getConfigProperty "gamePath"
+    $newGamePath = getConfigProperty "newGamePath"
+
+    try {
+        # We can't copy directly from game folder so we need to move and copy back
+        if (fileExists $gamePath 'Starfield.exe') {
+            writeToConsole "`n`tCopying Starfield.exe to new game folder!"
+            Start-Process -Wait -WindowStyle Hidden -Verb RunAs $rootPath/tools/PSTools/psexec.exe "-s -i -nobanner -accepteula powershell Move-Item (Join-Path $gamePath 'Starfield.exe') -Destination (Join-Path $newGamePath 'Starfield.exe')"
+            Start-Sleep -Seconds 5
+        }
+
+        if (fileExists $newGamePath 'Starfield.exe') {
+            Copy-Item (Join-Path $newGamePath 'Starfield.exe') -Destination (Join-Path $gamePath 'Starfield.exe')
+            writeToConsole "`n`tStarfield.exe Copied back successfully!"
+            Start-Sleep -Seconds 5
+        }
+    }
+    catch {
+        writeToConsole "`n`tFailed to copy Starfield.exe, try running as admin or manually copy the exe. (CTRL + X | CTRL + V)"
+        pause
+    }
+}
+
 function moveGameFiles() {
     Clear-Host
     writeToConsole "`n`tMove/Hardlink Game Files.."
@@ -463,24 +487,7 @@ function moveGameFiles() {
         }
     }
 
-    try {
-        # We can't copy directly from game folder so we need to move and copy back
-        if (fileExists $gamePath 'Starfield.exe') {
-            writeToConsole "`n`tCopying Starfield.exe to new game folder!"
-            Start-Process -Wait -WindowStyle Hidden -Verb RunAs $rootPath/tools/PSTools/psexec.exe "-s -i -nobanner -accepteula powershell Move-Item (Join-Path $gamePath 'Starfield.exe') -Destination (Join-Path $newGamePath 'Starfield.exe')"
-            Start-Sleep -Seconds 5
-        }
-
-        if (fileExists $newGamePath 'Starfield.exe') {
-            Copy-Item (Join-Path $newGamePath 'Starfield.exe') -Destination (Join-Path $gamePath 'Starfield.exe')
-            writeToConsole "`n`tStarfield.exe Copied back successfully!"
-            Start-Sleep -Seconds 5
-        }
-    }
-    catch {
-        pause
-        writeToConsole "`n`tFailed to copy Starfield.exe, try running as admin or manually copy the exe. (CTRL + X | CTRL + V)"
-    }
+    moveGameEXE
 }
 
 function autoInstall() {

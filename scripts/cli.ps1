@@ -1,7 +1,7 @@
 . .\functions.ps1
 
 Do {
-    switch ($mainOption) {
+    switch ($mainMenuOption) {
         1 { 
             Clear-Host
             autoInstall
@@ -21,7 +21,7 @@ Do {
         4 { 
             Clear-Host
             Do {
-                switch ($subOption) {
+                switch ($repoMenuOption) {
                     1 { 
                         Clear-Host
                         cloneRepo
@@ -56,9 +56,9 @@ Do {
                     q. Return
                 "
             
-                $subOption = Read-Host "Choose an option"
+                $repoMenuOption = Read-Host "Choose an option"
             }
-            while ($subOption -ne "q")
+            while ($repoMenuOption -ne "q")
             break
         }
         5 { 
@@ -66,19 +66,46 @@ Do {
             Write-Host 
                 
             "
-                Due to security permissions SFSE cannot be injected into the Starfield.exe from within it's original installation folder, 
-                to bypass this issue we need to link/copy the game files to a place that gives the user full control.
-
-                Copy Files - Additional space required, but will not break when the game updates.
-                Hardlink - Saves space, but certain files will be modified when the game updates.
+            Due to security permissions SFSE cannot be injected into the Starfield.exe 
+            from within it's original installation folder, to bypass this issue 
+            we need to link/copy the game files to a place that gives the user full control.
+            
+            `n`t`tCopy Files - Additional space required, but will not break when the game updates.
+            `n`t`tHardlink - Saves space, but certain files will be modified when the game updates.
             "
 
-            moveGameFiles
+            Do {
+                switch ($moveGameFilesOption) {
+                    1 { 
+                        Clear-Host
+                        moveGameFiles
+                        break
+                    }
+                    2 { 
+                        Clear-Host
+                        moveGameEXE
+                        break
+                    }
+                    Default {
+                    }
+                }
+            
+                Write-Host 
+                
+                "
+                    1. Copy/Hardlink Game Files
+                    2. Copy Game EXE Only
+                    q. Return
+                "
+            
+                $moveGameFilesOption = Read-Host "Choose an option"
+            }
+            while ($moveGameFilesOption -ne "q")
             break
         }
         6 { 
             Do {
-                switch ($subOption2) {
+                switch ($setConfigOption) {
                     1 { 
                         Clear-Host
                         setGamePaths
@@ -110,9 +137,9 @@ Do {
                     2. Set Bypass Choice
                     q. Return
                 "
-                $subOption2 = Read-Host "Choose an option"
+                $setConfigOption = Read-Host "Choose an option"
             }
-            while ($subOption2 -ne "q")
+            while ($setConfigOption -ne "q")
             break
         }
         Default {
@@ -132,11 +159,11 @@ Do {
         2. Check Installed Dependencies
         3. Install Dependencies
         4. SFSE
-        5. Copy/Hardlink Game Folder
+        5. Copy/Hardlink Game Files
         6. Options
         q. Quit
     "
 
-    $mainOption = Read-Host "Choose an option"
+    $mainMenuOption = Read-Host "Choose an option"
 }
-while ($mainOption -ne "q")
+while ($mainMenuOption -ne "q")
