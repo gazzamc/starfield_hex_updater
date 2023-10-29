@@ -173,6 +173,10 @@ The files will be added to the new folder you specified.
 
 You'll probably get an error when trying to move `Starfield.exe` manually, if this happens, do the following:
 
+1. Right-Click > Cut
+2. Paste `Starfield.exe` to the target folder (Right-click in folder > paste or `CTRL + V`)
+3. Copy it back to the original game folder
+
 <details>
   <summary>Screenshots:</summary>
 
@@ -184,10 +188,6 @@ You'll probably get an error when trying to move `Starfield.exe` manually, if th
 
 </details>
 <br />
-
-1. Right-Click > Cut
-2. Paste `Starfield.exe` to the target folder (Right-click in folder > paste or `CTRL + V`)
-3. Copy it back to the original game folder
 
 You will notice that the icon of the exe will change to the starfield logo, this is good.
 
