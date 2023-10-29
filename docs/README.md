@@ -32,7 +32,17 @@ If you're not as technical or just can't be bothered following the instructions 
     Move Files to game folder
     Hardlink/Copy game files to remove permissions
 
-If you have not ran Powershell scripts before you will need to change the Execution Policy to Unrestricted in order to lauch the script `cli.ps1` or `run.bat`, you can do so by doing the following:
+
+<details>
+  <summary>Script Preview:</summary>
+
+  ![welcome screen](./images/auto_install_script_splash.png)
+
+  ![script menu](./images/auto_install_script.png)
+</details>
+<br />
+
+If you have not ran Powershell scripts before you will need to change the Execution Policy to Unrestricted in order to launch the script `cli.ps1` or `run.bat`, you can do so by doing the following:
 
 1. Search for Powershell (Win Key)
 2. Select "Run as Administrator"
@@ -44,6 +54,15 @@ If you have not ran Powershell scripts before you will need to change the Execut
 
 4. Select 'Yes'
 5. Run `run.bat`
+
+<details>
+  <summary>Screenshot:</summary>
+
+  ![powershell admin](./images/powershell_admin.png)
+
+  ![execution policy](./images/powershell_execution_policy.png)
+</details>
+<br />
 
 You can re-enable the restricion by running the command:
 
@@ -76,12 +95,20 @@ Going on the assumption that you have a clean windows install with absolutely no
 ```
 - Backup the folder with the random numbers
 
+<details>
+  <summary>Screenshot:</summary>
+
+  ![powershell admin](./images/win_run.png)
+
+  ![execution policy](./images/save_folder_loc.png)
+</details>
+<br />
 
 #### Note: The `BethesdaSoftworks` folder may change names, if so you may need to go to it manually, everthing else won't change.
 
 ## Removing Permissions
 
-Windows store games have special permissions that prevents any tampering with the games exe (and in some cases the files), we will need to remove this in order to inject the mods with SFSE. Running the built SFSE in the game folder won't work.
+Windows store games have special permissions that prevents any tampering with the games exe (and in some cases the files), we will need to remove this in order to inject the mods with SFSE. Running the compiled SFSE exe in the game folder won't work.
 
 You have two options:
 
@@ -110,32 +137,66 @@ Get-ChildItem | ForEach-Object {
     $path  = "path/to/new/folder"
 
     # We can't hardlink folders, use junction
-    if ($_.PSIsContainer){
+    if ($_.PSIsContainer) {
         New-Item -ItemType Junction -Path "$($path)\$($_.Name)" -Value $_.FullName 
-    } else{ 
-        New-Item -ItemType HardLink -Path "$($path)\$($_.Name)" -Value $_.FullName 
+    }
+    else { 
+        if ($_.Name -ne "Starfield.exe") {
+            New-Item -ItemType HardLink -Path "$($path)\$($_.Name)" -Value $_.FullName 
+        }
     }
 }
 
 pause #Not really needed unless you want to check for errors
 ```
 
-1. Create file `copy-files.ps1` :grey_exclamation: <sup>name doesn't matter</sup>
+1. Create file `hardlink-files.ps1` :grey_exclamation: <sup>name doesn't matter</sup>
 2. Move file to the `content` folder
 2. Edit and paste the above script into it
 2. Right-Click > `Run with Powershell`
 
 The files will be added to the new folder you specified.
 
+<details>
+  <summary>Screenshots:</summary>
+
+  ![create script](./images/create_script.png)
+
+  ![run script](./images/run_hardlink_script.png)
+
+  ![script output](./images/script_result.png)
+
+</details>
+<br />
+
 #### Can't move exe?
 
-You'll probably get an error when trying to move `Starfield.exe`, if this happens, do the following:
+You'll probably get an error when trying to move `Starfield.exe` manually, if this happens, do the following:
+
+<details>
+  <summary>Screenshots:</summary>
+
+  ![cut exe](./images/move_exe_1.png)
+
+  ![exe opacity change](./images/move_exe_2.png)
+
+  ![icon change after move](./images/move_exe_3.png)
+
+</details>
+<br />
 
 1. Right-Click > Cut
-2. Paste `Starfield.exe` to the target folder
+2. Paste `Starfield.exe` to the target folder (Right-click in folder > paste or `CTRL + V`)
 3. Copy it back to the original game folder
 
 You will notice that the icon of the exe will change to the starfield logo, this is good.
+
+<details>
+  <summary>Icon:</summary>
+
+  ![powershell admin](./images/starfield_icon.png)
+
+</details>
 
 ### Pulling SFSE
 
@@ -166,6 +227,15 @@ In most cases the script will lag behind the latest commit of SFSE (Not necessar
 
 **You can find the commit id on the hex_table file eg. git <i>hex_table_1.7.33_`9f55120a`.json</i>
 
+<details>
+  <summary>Screenshots:</summary>
+
+  ![clone repo](./images/clone_repo_command.png)
+
+  ![checkout commit](./images/checkout_commit_id.png)
+
+</details>
+
 ### Pulling the Script
 
 It's almost identical the above without the checkout part.
@@ -185,6 +255,13 @@ It's almost identical the above without the checkout part.
     cd starfield_hex_updater
 ```
 
+<details>
+  <summary>Screenshot:</summary>
+
+  ![clone repo](./images/checkout_script.png)
+
+</details>
+
 ### Patching
 
 Patching the exe is incredibly simple :)
@@ -197,13 +274,20 @@ Patching the exe is incredibly simple :)
 - Type the following *
 ```
 
-    python hex_updater.py -m patch -p /path/to/SFSE/sfse_loader
+    python hex_updater.py -m patch -p /path/to/SFSE
 
 ```
 
 *Optionally you can prevent the backup of files touches with `-b false`
 
 **Be sure the path is pointing to the folder specified in `-p`, the script expects this folder
+
+<details>
+  <summary>Screenshot:</summary>
+
+  ![patch files](./images/patch_command.png)
+
+</details>
 
 ### Updating Addresses
 
@@ -217,13 +301,21 @@ Very similar to the last step
 - Type the following *
 ```
 
-    python hex_updater.py -m update -p /path/to/SFSE/sfse -d hex_tables/<latest-hex-table-json>
+    python hex_updater.py -m update -p /path/to/SFSE/sfse -d /path/to/hex_tables/<latest-hex-table-json>
 
 ```
 
 *Optionally you can prevent the backup of files touches with `-b false`
 
 **Be sure the path is pointing to the folder specified in `-p`, the script expects this folder
+
+<details>
+  <summary>Screenshots:</summary>
+
+  ![update command](./images/update_hex_command.png)
+  ![update output](./images/update_hex_output.png)
+
+</details>
 
 ### Building
 
@@ -243,10 +335,31 @@ The final step, with everything patched we can follow the instructions on SFSE r
     cmake --build sfse/build --config Release
 
 ```
+
 You will find the exe and dll within a Release folder under their respective names inside the build folder. eg. `Build/sfse_loader/Release`
 
 As with the official version move both files to the root of the game folder we created above. Start sfse_loader.exe to run the game.
 
+```
+    
+    build\sfse\Release
+    build\sfse_loader\Release
+
+```
+
+<details>
+  <summary>Screenshots:</summary>
+
+  ![cmake command to create build folder](./images/build_sfse.png)
+
+  ![build output](./images/build_sfse2.png)
+
+  ![compiled exe](./images/compiled_exe.png)
+
+  ![compiled dll](./images/compiled_dll.png)
+
+</details>
+<br />
 
 # Did it work?
 
