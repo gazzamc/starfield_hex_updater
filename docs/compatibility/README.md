@@ -73,9 +73,14 @@ Incompatible Info:
 
 #### L
 #### M
+
+* [MONSTERaider - Weightless Items](https://www.nexusmods.com/starfield/mods/5610)
+
 #### N
 #### O
 #### P
+
+* [Plugins.txt Enabler](https://www.nexusmods.com/starfield/mods/4157)
 
 * \* [powerofthree's Tweaks](https://www.nexusmods.com/starfield/mods/3621) - **[Download Here](https://github.com/gazzamc/po3-Tweaks-SFSE/releases/tag/1.1.1)**
 
@@ -90,6 +95,8 @@ Incompatible Info:
 * \* [Smart Aiming](https://www.nexusmods.com/starfield/mods/1302) - **[Download Here](https://github.com/gazzamc/SmartAimingSFSE/releases)**
 
 * [Sprint Stuttering Fix](https://www.nexusmods.com/starfield/mods/884)
+
+* [Starfield Community Patch](https://www.nexusmods.com/starfield/mods/1)
 
 #### T
 #### U
@@ -133,22 +140,14 @@ Incompatible Info:
 #### K
 #### L
 #### M
-
-* [MONSTERaider - Weightless Items](https://www.nexusmods.com/starfield/mods/5610)
-
 #### N
 #### O
 #### P
-
-* [Plugins.txt Enabler](https://www.nexusmods.com/starfield/mods/4157)
-
 #### Q
 #### R
 #### S
 
 * ** [SlowerThanLight - Fly in a star system](https://www.nexusmods.com/starfield/mods/3541)
-
-* [Starfield Community Patch](https://www.nexusmods.com/starfield/mods/1)
 
 * *** | ** [Streamline Native (Frame Gen - DLSS - Reflex Integration)](https://www.nexusmods.com/starfield/mods/2751)
 
