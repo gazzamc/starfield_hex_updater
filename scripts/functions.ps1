@@ -11,7 +11,7 @@ $rootPath = $PSScriptRoot | Split-Path # Root
 $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
 $dateNow = $((Get-Date).ToString('yyyy.MM.dd_hh.mm.ss'))
 $logfileName = "logfile_script_$dateNow.log"
-$version = "1.1.1"
+$version = "1.1.2"
 
 # Check if log folder exist
 if (!(testPath (Join-Path $rootPath 'logs'))) {
@@ -71,22 +71,25 @@ function checkCommand() {
     $isCommand = $true
 
     try {
-        if (!$command.Contains("vswhere.exe")) {
-            $result = [string](Get-Command $command | Select-Object).version
+        # Catch vs command check first to prevent error
+        # should set command variable true if present
+        if ($command -eq 'True') {
+            return $true
+        }
+        elseif ($command -eq 'False') {
+            return $false
+        }
 
-            if ($command -eq "python" -and $result -eq "0.0.0.0") {
-                $isCommand = $false
-            }
-        }
-        else {
-            $command | Out-Null
-        }
-    }
-    catch {
-        # vscode command should return true if it finds an install
-        if ($command -ne 'True') {
+        $result = [string](Get-Command $command | Select-Object).version
+
+        if ($command -eq "python" -and $result -eq "0.0.0.0") {
             $isCommand = $false
         }
+
+    }
+    catch {
+        # If we're here command not found, so software probably not installed
+        $isCommand = $false
     }
 
     return $isCommand
@@ -128,8 +131,8 @@ function isInstalled() {
             return checkCommand python
         }
         "vs" {
-            return checkCommand ((../tools/vswhere.exe -products Microsoft.VisualStudio.Product.Community -format json | 
-                    ConvertFrom-Json).productId -eq "Microsoft.VisualStudio.Product.Community")
+            return checkCommand (Invoke-Expression "($(Join-Path (Join-Path $rootPath 'tools') vswhere.exe) -products Microsoft.VisualStudio.Product.Community -format json | 
+            ConvertFrom-Json).productId -eq `"Microsoft.VisualStudio.Product.Community`"")
         }
         "chocolatey" {
             return checkCommand choco
@@ -167,8 +170,9 @@ function checkVsCodeInstalled() {
     #Check if we already downloaded it
     if (!(fileExists $rootPath "tools/vswhere.exe")) {
         try {
-            askAndDownload "`n`t`tDo you want to download the tool to check if vs studio is installed? [y/n]" $vsWhereURL "vswhere.exe" (getConfigProperty "bypassPrompts")
-        } catch {
+            askAndDownload "`n`t`tDo you want to download the tool to check if vs studio is installed? [y/n]" $vsWhereURL "vswhere.exe" [System.Convert]::ToBoolean((getConfigProperty "bypassPrompts"))
+        }
+        catch {
             writeToConsole "`n`t`t`t> Failed to download vswhere.exe!"
             pause
             exit
@@ -443,7 +447,7 @@ function moveGameFiles() {
     if (!(fileExists $rootPath "tools/PSTools/PsExec.exe")) {
         try {
             $question = "`n`tIn order to move the secured game exe we need to use PSTools, download? [y/n]"
-            askAndDownload $question $pstools "pstools.zip" (getConfigProperty "bypassPrompts")
+            askAndDownload $question $pstools "pstools.zip" [System.Convert]::ToBoolean((getConfigProperty "bypassPrompts"))
     
             if (fileExists $rootPath "tools/PSTools.zip") {
                 #Extract to folder
