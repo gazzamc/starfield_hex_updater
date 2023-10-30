@@ -11,7 +11,7 @@ $rootPath = $PSScriptRoot | Split-Path # Root
 $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
 $dateNow = $((Get-Date).ToString('yyyy.MM.dd_hh.mm.ss'))
 $logfileName = "logfile_script_$dateNow.log"
-$version = "1.1.0"
+$version = "1.1.1"
 
 # Check if log folder exist
 if (!(testPath (Join-Path $rootPath 'logs'))) {
@@ -210,7 +210,7 @@ function checkDependencies() {
 
     writeToConsole ("`n`t`tVisual Studio 2022 [https://visualstudio.microsoft.com/vs/] / C++ Build Tools ...." + (& { if (checkVsCodeInstalled) { "`tInstalled" } else { "`tNot Found"; $progsToInstall.Add("vs") } }))
 
-    if (!(getConfigProperty "bypassPrompts")) {
+    if (![System.Convert]::ToBoolean((getConfigProperty "bypassPrompts"))) {
         pause
     }
 }
@@ -282,7 +282,7 @@ function buildRepo() {
 
         if (fileExists $rootPath "sfse\build") {
             writeToConsole "`n`t`tSuccessfully built"
-            if (!(getConfigProperty "bypassPrompts")) {
+            if (![System.Convert]::ToBoolean((getConfigProperty "bypassPrompts"))) {
                 pause
             }
         }
@@ -355,7 +355,7 @@ function patchFiles() {
 
     if ($backFiles.length -eq 30) {
         writeToConsole "`n`t`tSuccessfully Patched SFSE"
-        if (!(getConfigProperty "bypassPrompts")) {
+        if (![System.Convert]::ToBoolean((getConfigProperty "bypassPrompts"))) {
             pause
         }
     }
