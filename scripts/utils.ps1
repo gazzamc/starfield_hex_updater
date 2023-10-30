@@ -37,13 +37,22 @@ function getFullPath() {
     return (Join-Path $rootPath $file)
 }
 
+function logToFile() {
+    param (
+        [Parameter(Mandatory = $true)] [String] $content,
+        [Parameter(Mandatory = $true)] [String] $filePath
+    )
+    
+    "$((Get-Date).ToString()) $content" | Out-File $filePath -Append -Encoding UTF8
+}
 
 function writeToConsole() {
     param (
         [Parameter(Mandatory = $true)] [String] $msg,
         [Parameter(Mandatory = $false)] [switch] $type,
         [Parameter(Mandatory = $false)] [String] $color,
-        [Parameter(Mandatory = $false)] [String] $bgcolor
+        [Parameter(Mandatory = $false)] [String] $bgcolor,
+        [Parameter(Mandatory = $false)] [String] $logPath
     )
 
     if ($type) {
@@ -57,7 +66,10 @@ function writeToConsole() {
 
         Write-Host $msg -ForegroundColor $color -BackgroundColor $bgcolor
     }
-    else {
+    elseif($logPath) {
+        Write-Information s -MessageData $msg -InformationAction Continue -InformationVariable 'InfoMsg'
+        logToFile $InfoMsg $logPath
+    } else {
         Write-Information s -MessageData $msg -InformationAction Continue
     }
 }
