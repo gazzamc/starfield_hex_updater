@@ -11,7 +11,7 @@ $rootPath = $PSScriptRoot | Split-Path # Root
 $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
 $dateNow = $((Get-Date).ToString('yyyy.MM.dd_hh.mm.ss'))
 $logfileName = "logfile_script_$dateNow.log"
-$version = "1.1.3"
+$version = "1.1.4"
 
 # Check if log folder exist
 if (!(testPath (Join-Path $rootPath 'logs'))) {
