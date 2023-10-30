@@ -11,7 +11,7 @@ $rootPath = $PSScriptRoot | Split-Path # Root
 $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
 $dateNow = $((Get-Date).ToString('yyyy.MM.dd_hh.mm.ss'))
 $logfileName = "logfile_script_$dateNow.log"
-$version = "1.1.2"
+$version = "1.1.3"
 
 # Check if log folder exist
 if (!(testPath (Join-Path $rootPath 'logs'))) {
@@ -538,6 +538,13 @@ function setGamePaths() {
             }
             else {
                 if ($pathName -eq $paths[0]) {
+                    # Add a check for the content folder, add it if not present
+                    $splitPath = $inputtedPath.split('\')
+
+                    if($splitPath[$splitPath.Length - 1].ToLower() -ne "content"){
+                        $inputtedPath = Join-Path $inputtedPath "Content"
+                    }
+
                     setConfigProperty "gamePath" $inputtedPath
                 }
                 else {
