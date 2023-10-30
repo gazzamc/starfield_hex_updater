@@ -170,7 +170,7 @@ function checkVsCodeInstalled() {
     #Check if we already downloaded it
     if (!(fileExists $rootPath "tools/vswhere.exe")) {
         try {
-            askAndDownload "`n`t`tDo you want to download the tool to check if vs studio is installed? [y/n]" $vsWhereURL "vswhere.exe" [System.Convert]::ToBoolean((getConfigProperty "bypassPrompts"))
+            askAndDownload "`n`t`tDo you want to download the tool to check if vs studio is installed? [y/n]" $vsWhereURL "vswhere.exe" ([System.Convert]::ToBoolean((getConfigProperty "bypassPrompts")))
         }
         catch {
             writeToConsole "`n`t`t`t> Failed to download vswhere.exe!"
@@ -447,7 +447,7 @@ function moveGameFiles() {
     if (!(fileExists $rootPath "tools/PSTools/PsExec.exe")) {
         try {
             $question = "`n`tIn order to move the secured game exe we need to use PSTools, download? [y/n]"
-            askAndDownload $question $pstools "pstools.zip" [System.Convert]::ToBoolean((getConfigProperty "bypassPrompts"))
+            askAndDownload $question $pstools "pstools.zip" ([System.Convert]::ToBoolean((getConfigProperty "bypassPrompts")))
     
             if (fileExists $rootPath "tools/PSTools.zip") {
                 #Extract to folder
