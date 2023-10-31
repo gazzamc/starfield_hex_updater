@@ -11,7 +11,7 @@ $rootPath = $PSScriptRoot | Split-Path # Root
 $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
 $dateNow = $((Get-Date).ToString('yyyy.MM.dd_hh.mm.ss'))
 $logfileName = "logfile_$dateNow.log"
-$version = "1.2.0"
+$version = "1.2.1"
 
 $LogPath = Join-Path (Join-Path $rootPath 'logs') $logfileName
 
@@ -113,7 +113,7 @@ function checkForCompiler() {
             Remove-Item '__cmake_systeminformation' -Recurse
         }
 
-        if($output){
+        if ($output) {
             logToFile $output $LogPath
         }
 
@@ -406,9 +406,35 @@ function checkSpaceReq() {
     
 }
 
+function checkForPStools() {
+    if (!(fileExists $rootPath "tools/PSTools/PsExec.exe")) {
+        try {
+            $question = "`n`tIn order to move the secured game exe we need to use PSTools, download? [y/n]"
+            askAndDownload $question $pstools "pstools.zip" ([System.Convert]::ToBoolean((getConfigProperty "bypassPrompts")))
+    
+            if (fileExists $rootPath "tools/PSTools.zip") {
+                #Extract to folder
+                Expand-Archive -LiteralPath (getFullPath 'tools/PSTools.zip') -DestinationPath (getFullPath 'tools/PSTools')
+    
+                #Clean up zip
+                Remove-Item (getFullPath 'tools/PSTools.zip')
+            }
+    
+        }
+        catch {
+            writeToConsole "`n`tFailed to download PSTools, exiting!" -logPath $LogPath
+            logToFile $_.Exception $LogPath
+            pause
+            exit 
+        }
+    }
+}
+
 function moveGameEXE() {
     $gamePath = getConfigProperty "gamePath"
     $newGamePath = getConfigProperty "newGamePath"
+
+    checkForPStools
 
     try {
         # We can't copy directly from game folder so we need to move and copy back
@@ -419,16 +445,32 @@ function moveGameEXE() {
             Out-File -FilePath $LogPath -Append -Encoding UTF8"
             Start-Sleep -Seconds 5
         }
+        else {
+            throw [System.IO.FileNotFoundException] "Starfield.exe cannot be found in game path $gamePath"
+        }
 
         if (fileExists $newGamePath 'Starfield.exe') {
             Copy-Item (Join-Path $newGamePath 'Starfield.exe') -Destination (Join-Path $gamePath 'Starfield.exe')
             writeToConsole "`n`tStarfield.exe Copied back successfully!" -logPath $LogPath
             Start-Sleep -Seconds 5
         }
+        else {
+            throw [System.IO.FileNotFoundException] "Starfield.exe was not copied correctly as it cannot be found in $newGamePath"
+        }
     }
     catch {
-        writeToConsole "`n`tFailed to copy Starfield.exe, try running as admin or manually copy the exe. (CTRL + X | CTRL + V)" -logPath $LogPath
+        if ($_.Exception.GetType().Name -eq "InvalidOperationException") {
+            writeToConsole "`n`tCannot find PsExec.exe, please check that PSTools has been downloaded to the tools folder." -logPath $LogPath
+        }
+        elseif ($_.Exception.GetType().Name -eq "FileNotFoundException") {
+            writeToConsole "`n`tStarfield.exe cannot be found in the folder specified, check log for more information!" -logPath $LogPath
+        }
+        else {
+            writeToConsole "`n`tFailed to copy Starfield.exe for unknown reason, try manually copying the exe. (CTRL + X | CTRL + V)" -logPath $LogPath
+        }
+
         logToFile $_.Exception $LogPath
+        logToFile $_.Exception.GetType().Name $LogPath
         pause
     }
 }
@@ -454,27 +496,6 @@ function moveGameFiles() {
         exit 
     }
 
-    if (!(fileExists $rootPath "tools/PSTools/PsExec.exe")) {
-        try {
-            $question = "`n`tIn order to move the secured game exe we need to use PSTools, download? [y/n]"
-            askAndDownload $question $pstools "pstools.zip" ([System.Convert]::ToBoolean((getConfigProperty "bypassPrompts")))
-    
-            if (fileExists $rootPath "tools/PSTools.zip") {
-                #Extract to folder
-                Expand-Archive -LiteralPath (getFullPath 'tools/PSTools.zip') -DestinationPath (getFullPath 'tools/PSTools')
-    
-                #Clean up zip
-                Remove-Item (getFullPath 'tools/PSTools.zip')
-            }
-    
-        }
-        catch {
-            writeToConsole "`n`tFailed to download PSTools, exiting!" -logPath $LogPath
-            logToFile $_.Exception $LogPath
-            pause
-            exit 
-        }
-    }
     
     # Get path of game install and new location for files
     $gamePath = getConfigProperty "gamePath"
