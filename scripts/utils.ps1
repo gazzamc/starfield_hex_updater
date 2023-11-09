@@ -66,29 +66,53 @@ function writeToConsole() {
 
         Write-Host $msg -ForegroundColor $color -BackgroundColor $bgcolor
     }
-    elseif($logPath) {
+    elseif ($logPath) {
         Write-Information s -MessageData $msg -InformationAction Continue -InformationVariable 'InfoMsg'
         logToFile $InfoMsg $logPath
-    } else {
+    }
+    else {
         Write-Information s -MessageData $msg -InformationAction Continue
     }
 }
 
+function getAllHexTableFileNames() {
+    return Get-ChildItem -Path (getFullPath 'hex_tables') -filter *.json -file | Sort-Object -Property Name -Descending
+}
+
+function getLatestFileName() {
+    param (
+        [Array]$files
+    )
+
+    if($powershellVersion -ne 5){
+        return $files[0].Name
+    } else {
+        return $files[0]
+    }
+}
+
 function getLatestCommitId() {
-    $files = Get-ChildItem -Path (getFullPath 'hex_tables') -filter *.json -file | Sort-Object -Property Name -Descending
-    $highestVersion = $files[0].toString().Split('_')[3]
-    return $highestVersion.substring(0, $highestVersion.length - 0 - 5)
+    $files = getAllHexTableFileNames
+    $fileName = getLatestFileName($files)
+    $fileNameParts = $fileName.toString().Split('_')[3]
+    $commitId = $fileNameParts.substring(0, $fileNameParts.length - 0 - 5)
+
+    return $commitId
 }
 
 function getGameVersion() {
-    $files = Get-ChildItem -Path (getFullPath 'hex_tables') -filter *.json -file | Sort-Object -Property Name -Descending
-    $highestVersion = $files[0].toString().Split('_')[2].Split('.') -join '_'
-    return $highestVersion
+    $files = getAllHexTableFileNames
+    $fileName = getLatestFileName($files)
+    $version = $fileName.toString().Split('_')[2].Split('.') -join '_'
+
+    return $version
 }
 
 function getLatestDictFileName() {
-    $files = Get-ChildItem -Path (getFullPath 'hex_tables') -filter *.json -file | Sort-Object -Property Name -Descending
-    return $files[0]
+    $files = getAllHexTableFileNames
+    $fileName = getLatestFileName($files)
+    
+    return $fileName
 }
 
 

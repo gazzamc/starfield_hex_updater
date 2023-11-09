@@ -11,9 +11,17 @@ $rootPath = $PSScriptRoot | Split-Path # Root
 $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
 $dateNow = $((Get-Date).ToString('yyyy.MM.dd_hh.mm.ss'))
 $logfileName = "logfile_$dateNow.log"
-$version = "1.2.1"
+$version = "1.3.0"
 
 $LogPath = Join-Path (Join-Path $rootPath 'logs') $logfileName
+
+# Change powershell executable depending on version
+if ($powershellVersion -eq 5) {
+    $poweshellExe = "powershell"
+}
+else {
+    $poweshellExe = "pwsh"
+}
 
 # Check if log folder exist
 if (!(testPath (Join-Path $rootPath 'logs'))) {
@@ -28,34 +36,34 @@ function installProg() {
     Switch ($name) {
         "git" {
             writeToConsole "`n`t`tInstalling Git..." -logPath $LogPath
-            Start-Process -Wait -WindowStyle Hidden -Verb RunAs powershell -ArgumentList "-command choco install git -y | Out-File $LogPath -Append -Encoding UTF8"
+            Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -ArgumentList "-command choco install git -y | Out-File $LogPath -Append -Encoding UTF8"
             Break
         }
         "cmake" {
             writeToConsole "`n`t`tInstalling CMake..." -logPath $LogPath
-            Start-Process -Wait -WindowStyle Hidden -Verb RunAs powershell -ArgumentList "-command choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y | Out-File $LogPath -Append -Encoding UTF8"
+            Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -ArgumentList "-command choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y | Out-File $LogPath -Append -Encoding UTF8"
             Break
         }
         "python" {
             writeToConsole "`n`t`tInstalling Python 3..." -logPath $LogPath
-            Start-Process -Wait -WindowStyle Hidden -Verb RunAs powershell -ArgumentList "-command choco install python311 -y | Out-File $LogPath -Append -Encoding UTF8"
+            Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -ArgumentList "-command choco install python311 -y | Out-File $LogPath -Append -Encoding UTF8"
             Break
         }
         "vs" {
             writeToConsole "`n`t`tInstalling C++ Build Tools, This might take a while.." -logPath $LogPath
-            Start-Process -Wait -WindowStyle Hidden -Verb RunAs powershell -ArgumentList "-command choco install visualstudio2019-workload-vctools --passive -y | Out-File $LogPath -Append -Encoding UTF8"
+            Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -ArgumentList "-command choco install visualstudio2019-workload-vctools --passive -y | Out-File $LogPath -Append -Encoding UTF8"
             Break
         }
         "chocolatey" {
             writeToConsole "`n`t`tInstalling chocolatey..." -logPath $LogPath
 
             # Choco requires admin rights to install properly
-            Start-Process -Wait -WindowStyle Hidden -Verb RunAs powershell -ArgumentList "-command 
+            Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -ArgumentList "-command 
 
             Set-ExecutionPolicy Bypass -Scope Process -Force; 
             [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; 
             Invoke-Expression (
-                (New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1')) | Out-File $LogPath -Append -Encoding UTF8"
+                (New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1')) | Out-File $LogPath -Append -Encoding UTF8;"
 
             Break
         }
@@ -267,13 +275,19 @@ function cloneRepo() {
         writeToConsole "`n`t`tCloning SFSE and Checking out CommitID!" -logPath $LogPath
 
         git clone https://github.com/gazzamc/sfse.git
-        Set-Location 'sfse'
+        Set-Location "sfse"
         git checkout $commit
+
+        # Verify sfse exist before continuing
+        if (!(fileExists $rootPath "sfse")) {
+            throw "There was a problem cloning sfse repo"
+        }
     }
     catch {
         # Catch exception to prevent script failure
         writeToConsole "`n`t`tFailed trying to checkout SFSE" -logPath $LogPath
         logToFile $_.Exception $LogPath
+        pause
     }
 }
 
@@ -282,10 +296,10 @@ function buildRepo() {
     writeToConsole "`n`t`tBuilding SFSE" -logPath $LogPath
 
     try {
-        Start-Process -Wait -WindowStyle Hidden -Verb RunAs powershell -ArgumentList "-command
-        Set-Location $rootPath |
+        Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -WorkingDirectory $rootPath -ArgumentList "-command 
         cmake -B sfse/build -S sfse | Out-File $LogPath -Append -Encoding UTF8
-        cmake --build sfse/build --config Release | Out-File $LogPath -Append -Encoding UTF8"
+        cmake --build sfse/build --config Release | Out-File $LogPath -Append -Encoding UTF8
+        exit"
 
         writeToConsole "`n`t`tBuild finished, verifying!" -logPath $LogPath
 
@@ -297,6 +311,7 @@ function buildRepo() {
         }
         else {
             writeToConsole "`n`t`tCould not verify build, check manually!" -logPath $LogPath
+            pause
         }
     }
     catch {
@@ -440,6 +455,9 @@ function moveGameEXE() {
         # We can't copy directly from game folder so we need to move and copy back
         if (fileExists $gamePath 'Starfield.exe') {
             writeToConsole "`n`tCopying Starfield.exe to new game folder!" -logPath $LogPath
+         
+            # Calling powershell 7 from within psexec.exe does not seem to work, leaving it as powershell for now
+            # as it's built-in to windows it should not cause issues as it's being called with system permissions anyway
             Start-Process -Wait -WindowStyle Hidden -Verb RunAs $rootPath/tools/PSTools/psexec.exe "-s -i -nobanner -accepteula powershell 
             Move-Item (Join-Path $gamePath 'Starfield.exe') -Destination (Join-Path $newGamePath 'Starfield.exe') -Verbose -Force *>&1 | 
             Out-File -FilePath $LogPath -Append -Encoding UTF8"

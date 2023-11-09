@@ -1,0 +1,1 @@
+pwsh -command " Start-Process pwsh -Verb RunAs \""-Command `\""cd '%cd%\scripts'; & '.\cli.ps1';`\""\""   "

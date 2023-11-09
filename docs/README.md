@@ -64,7 +64,7 @@ If you have not ran Powershell scripts before you will need to change the Execut
 </details>
 <br />
 
-You can re-enable the restricion by running the command:
+You can re-enable the restriction by running the command:
 
 ```
     Set-ExecutionPolicy Restricted    
@@ -76,13 +76,17 @@ For those who like to get their hands dirty, follow the guide below.
 ## Prerequisites
 Going on the assumption that you have a clean windows install with absolutely no tools installed, this is what you will need to complete this guide.
 
+- Powershell 5 | Powershell 7 *
 - [Python 3.11](https://www.python.org/ftp/python/3.11.0/python-3.11.0-amd64.exe)
 - [Git](https://github.com/git-for-windows/git/releases/download/v2.42.0.windows.2/Git-2.42.0.2-64-bit.exe)
 - [CMake](https://github.com/Kitware/CMake/releases/download/v3.27.6/cmake-3.27.6-windows-x86_64.msi)
 - [Windows Visual Studio Community](https://visualstudio.microsoft.com/downloads/)
     - Select `Desktop development with C++` on installation, no need for the others
+    - Ensure you have at least `VS 2019 C++ Build Tools` (`MSVC v142`)
 
 <i>Be sure to add these to windows path if the option is available</i>
+
+\* *Powershell 5 comes pre-installed with windows, I'd recommend this version as it's been developed/tested with it.*
 
 ## Backing up save files
 
@@ -301,13 +305,15 @@ Very similar to the last step
 - Type the following *
 ```
 
-    python hex_updater.py -m update -p /path/to/SFSE/sfse -d /path/to/hex_tables/<latest-hex-table-json>
+    python hex_updater.py -m update -p </path/to/SFSE>/sfse -d /path/to/hex_tables/<latest-hex-table-json>
 
 ```
 
 *Optionally you can prevent the backup of files touches with `-b false`
 
 **Be sure the path is pointing to the folder specified in `-p`, the script expects this folder
+
+Note: The path should point to the sfse folder within the sfse root folder eg. `sfse/sfse`
 
 <details>
   <summary>Screenshots:</summary>
@@ -386,6 +392,10 @@ Did you do the [Patching](#patching) step, and point it to the sfse folder (not 
 Be sure you're checking out the correct commit id and using the correct version of the game, this information is within the name of the hex_table file. 
 
 Also if the game is launching and it's crashing, please be sure you're using one of the [Supported Mods](#supported-mods), not all mods for sfse will work with this modified version. If the mod has an open source repo (usually mentioned on nexus mods) you can reach out to me and I'll try and patch it.
+
+- `The AIO script hangs when Building SFSE`
+
+This is a known issues and I'm currently looking into a solution to prevent or mitigate it in the future. In most cases the Build has completed and the main script hasn't been given back focus, occasionly clicking on the main window makes it continue. If that fails force close the script `CTRL + C` and re-run it.
 
 ### Supported Mods
 
