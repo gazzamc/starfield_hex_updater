@@ -11,7 +11,7 @@ $rootPath = $PSScriptRoot | Split-Path # Root
 $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
 $dateNow = $((Get-Date).ToString('yyyy.MM.dd_hh.mm.ss'))
 $logfileName = "logfile_$dateNow.log"
-$version = "1.3.0"
+$version = "1.3.1"
 
 $LogPath = Join-Path (Join-Path $rootPath 'logs') $logfileName
 
@@ -649,6 +649,18 @@ function welcomeScreen() {
     pause
     setGamePaths
     setBypassChoice
+}
+
+
+# Show warning about spaced Path
+if($rootPath.Contains(" ")){
+    writeToConsole "
+    It looks like you're running the script from a path that contains spaces: 
+    `n`t'$rootPath'`n
+    I would recommend moving and running the script from a location without spaces as they are known the cause issues. 
+    I'm currently looking into this issue and hope to find a solution soon."
+
+    pause
 }
 
 # Display start message/ set paths if config exist
