@@ -11,7 +11,7 @@ $rootPath = $PSScriptRoot | Split-Path # Root
 $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
 $dateNow = $((Get-Date).ToString('yyyy.MM.dd_hh.mm.ss'))
 $logfileName = "logfile_$dateNow.log"
-$version = "1.3.1"
+$version = "1.3.2"
 
 $LogPath = Join-Path (Join-Path $rootPath 'logs') $logfileName
 
@@ -296,10 +296,13 @@ function buildRepo() {
     writeToConsole "`n`t`tBuilding SFSE" -logPath $LogPath
 
     try {
-        Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -WorkingDirectory $rootPath -ArgumentList "-command 
-        cmake -B sfse/build -S sfse | Out-File $LogPath -Append -Encoding UTF8
-        cmake --build sfse/build --config Release | Out-File $LogPath -Append -Encoding UTF8
-        exit"
+        # Split build commands to reduce hanging
+        Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -PassThru -WorkingDirectory $rootPath -ArgumentList "-command 
+        cmake -B sfse/build -S sfse | Out-File $LogPath -Append -Encoding UTF8"
+
+
+        Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -PassThru -WorkingDirectory $rootPath -ArgumentList "-command 
+        cmake --build sfse/build --config Release | Out-File $LogPath -Append -Encoding UTF8"
 
         writeToConsole "`n`t`tBuild finished, verifying!" -logPath $LogPath
 
