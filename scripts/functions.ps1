@@ -383,14 +383,14 @@ function patchFiles() {
     # Check if bak files were created
     $backFiles = Get-ChildItem -Path (getFullPath "sfse/") -Filter *.bak -Recurse -File -Name
 
-    if ($backFiles.length -eq 30) {
+    if ($backFiles.length -eq 33) {
         writeToConsole "`n`t`tSuccessfully Patched SFSE" -logPath $LogPath
         if (![System.Convert]::ToBoolean((getConfigProperty "bypassPrompts"))) {
             pause
         }
     }
     else {
-        writeToConsole "`n`t`tUnsuccessfully Patched SFSE, backup files found ($($backFiles.length)/30) " -logPath $LogPath
+        writeToConsole "`n`t`tUnsuccessfully Patched SFSE, backup files found ($($backFiles.length)/33) " -logPath $LogPath
         pause
     }
 }

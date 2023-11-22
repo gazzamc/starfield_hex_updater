@@ -240,16 +240,16 @@ def patch(path, silent, backup):
 
                         if file == files_to_patch[0]:
                             # Check if already patched
-                            if str(lines[387]).startswith('//'):
+                            if str(lines[399]).startswith('//'):
                                 already_patched = True
                             else:
                                 for idx, line in enumerate(lines):
-                                    if idx == 386:
+                                    if idx == 398:
                                         old_line = lines.pop(idx)
                                         new_line = "//{}".format(old_line)
                                         lines.insert(idx, new_line)
 
-                                    if idx == 389:
+                                    if idx == 401:
                                         old_line = lines.pop(idx)
                                         new_line = line.replace(
                                             convert([
@@ -266,7 +266,7 @@ def patch(path, silent, backup):
                                             )
                                         lines.insert(idx, new_line)
 
-                                    elif idx == 393:
+                                    elif idx == 405:
                                         old_line = lines.pop(idx)
                                         new_line = line.replace(
                                             convert([
@@ -286,7 +286,7 @@ def patch(path, silent, backup):
 
 def main(argv):
     modes = ["update", "generate", "patch"]
-    version = "0.1.3"
+    version = "0.1.4"
 
     mode= ''
     path = ''
