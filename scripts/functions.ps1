@@ -11,6 +11,7 @@ $rootPath = $PSScriptRoot | Split-Path # Root
 $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
 $dateNow = $((Get-Date).ToString('yyyy.MM.dd_hh.mm.ss'))
 $logfileName = "logfile_$dateNow.log"
+$powershellVersion = $host.Version.Major
 $version = "1.3.2"
 
 $LogPath = Join-Path (Join-Path $rootPath 'logs') $logfileName
@@ -389,7 +390,7 @@ function patchFiles() {
         }
     }
     else {
-        writeToConsole "`n`t`tUnsuccessfully Patched SFSE" -logPath $LogPath
+        writeToConsole "`n`t`tUnsuccessfully Patched SFSE, backup files found ($($backFiles.length)/30) " -logPath $LogPath
         pause
     }
 }
