@@ -298,15 +298,12 @@ function buildRepo() {
 
     try {
         # Split build commands to reduce hanging
-        $process = Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -PassThru -WorkingDirectory $rootPath -ArgumentList "-command 
+        Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -PassThru -WorkingDirectory $rootPath -ArgumentList "-command 
         cmake -B sfse/build -S sfse"
 
-        writeToConsole $process.ExitCode -logPath $LogPath
 
-        $process2 = Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -PassThru -WorkingDirectory $rootPath -ArgumentList "-command 
+        Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -PassThru -WorkingDirectory $rootPath -ArgumentList "-command 
         cmake --build sfse/build --config Release"
-
-        writeToConsole $process2.ExitCode -logPath $LogPath
 
         writeToConsole "`n`t`tBuild finished, verifying!" -logPath $LogPath
 
