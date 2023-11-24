@@ -292,6 +292,33 @@ function cloneRepo() {
     }
 }
 
+function pullRepo() {
+    Clear-Host
+
+    # Reset path
+    Set-Location $rootPath
+
+    $commit = getLatestCommitId
+    try {
+        writeToConsole "`n`t`tUpdating SFSE and checking out CommitID!" -logPath $LogPath
+
+        Set-Location "sfse"
+        git pull
+        git checkout $commit
+
+        # Verify sfse exist before continuing
+        if (!(fileExists $rootPath "sfse")) {
+            throw "There was a problem updating sfse repo"
+        }
+    }
+    catch {
+        # Catch exception to prevent script failure
+        writeToConsole "`n`t`tFailed trying to update SFSE" -logPath $LogPath
+        logToFile $_.Exception $LogPath
+        pause
+    }
+}
+
 function buildRepo() {
     Clear-Host
     writeToConsole "`n`t`tBuilding SFSE" -logPath $LogPath
