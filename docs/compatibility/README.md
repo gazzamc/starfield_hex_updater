@@ -42,6 +42,8 @@ Incompatible Info:
 
 #### B
 
+* **** [Baka Achievement Enabler](https://www.nexusmods.com/starfield/mods/658) - **[Download Here](https://github.com/gazzamc/AchievementEnablerSFSE/releases/tag/v2.1.0)**
+
 #### C
 
 #### D
@@ -100,8 +102,6 @@ Incompatible Info:
 
 * **** [Baka Disable My Games Folder](https://www.nexusmods.com/starfield/mods/1599)
 
-* **** [Baka Achievement Enabler](https://www.nexusmods.com/starfield/mods/658)
-
 * **** [Baka Quick Full Saves](https://www.nexusmods.com/starfield/mods/1750)
 
 * **** [Baka Quit Game Fix](https://www.nexusmods.com/starfield/mods/1662)
@@ -109,6 +109,7 @@ Incompatible Info:
 #### C
 
 * \* [Console Command Runner](https://www.nexusmods.com/starfield/mods/2740)
+
 * *** | \* [Console Output To File](https://www.nexusmods.com/starfield/mods/3142)
 
 #### D
@@ -137,14 +138,16 @@ Incompatible Info:
 #### O
 #### P
 
-* [Plugins.txt Enabler](https://www.nexusmods.com/starfield/mods/4157)
+* ** [Plugins.txt Enabler](https://www.nexusmods.com/starfield/mods/4157)
 
 #### Q
 #### R
 #### S
 
 * ** [SlowerThanLight - Fly in a star system](https://www.nexusmods.com/starfield/mods/3541)
+
 * [Starfield Community Patch](https://www.nexusmods.com/starfield/mods/1)
+
 * [SFSE ASI Loader](https://www.nexusmods.com/starfield/mods/857)
 
 #### T
