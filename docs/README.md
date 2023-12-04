@@ -229,7 +229,7 @@ In most cases the script will lag behind the latest commit of SFSE (Not necessar
 
 *You can do this in powershell too but I'll be using CMD
 
-**You can find the commit id on the hex_table file eg. git <i>hex_table_1.7.33_`9f55120a`.json</i>
+**You can find the commit id on the hex_table file eg. git <i>hex_table_1.7.33_`9f55120a`.json</i> If however, you created a fresh hex table from updated offsets then use the commit of the release version of SFSE you are working with.
 
 <details>
   <summary>Screenshots:</summary>
