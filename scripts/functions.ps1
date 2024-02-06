@@ -12,7 +12,7 @@ $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
 $dateNow = $((Get-Date).ToString('yyyy.MM.dd_hh.mm.ss'))
 $logfileName = "logfile_$dateNow.log"
 $powershellVersion = $host.Version.Major
-$version = "1.3.3"
+$version = "1.4.0"
 
 $LogPath = Join-Path (Join-Path $rootPath 'logs') $logfileName
 
@@ -302,10 +302,20 @@ function buildRepo() {
         cmake -B sfse/build -S sfse"
 
 
-        Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -PassThru -WorkingDirectory $rootPath -ArgumentList "-command 
+        $proc = Start-Process -WindowStyle Hidden -Verb RunAs $poweshellExe -PassThru -WorkingDirectory $rootPath -ArgumentList "-command 
         cmake --build sfse/build --config Release"
 
-        writeToConsole "`n`t`tBuild finished, verifying!" -logPath $LogPath
+        $timeout = $null
+        $proc | Wait-Process -Timeout 60 -ErrorAction SilentlyContinue -ErrorVariable timeout
+
+        if ($timeout) {
+            writeToConsole "`n`t`tBuild Process timed out, checking if successful" -logPath $LogPath
+            $proc | kill
+        }
+        else {
+            writeToConsole "`n`t`tBuild finished, verifying!" -logPath $LogPath
+        }
+
 
         if (fileExists $rootPath "sfse\build") {
             writeToConsole "`n`t`tSuccessfully built" -logPath $LogPath
