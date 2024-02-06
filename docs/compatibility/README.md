@@ -2,13 +2,11 @@
 
     Any SFSE Mod utilizing the Address Library should work on this version of SFSE. 
 
-    If the mods has updated for Starfield `v1.8.86 +` then it should be good, 
+    If the mods has updated for Starfield `v1.9.51 +` then it should be good, 
     otherwise get in contact with me and I'll add it to the incompatible list below.
 
     **NOTE** 
-    Due to the `1.8.86` update breaking some things in SFSE some of these mods below are awaiting updates 
-    and/or have removed Address Library support temporarily. 
-    I've moved many into incompatible until I can patch for the GamePass version
+    I've temporarily moved mods many into incompatible until I can verify the most common
 
 ### Testing
 
@@ -20,7 +18,7 @@
 
 #
 
-### Updated as of Starfield `v1.8.86`
+### Updated as of Starfield `v1.9.51`
 
 Incompatible Info:
 
@@ -32,30 +30,18 @@ Incompatible Info:
 
     **** Needs patching for GamePass
 
+    ***** Needs to be re-checked for newer patch
 
 # Compatible
 
 
 #### A
-
-* [Auto Unlock SFSE](https://www.nexusmods.com/starfield/mods/5571)
-
 #### B
-
-* **** [Baka Achievement Enabler](https://www.nexusmods.com/starfield/mods/658) - **[Download Here](https://github.com/gazzamc/AchievementEnablerSFSE/releases/tag/v2.1.0)**
-
 #### C
-
 #### D
 #### E
-
-* [Enemy Friendly Fire](https://www.nexusmods.com/starfield/mods/614)
-
 #### F
 #### G
-
-* [Gravity Affects Weight](https://www.nexusmods.com/starfield/mods/3048)
-
 #### H
 #### I
 #### J
@@ -65,26 +51,13 @@ Incompatible Info:
 #### N
 #### O
 #### P
-
-* [powerofthree's Tweaks](https://www.nexusmods.com/starfield/mods/3621)
-
 #### Q
 #### R
 #### S
-
-* [Simple Offence Suppression](https://www.nexusmods.com/starfield/mods/4456)
-
-* [Smart Aiming](https://www.nexusmods.com/starfield/mods/1302)
-
-* [Sprint Stuttering Fix](https://www.nexusmods.com/starfield/mods/884)
-
 #### T
 #### U
 #### V
 #### W
-
-* [Weapon Swap Stuttering Fix](https://www.nexusmods.com/starfield/mods/2830)
-
 #### X
 #### Y
 #### Z
@@ -96,9 +69,13 @@ Incompatible Info:
 
 * ** [ADS FOV Removed](https://www.nexusmods.com/starfield/mods/2192)
 
+* ***** [Auto Unlock SFSE](https://www.nexusmods.com/starfield/mods/5571)
+
 * \* [Auto Recent Save Load](https://www.nexusmods.com/starfield/mods/2962)
 
 #### B
+
+* ***** [Baka Achievement Enabler](https://www.nexusmods.com/starfield/mods/658)
 
 * **** [Baka Disable My Games Folder](https://www.nexusmods.com/starfield/mods/1599)
 
@@ -114,11 +91,17 @@ Incompatible Info:
 
 #### D
 #### E
+
+* ***** [Enemy Friendly Fire](https://www.nexusmods.com/starfield/mods/614)
+
 #### F
 
 * \* [Fast Travel Restrictions](https://www.nexusmods.com/starfield/mods/3220)
 
 #### G
+
+* ***** [Gravity Affects Weight](https://www.nexusmods.com/starfield/mods/3048)
+
 #### H
 
 * [Height Randomizer](https://www.nexusmods.com/starfield/mods/2525)
@@ -138,22 +121,33 @@ Incompatible Info:
 #### O
 #### P
 
+* ***** [powerofthree's Tweaks](https://www.nexusmods.com/starfield/mods/3621)
+
 * ** [Plugins.txt Enabler](https://www.nexusmods.com/starfield/mods/4157)
 
 #### Q
 #### R
 #### S
 
+* [SFSE ASI Loader](https://www.nexusmods.com/starfield/mods/857)
+
+* ***** [Simple Offence Suppression](https://www.nexusmods.com/starfield/mods/4456)
+
+* ***** [Smart Aiming](https://www.nexusmods.com/starfield/mods/1302)
+
+* ***** [Sprint Stuttering Fix](https://www.nexusmods.com/starfield/mods/884)
+
 * ** [SlowerThanLight - Fly in a star system](https://www.nexusmods.com/starfield/mods/3541)
 
 * [Starfield Community Patch](https://www.nexusmods.com/starfield/mods/1)
-
-* [SFSE ASI Loader](https://www.nexusmods.com/starfield/mods/857)
 
 #### T
 #### U
 #### V
 #### W
+
+* ***** [Weapon Swap Stuttering Fix](https://www.nexusmods.com/starfield/mods/2830)
+
 #### X
 #### Y
 #### Z

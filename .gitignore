@@ -3,3 +3,4 @@ PSTools/
 logs/
 vswhere.exe
 config.json
+__cmake_systeminformation
