@@ -2,6 +2,7 @@
 # Be aware this will create a much bigger files that the ones in hex_table folder
 
 import json
+import os
 
 
 def convert_add_lib_to_hex_map(lib):
@@ -43,10 +44,24 @@ def gen_hex_table(steam_path, win_path):
     with open("diff.json", "w") as f:
         f.write(json.dumps(hex_dict))
         f.close()
+        print("Hex table generated")
 
 
+def check_file_path(file: str):
+    # Remove leading/trailing spaces and quotes
+    trimmed_string = file.lstrip().rstrip().replace('"', '')
+    if (os.path.exists(trimmed_string)):
+        return trimmed_string
+    else:
+        exit("File not found")
 
-steam_path = input('Steam address library file path: ')
-win_path = input('Windows address library file path: ')
 
-gen_hex_table(steam_path, win_path)
+steam_path = check_file_path(input('Steam address library file path: '))
+win_path = check_file_path(input('Windows address library file path: '))
+
+
+try:
+    gen_hex_table(steam_path, win_path)
+
+except Exception as err:
+    print(err)
