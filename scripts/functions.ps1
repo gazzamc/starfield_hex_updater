@@ -12,7 +12,7 @@ $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
 $dateNow = $((Get-Date).ToString('yyyy.MM.dd_hh.mm.ss'))
 $logfileName = "logfile_$dateNow.log"
 $powershellVersion = $host.Version.Major
-$version = "1.4.0"
+$version = "1.5.0"
 
 $LogPath = Join-Path (Join-Path $rootPath 'logs') $logfileName
 
@@ -273,6 +273,12 @@ function cloneRepo() {
 
     $commit = getLatestCommitId
     try {
+        # Delete SFSE if already preset
+        if (fileExists $rootPath "sfse") {
+            writeToConsole "`n`t`tSFSE already exists, removing first" -logPath $LogPath
+            Remove-Item -Force -Recurse (Join-Path $rootPath "sfse")
+        }
+
         writeToConsole "`n`t`tCloning SFSE and Checking out CommitID!" -logPath $LogPath
 
         git clone https://github.com/gazzamc/sfse.git
@@ -310,7 +316,7 @@ function buildRepo() {
 
         if ($timeout) {
             writeToConsole "`n`t`tBuild Process timed out, checking if successful" -logPath $LogPath
-            $proc | kill
+            $proc | Stop-Process
         }
         else {
             writeToConsole "`n`t`tBuild finished, verifying!" -logPath $LogPath
