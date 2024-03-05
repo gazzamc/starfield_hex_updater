@@ -213,17 +213,17 @@ def patch(path, silent, backup):
 
                         if file == files_to_patch[1]:
                             # Check if already patched
-                            if line_count != 470:
+                            if line_count != 472:
                                 if str(lines[318]).startswith('//'):
                                     already_patched = True
                             else:
                                 for idx, line in enumerate(lines):
-                                    if idx >= 317 and idx <= 321:
+                                    if idx >= 319 and idx <= 323:
                                         old_line = lines.pop(idx)
                                         new_line = "//{}".format(old_line)
                                         lines.insert(idx, new_line)
 
-                                    if idx == 440:
+                                    if idx == 442:
                                         new_line = line.replace(
                                             convert([83, 116, 101, 97, 109]), 
                                             convert([
@@ -231,9 +231,9 @@ def patch(path, silent, backup):
                                                 116, 111, 114, 101
                                             ])
                                             )
-                                        lines.insert(440, new_line)
+                                        lines.insert(442, new_line)
 
-                                    elif idx >= 450 and idx <= 456:
+                                    elif idx >= 452 and idx <= 458:
                                         old_line = lines.pop(idx)
                                         new_line = "//{}".format(old_line)
                                         lines.insert(idx, new_line)
@@ -286,7 +286,7 @@ def patch(path, silent, backup):
 
 def main(argv):
     modes = ["update", "generate", "patch"]
-    version = "0.1.5"
+    version = "0.1.6"
 
     mode= ''
     path = ''
