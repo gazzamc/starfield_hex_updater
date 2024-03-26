@@ -75,46 +75,32 @@ function writeToConsole() {
     }
 }
 
-function getAllHexTableFileNames() {
-    return Get-ChildItem -Path (getFullPath 'hex_tables') -filter *.json -file | Sort-Object -Property Name -Descending
-}
-
 function getLatestFileName() {
-    param (
-        [Array]$files
-    )
+    $files = Get-ChildItem -Path (getFullPath 'hex_tables') -filter *.json -file
+    $versionUnsorted = $files | ForEach-Object { $_.toString().Split("_")[2] }
+    $versionSorted = $versionUnsorted | Sort-Object { [version]$_ } -Descending
+    $latestVersionidx = [array]::IndexOf($versionUnsorted, $versionSorted[0])
 
-    if($powershellVersion -ne 5){
-        return $files[0].Name
-    } else {
-        return $files[0]
+    if ($powershellVersion -ne 5) {
+        return $files[$latestVersionidx].Name
+    }
+    else {
+        return $files[$latestVersionidx]
     }
 }
 
 function getLatestCommitId() {
-    $files = getAllHexTableFileNames
-    $fileName = getLatestFileName($files)
+    $fileName = getLatestFileName
     $fileNameParts = $fileName.toString().Split('_')[3]
     $commitId = $fileNameParts.substring(0, $fileNameParts.length - 0 - 5)
-
     return $commitId
 }
 
 function getGameVersion() {
-    $files = getAllHexTableFileNames
-    $fileName = getLatestFileName($files)
+    $fileName = getLatestFileName
     $version = $fileName.toString().Split('_')[2].Split('.') -join '_'
-
     return $version
 }
-
-function getLatestDictFileName() {
-    $files = getAllHexTableFileNames
-    $fileName = getLatestFileName($files)
-    
-    return $fileName
-}
-
 
 function getConfigProperty() {
     param (

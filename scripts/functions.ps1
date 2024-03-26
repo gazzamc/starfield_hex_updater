@@ -12,7 +12,7 @@ $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
 $dateNow = $((Get-Date).ToString('yyyy.MM.dd_hh.mm.ss'))
 $logfileName = "logfile_$dateNow.log"
 $powershellVersion = $host.Version.Major
-$version = "1.5.0"
+$version = "1.5.1"
 
 $LogPath = Join-Path (Join-Path $rootPath 'logs') $logfileName
 
@@ -388,7 +388,7 @@ function patchFiles() {
     writeToConsole "`n`tPatching SFSE" -logPath $LogPath
 
     # Get latest dictFile
-    $dictFile = getFullPath ('/hex_tables/' + (getLatestDictFileName))
+    $dictFile = getFullPath ('/hex_tables/' + (getLatestFileName))
 
     # Update hex values
     python hex_updater.py -m update -p (getFullPath 'sfse/sfse') -d "$dictFile" | Out-File $LogPath -Append -Encoding UTF8
