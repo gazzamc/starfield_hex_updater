@@ -12,7 +12,7 @@ $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
 $dateNow = $((Get-Date).ToString('yyyy.MM.dd_hh.mm.ss'))
 $logfileName = "logfile_$dateNow.log"
 $powershellVersion = $host.Version.Major
-$version = "1.5.1"
+$version = "1.5.2"
 
 $LogPath = Join-Path (Join-Path $rootPath 'logs') $logfileName
 
@@ -353,28 +353,37 @@ function moveSFSEFiles() {
     $gameVersion = getGameVersion
     $filesToCopy = "sfse_loader.exe", "sfse_$gameVersion.dll"
 
-
-
     try {
         # Find files in build folder and copy to user provided path
-        foreach ($file in $filesToCopy) {
-            Get-ChildItem -Path (getFullPath "sfse/build/") -Filter $file -Recurse | Copy-Item -Destination $gamePath  -Verbose *>&1 | Out-File -FilePath $LogPath -Append -Encoding UTF8
-        }
-
-        # Check files exist
-        foreach ($file in $filesToCopy) {
-            if (Test-Path -Path $gamePath -Filter $file) {
-                writeToConsole "`n`t`t$file Successfully Copied!" -logPath $LogPath
+        if (fileExists $rootPath "sfse/build") {
+            foreach ($file in $filesToCopy) {
+                Get-ChildItem -Path (getFullPath "sfse/build/") -Filter $file -Recurse | Copy-Item -Destination $gamePath  -Verbose *>&1 | Out-File -FilePath $LogPath -Append -Encoding UTF8
             }
-            else {
-                writeToConsole "`n`t`tThere was an issue copying $file!" -logPath $LogPath
+    
+            # Check files exist
+            foreach ($file in $filesToCopy) {
+                if (Test-Path -Path $gamePath -Filter $file) {
+                    writeToConsole "`n`t`t$file Successfully Copied!" -logPath $LogPath
+                }
+                else {
+                    writeToConsole "`n`t`tThere was an issue copying $file!" -logPath $LogPath
+                }
             }
+    
+            Start-Sleep 5
         }
-
-        Start-Sleep 5
+        else {
+            throw
+        }
     }
     catch {
-        writeToConsole "`n`t`tAn Error occured during the copying of files" -logPath $LogPath
+        if ($_.Exception.GetType().Name -eq "RuntimeException") {
+            writeToConsole "`n`t`tFiles not found, please run build before trying to copy" -logPath $LogPath
+        }
+        else {
+            writeToConsole "`n`t`tAn Error occured during the copying of files, check log for more details" -logPath $LogPath
+        }
+
         logToFile $_.Exception $LogPath
         pause
     }
@@ -549,15 +558,21 @@ function moveGameFiles() {
     }
     elseif ($type -eq 2) {
         writeToConsole "`n`tHardlinking files to new location!" -logPath $LogPath
-        Get-ChildItem -Path $gamePath | ForEach-Object { 
-            if ($_.PSIsContainer) {
-                New-Item -ItemType Junction -Path "$($newGamePath)\$($_.Name)" -Value $_.FullName | Out-File $LogPath -Append -Encoding UTF8
-            }
-            else { 
-                if ($_.Name -ne "Starfield.exe") {
-                    New-Item -ItemType HardLink -Path "$($newGamePath)\$($_.Name)" -Value $_.FullName | Out-File $LogPath -Append -Encoding UTF8
+
+        try {
+            Get-ChildItem -Path $gamePath | ForEach-Object { 
+                if ($_.PSIsContainer) {
+                    New-Item -ItemType Junction -Path "$($newGamePath)\$($_.Name)" -Value $_.FullName | Out-File $LogPath -Append -Encoding UTF8
+                }
+                else { 
+                    if ($_.Name -ne "Starfield.exe") {
+                        New-Item -ItemType HardLink -Path "$($newGamePath)\$($_.Name)" -Value $_.FullName | Out-File $LogPath -Append -Encoding UTF8
+                    }
                 }
             }
+        }
+        catch {
+            logToFile $_.Exception $LogPath
         }
     }
 
