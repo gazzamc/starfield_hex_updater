@@ -2,7 +2,7 @@
 
     Any SFSE Mod utilizing the Address Library should work on this version of SFSE. 
 
-    If the mods has updated for Starfield `v1.9.51 +` then it should be good, 
+    If the mods has updated for Starfield `v1.10.32 +` then it should be good, 
     otherwise get in contact with me and I'll add it to the incompatible list below.
 
     **NOTE** 
@@ -18,7 +18,7 @@
 
 #
 
-### Updated as of Starfield `v1.9.51`
+### Updated as of Starfield `v1.10.32`
 
 Incompatible Info:
 
@@ -36,7 +36,13 @@ Incompatible Info:
 
 
 #### A
+
+* [Auto Unlock SFSE](https://www.nexusmods.com/starfield/mods/5571)
+
 #### B
+
+* [Baka Achievement Enabler](https://www.nexusmods.com/starfield/mods/658)
+
 #### C
 #### D
 #### E
@@ -54,6 +60,9 @@ Incompatible Info:
 #### Q
 #### R
 #### S
+
+* [Smart Aiming](https://www.nexusmods.com/starfield/mods/1302)
+
 #### T
 #### U
 #### V
@@ -69,13 +78,9 @@ Incompatible Info:
 
 * ** [ADS FOV Removed](https://www.nexusmods.com/starfield/mods/2192)
 
-* ***** [Auto Unlock SFSE](https://www.nexusmods.com/starfield/mods/5571)
-
 * \* [Auto Recent Save Load](https://www.nexusmods.com/starfield/mods/2962)
 
 #### B
-
-* ***** [Baka Achievement Enabler](https://www.nexusmods.com/starfield/mods/658)
 
 * **** [Baka Disable My Games Folder](https://www.nexusmods.com/starfield/mods/1599)
 
@@ -90,6 +95,9 @@ Incompatible Info:
 * *** | \* [Console Output To File](https://www.nexusmods.com/starfield/mods/3142)
 
 #### D
+
+* *** [Detailed Reference Info](https://www.nexusmods.com/starfield/mods/7589)
+
 #### E
 
 * ***** [Enemy Friendly Fire](https://www.nexusmods.com/starfield/mods/614)
@@ -132,8 +140,6 @@ Incompatible Info:
 * [SFSE ASI Loader](https://www.nexusmods.com/starfield/mods/857)
 
 * ***** [Simple Offence Suppression](https://www.nexusmods.com/starfield/mods/4456)
-
-* ***** [Smart Aiming](https://www.nexusmods.com/starfield/mods/1302)
 
 * ***** [Sprint Stuttering Fix](https://www.nexusmods.com/starfield/mods/884)
 
