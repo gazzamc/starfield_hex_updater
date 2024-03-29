@@ -42,31 +42,54 @@ Incompatible Info:
 #### B
 
 * [Baka Achievement Enabler](https://www.nexusmods.com/starfield/mods/658)
+* [Baka Quick Full Saves](https://www.nexusmods.com/starfield/mods/1750)
+* [BetterConsole - Console Replacer and MOD Menu](https://www.nexusmods.com/starfield/mods/3683)
 
 #### C
+
+* [Console Command Runner](https://www.nexusmods.com/starfield/mods/2740)
+
 #### D
+
+* [Disable Dialogue Camera](https://www.nexusmods.com/starfield/mods/7157)
+* [Discord Rich Presence](https://www.nexusmods.com/starfield/mods/2545)
+
 #### E
+
+* [Enemy Friendly Fire](https://www.nexusmods.com/starfield/mods/614)
+
 #### F
 #### G
 #### H
 #### I
 #### J
 #### K
+
+* [KiLoader for Starfield](https://www.nexusmods.com/starfield/mods/3298)
+
 #### L
 #### M
 #### N
 #### O
 #### P
+
+* [Plugins.txt Enabler](https://www.nexusmods.com/starfield/mods/4157)
+
 #### Q
 #### R
 #### S
 
 * [Smart Aiming](https://www.nexusmods.com/starfield/mods/1302)
+* [Starfield Community Patch](https://www.nexusmods.com/starfield/mods/1)
+* [Sprint Stuttering Fix](https://www.nexusmods.com/starfield/mods/884)
 
 #### T
 #### U
 #### V
 #### W
+
+* [Weapon Swap Stuttering Fix](https://www.nexusmods.com/starfield/mods/2830)
+
 #### X
 #### Y
 #### Z
@@ -77,20 +100,14 @@ Incompatible Info:
 #### A
 
 * ** [ADS FOV Removed](https://www.nexusmods.com/starfield/mods/2192)
-
 * \* [Auto Recent Save Load](https://www.nexusmods.com/starfield/mods/2962)
 
 #### B
 
 * **** [Baka Disable My Games Folder](https://www.nexusmods.com/starfield/mods/1599)
-
-* **** [Baka Quick Full Saves](https://www.nexusmods.com/starfield/mods/1750)
-
 * **** [Baka Quit Game Fix](https://www.nexusmods.com/starfield/mods/1662)
 
 #### C
-
-* \* [Console Command Runner](https://www.nexusmods.com/starfield/mods/2740)
 
 * *** | \* [Console Output To File](https://www.nexusmods.com/starfield/mods/3142)
 
@@ -99,9 +116,6 @@ Incompatible Info:
 * *** [Detailed Reference Info](https://www.nexusmods.com/starfield/mods/7589)
 
 #### E
-
-* ***** [Enemy Friendly Fire](https://www.nexusmods.com/starfield/mods/614)
-
 #### F
 
 * \* [Fast Travel Restrictions](https://www.nexusmods.com/starfield/mods/3220)
@@ -112,14 +126,11 @@ Incompatible Info:
 
 #### H
 
-* [Height Randomizer](https://www.nexusmods.com/starfield/mods/2525)
+* ***** [Height Randomizer](https://www.nexusmods.com/starfield/mods/2525)
 
 #### I
 #### J
 #### K
-
-* [KiLoader for Starfield](https://www.nexusmods.com/starfield/mods/3298)
-
 #### L
 #### M
 
@@ -131,34 +142,23 @@ Incompatible Info:
 
 * ***** [powerofthree's Tweaks](https://www.nexusmods.com/starfield/mods/3621)
 
-* ** [Plugins.txt Enabler](https://www.nexusmods.com/starfield/mods/4157)
-
 #### Q
 #### R
 #### S
 
 * [SFSE ASI Loader](https://www.nexusmods.com/starfield/mods/857)
-
 * ***** [Simple Offence Suppression](https://www.nexusmods.com/starfield/mods/4456)
-
-* ***** [Sprint Stuttering Fix](https://www.nexusmods.com/starfield/mods/884)
-
 * ** [SlowerThanLight - Fly in a star system](https://www.nexusmods.com/starfield/mods/3541)
-
-* [Starfield Community Patch](https://www.nexusmods.com/starfield/mods/1)
 
 #### T
 #### U
 #### V
 #### W
-
-* ***** [Weapon Swap Stuttering Fix](https://www.nexusmods.com/starfield/mods/2830)
-
 #### X
 #### Y
 #### Z
 
-* [Zero Weight](https://www.nexusmods.com/starfield/mods/3475)
+* ***** [Zero Weight](https://www.nexusmods.com/starfield/mods/3475)
 
 # Obsolete 
 
