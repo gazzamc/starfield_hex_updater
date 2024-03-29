@@ -5,6 +5,7 @@
 #URLs for tools needed
 $vsWhereURL = "https://github.com/microsoft/vswhere/releases/download/3.1.7/vswhere.exe"
 $pstools = "https://download.sysinternals.com/files/PSTools.zip"
+$python = "https://www.python.org/ftp/python/3.11.8/python-3.11.8-embed-amd64.zip"
 
 $ErrorActionPreference = "Stop"
 $rootPath = $PSScriptRoot | Split-Path # Root
@@ -12,7 +13,7 @@ $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
 $dateNow = $((Get-Date).ToString('yyyy.MM.dd_hh.mm.ss'))
 $logfileName = "logfile_$dateNow.log"
 $powershellVersion = $host.Version.Major
-$version = "1.5.4"
+$version = "1.5.5"
 
 $LogPath = Join-Path (Join-Path $rootPath 'logs') $logfileName
 
@@ -223,8 +224,14 @@ function checkDependencies() {
 
     writeToConsole ("`n`t`tChocolatey [https://chocolatey.org/] ...." + (& { if (isInstalled "chocolatey") { "`tInstalled" } else { "`tNot Found"; $progsToInstall.Add("chocolatey") } })) -logPath $LogPath
 
-    writeToConsole ("`n`t`tPython [https://www.python.org/] ...." + (& { if (isInstalled "python") { "`tInstalled" } else { "`tNot Found"; $progsToInstall.Add("python") } })) -logPath $LogPath
-    
+    if (![System.Convert]::ToBoolean((getConfigProperty "standalonePython"))) {
+        writeToConsole ("`n`t`tPython [https://www.python.org/] ...." + (& { if (isInstalled "python") { "`tInstalled" } else { "`tNot Found"; $progsToInstall.Add("python") } })) -logPath $LogPath
+    }
+    else {
+        installPortablePython
+        writeToConsole ("`n`t`tPython [https://www.python.org/] .... Installed [Using Portable]") -logPath $LogPath
+    }
+
     writeToConsole ("`n`t`tCMake [https://cmake.org/] ...." + (& { if (isInstalled "cmake") { "`tInstalled" } else { "`tNot Found"; $progsToInstall.Add("CMake") } })) -logPath $LogPath
 
     writeToConsole ("`n`t`tGit [https://git-scm.com/] ...." + (& { if (isInstalled "git") { "`tInstalled" } else { "`tNot Found"; $progsToInstall.Add("Git") } })) -logPath $LogPath
@@ -233,6 +240,30 @@ function checkDependencies() {
 
     if (![System.Convert]::ToBoolean((getConfigProperty "bypassPrompts"))) {
         pause
+    }
+}
+
+function installPortablePython() {
+    if (!(fileExists $rootPath "tools/Python/python.exe")) {
+        try {
+            $question = "`n`tPython has not been detected on your system, do you want to download a portable version? [y/n]"
+            askAndDownload $question $python "python.zip" ([System.Convert]::ToBoolean((getConfigProperty "bypassPrompts")))
+    
+            if (fileExists $rootPath "tools/python.zip") {
+                #Extract to folder
+                Expand-Archive -LiteralPath (getFullPath 'tools/python.zip') -DestinationPath (getFullPath 'tools/python')
+    
+                #Clean up zip
+                Remove-Item (getFullPath 'tools/python.zip')
+            }
+    
+        }
+        catch {
+            writeToConsole "`n`tFailed to download Python, exiting!" -logPath $LogPath
+            logToFile $_.Exception $LogPath
+            pause
+            exit 
+        }
     }
 }
 
@@ -379,16 +410,25 @@ function patchFiles() {
 
     # Reset path
     Set-Location $rootPath
+
+    $dictFile = getFullPath ('/hex_tables/' + (getLatestFileName))
+    $pythonExe = 'python'
+    $updateArgs = 'hex_updater.py', '-m', 'update', '-p', (getFullPath 'sfse/sfse'), '-d', "$dictFile"
+    $patchArgs = 'hex_updater.py', '-m', 'patch', '-p', (getFullPath 'sfse')
+
+    if (([System.Convert]::ToBoolean((getConfigProperty "standalonePython")))) {
+        installPortablePython
+
+        $pythonExe = 'tools/python/python.exe'
+    }
+
     writeToConsole "`n`tPatching SFSE" -logPath $LogPath
 
-    # Get latest dictFile
-    $dictFile = getFullPath ('/hex_tables/' + (getLatestFileName))
-
     # Update hex values
-    python hex_updater.py -m update -p (getFullPath 'sfse/sfse') -d "$dictFile" | Out-File $LogPath -Append -Encoding UTF8
+    & $pythonExe $updateArgs | Out-File $LogPath -Append -Encoding UTF8
 
     # Patch loader
-    python hex_updater.py -m patch -p (getFullPath 'sfse') | Out-File $LogPath -Append -Encoding UTF8
+    & $pythonExe $patchArgs | Out-File $LogPath -Append -Encoding UTF8
 
     # Check if bak files were created
     $backFiles = Get-ChildItem -Path (getFullPath "sfse/") -Filter *.bak -Recurse -File -Name
@@ -645,6 +685,26 @@ function setBypassChoice() {
     }
 }
 
+function setPythonChoice() {
+    Clear-Host
+    writeToConsole "`n`tRecommended if having issues detecting local install" -type -color yellow -bgcolor black
+    writeToConsole "`n`tPython will be installed to the tools folder" -type -color yellow -bgcolor black
+
+    $question = "
+        Would you like to use a standalone python install? [y/n]"
+    $confirmation = Read-Host $question
+    while ($confirmation -ne "y" -and $confirmation -ne "n") {  
+        $confirmation = Read-Host $question
+    }
+
+    if ($confirmation -eq 'y') {
+        setConfigProperty "standalonePython" $true
+    }
+    elseif ($confirmation -eq 'n') {
+        setConfigProperty "standalonePython" $false
+    }
+}
+
 function welcomeScreen() {
     Clear-Host
     $title = (Get-Content -Raw "header.txt").Replace('x.x.x', $version).Replace('[at]', '@')
@@ -668,7 +728,8 @@ function welcomeScreen() {
 
     pause
     setGamePaths
-        setBypassChoice
+    setPythonChoice
+    setBypassChoice
 }
 
 

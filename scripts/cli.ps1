@@ -116,6 +116,11 @@ Do {
                         setBypassChoice
                         break
                     }
+                    3 { 
+                        Clear-Host
+                        setPythonChoice
+                        break
+                    }
                     Default {
                     }
                 }
@@ -130,11 +135,14 @@ Do {
                 Write-Host "`t"
                 Write-Host "`tBypass Prompts: $(getConfigProperty "bypassPrompts" )"
                 Write-Host "`t"
+                Write-Host "`tStandalone Python: $(getConfigProperty "standalonePython" )"
+                Write-Host "`t"
 
                 Write-Host 
                 "
                     1. Set Paths
                     2. Set Bypass Choice
+                    3. Set Python Choice
                     q. Return
                 "
                 $setConfigOption = Read-Host "Choose an option"
