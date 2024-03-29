@@ -144,3 +144,47 @@ function setConfigProperty() {
 
     ConvertTo-Json $config -Depth 1 | Out-File "$rootPath\config.json" -Force
 }
+
+function runProcessAndLog() {
+    param (
+        [string]$command,
+        [string]$workingDir,
+        [string]$argsToPass,
+        [int]$timeout
+    )
+
+    $pinfo = New-Object System.Diagnostics.ProcessStartInfo
+    $pinfo.FileName = $command
+    $pinfo.WorkingDirectory = $workingDir
+    $pinfo.Arguments = $argsToPass
+    $pinfo.Verb = "runAs"
+
+    $pinfo.RedirectStandardError = $true
+    $pinfo.RedirectStandardOutput = $true
+    $pinfo.UseShellExecute = $false
+    $pinfo.CreateNoWindow = $false
+
+    $p = New-Object System.Diagnostics.Process
+    $p.StartInfo = $pinfo
+    $p.Start() | Out-Null
+    
+    if ($timeout) {
+        $Seconds = $timeout
+        $EndTime = [datetime]::UtcNow.AddSeconds($Seconds)
+
+        while (($TimeRemaining = ($EndTime - [datetime]::UtcNow)) -gt 0) {
+            Write-Progress -Activity 'Building SFSE...' -Status Building -SecondsRemaining $TimeRemaining.TotalSeconds
+            Start-Sleep 1
+            if ($p.ExitCode -eq 0) {
+                break
+            }
+        }
+    }
+    
+    $p.WaitForExit()
+    $stdout = $p.StandardOutput.ReadToEnd()
+    $stderr = $p.StandardError.ReadToEnd()
+    logToFile "stdout: $stdout" $logPath
+    logToFile "stderr: $stderr" $logPath
+    logToFile ("exit code: " + $p.ExitCode) $logPath
+}

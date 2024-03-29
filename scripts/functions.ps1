@@ -12,7 +12,7 @@ $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
 $dateNow = $((Get-Date).ToString('yyyy.MM.dd_hh.mm.ss'))
 $logfileName = "logfile_$dateNow.log"
 $powershellVersion = $host.Version.Major
-$version = "1.5.3"
+$version = "1.5.4"
 
 $LogPath = Join-Path (Join-Path $rootPath 'logs') $logfileName
 
@@ -300,28 +300,13 @@ function cloneRepo() {
 
 function buildRepo() {
     Clear-Host
-    writeToConsole "`n`t`tBuilding SFSE" -logPath $LogPath
 
     try {
         # Split build commands to reduce hanging
-        Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -PassThru -WorkingDirectory $rootPath -ArgumentList "-command 
-        cmake -B sfse/build -S sfse"
-        
+        runProcessAndLog $poweshellExe $rootPath "-command cmake -B sfse/build -S sfse"
+        runProcessAndLog $poweshellExe $rootPath "-command cmake --build sfse/build --config Release" 60
 
-        $proc = Start-Process -WindowStyle Hidden -Verb RunAs $poweshellExe -PassThru -WorkingDirectory $rootPath -ArgumentList "-command 
-        cmake --build sfse/build --config Release"
-
-        $timeout = $null
-        $proc | Wait-Process -Timeout 60 -ErrorAction SilentlyContinue -ErrorVariable timeout
-
-        if ($timeout) {
-            writeToConsole "`n`t`tBuild Process timed out, checking if successful" -logPath $LogPath
-            $proc | Stop-Process
-        }
-        else {
-            writeToConsole "`n`t`tBuild finished, verifying!" -logPath $LogPath
-        }
-
+        writeToConsole "`n`t`tBuild finished, verifying!" -logPath $LogPath
 
         if (fileExists $rootPath "sfse\build") {
             writeToConsole "`n`t`tSuccessfully built" -logPath $LogPath
