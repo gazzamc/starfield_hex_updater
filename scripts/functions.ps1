@@ -13,7 +13,7 @@ $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
 $dateNow = $((Get-Date).ToString('yyyy.MM.dd_hh.mm.ss'))
 $logfileName = "logfile_$dateNow.log"
 $powershellVersion = $host.Version.Major
-$version = "1.5.5"
+$version = "1.5.6"
 
 $LogPath = Join-Path (Join-Path $rootPath 'logs') $logfileName
 
@@ -228,8 +228,8 @@ function checkDependencies() {
         writeToConsole ("`n`t`tPython [https://www.python.org/] ...." + (& { if (isInstalled "python") { "`tInstalled" } else { "`tNot Found"; $progsToInstall.Add("python") } })) -logPath $LogPath
     }
     else {
-        installPortablePython
-        writeToConsole ("`n`t`tPython [https://www.python.org/] .... Installed [Using Portable]") -logPath $LogPath
+        installStandalonePython
+        writeToConsole ("`n`t`tPython [https://www.python.org/] .... Installed [Using Standalone]") -logPath $LogPath
     }
 
     writeToConsole ("`n`t`tCMake [https://cmake.org/] ...." + (& { if (isInstalled "cmake") { "`tInstalled" } else { "`tNot Found"; $progsToInstall.Add("CMake") } })) -logPath $LogPath
@@ -243,20 +243,20 @@ function checkDependencies() {
     }
 }
 
-function installPortablePython() {
+function installStandalonePython() {
     if (!(fileExists $rootPath "tools/Python/python.exe")) {
         try {
-            $question = "`n`tPython has not been detected on your system, do you want to download a portable version? [y/n]"
+            $question = "`n`tPython has not been detected on your system, do you want to download a standalone version? [y/n]"
             askAndDownload $question $python "python.zip" ([System.Convert]::ToBoolean((getConfigProperty "bypassPrompts")))
-    
+
             if (fileExists $rootPath "tools/python.zip") {
                 #Extract to folder
                 Expand-Archive -LiteralPath (getFullPath 'tools/python.zip') -DestinationPath (getFullPath 'tools/python')
-    
+
                 #Clean up zip
                 Remove-Item (getFullPath 'tools/python.zip')
             }
-    
+
         }
         catch {
             writeToConsole "`n`tFailed to download Python, exiting!" -logPath $LogPath
@@ -417,7 +417,7 @@ function patchFiles() {
     $patchArgs = 'hex_updater.py', '-m', 'patch', '-p', (getFullPath 'sfse')
 
     if (([System.Convert]::ToBoolean((getConfigProperty "standalonePython")))) {
-        installPortablePython
+        installStandalonePython
 
         $pythonExe = 'tools/python/python.exe'
     }

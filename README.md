@@ -18,6 +18,8 @@ Be vigilant of the hex table name `hex_table_{game_version}_{commit_id}.json`, i
 
 * Added support for Powershell 7
 
+* As of v1.5.6, the powershell GUI can now install a standalone python version, this can be helpful if you're having issues detecting your install.
+
 ## Usage
         hex_script.py -m <mode> <options>
 
