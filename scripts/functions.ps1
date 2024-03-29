@@ -12,7 +12,7 @@ $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
 $dateNow = $((Get-Date).ToString('yyyy.MM.dd_hh.mm.ss'))
 $logfileName = "logfile_$dateNow.log"
 $powershellVersion = $host.Version.Major
-$version = "1.5.2"
+$version = "1.5.3"
 
 $LogPath = Join-Path (Join-Path $rootPath 'logs') $logfileName
 
@@ -224,7 +224,7 @@ function checkDependencies() {
     writeToConsole ("`n`t`tChocolatey [https://chocolatey.org/] ...." + (& { if (isInstalled "chocolatey") { "`tInstalled" } else { "`tNot Found"; $progsToInstall.Add("chocolatey") } })) -logPath $LogPath
 
     writeToConsole ("`n`t`tPython [https://www.python.org/] ...." + (& { if (isInstalled "python") { "`tInstalled" } else { "`tNot Found"; $progsToInstall.Add("python") } })) -logPath $LogPath
-
+    
     writeToConsole ("`n`t`tCMake [https://cmake.org/] ...." + (& { if (isInstalled "cmake") { "`tInstalled" } else { "`tNot Found"; $progsToInstall.Add("CMake") } })) -logPath $LogPath
 
     writeToConsole ("`n`t`tGit [https://git-scm.com/] ...." + (& { if (isInstalled "git") { "`tInstalled" } else { "`tNot Found"; $progsToInstall.Add("Git") } })) -logPath $LogPath
@@ -306,7 +306,7 @@ function buildRepo() {
         # Split build commands to reduce hanging
         Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -PassThru -WorkingDirectory $rootPath -ArgumentList "-command 
         cmake -B sfse/build -S sfse"
-
+        
 
         $proc = Start-Process -WindowStyle Hidden -Verb RunAs $poweshellExe -PassThru -WorkingDirectory $rootPath -ArgumentList "-command 
         cmake --build sfse/build --config Release"
@@ -408,14 +408,14 @@ function patchFiles() {
     # Check if bak files were created
     $backFiles = Get-ChildItem -Path (getFullPath "sfse/") -Filter *.bak -Recurse -File -Name
 
-    if ($backFiles.length -eq 33) {
+    if ($backFiles.length -eq 34) {
         writeToConsole "`n`t`tSuccessfully Patched SFSE" -logPath $LogPath
         if (![System.Convert]::ToBoolean((getConfigProperty "bypassPrompts"))) {
             pause
         }
     }
     else {
-        writeToConsole "`n`t`tUnsuccessfully Patched SFSE, backup files found ($($backFiles.length)/33) " -logPath $LogPath
+        writeToConsole "`n`t`tUnsuccessfully Patched SFSE, backup files found ($($backFiles.length)/34) " -logPath $LogPath
         pause
     }
 }
@@ -683,7 +683,7 @@ function welcomeScreen() {
 
     pause
     setGamePaths
-    setBypassChoice
+        setBypassChoice
 }
 
 

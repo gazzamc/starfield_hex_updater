@@ -76,16 +76,18 @@ function writeToConsole() {
 }
 
 function getLatestFileName() {
-    $files = Get-ChildItem -Path (getFullPath 'hex_tables') -filter *.json -file
-    $versionUnsorted = $files | ForEach-Object { $_.toString().Split("_")[2] }
-    $versionSorted = $versionUnsorted | Sort-Object { [version]$_ } -Descending
-    $latestVersionidx = [array]::IndexOf($versionUnsorted, $versionSorted[0])
+    try {
+        $files = Get-ChildItem -Path (getFullPath 'hex_tables') -filter *.json | ForEach-Object { $_.Name }
 
-    if ($powershellVersion -ne 5) {
-        return $files[$latestVersionidx].Name
-    }
-    else {
+        $versionUnsorted = $files | ForEach-Object { $_.toString().Split("_")[2] }
+        $versionSorted = $versionUnsorted | Sort-Object { [version]$_ } -Descending
+        $latestVersionidx = [array]::IndexOf($versionUnsorted, $versionSorted[0])
+    
         return $files[$latestVersionidx]
+    }
+    catch {
+        logToFile $_.Exception $LogPath
+        pause
     }
 }
 

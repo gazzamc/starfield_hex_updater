@@ -283,10 +283,11 @@ def patch(path, silent, backup):
                         new_file.writelines(lines)
 
                 move_file(path_to_file, abs_path, backup, True)
+                print("patched {}".format(file))
 
 def main(argv):
     modes = ["update", "generate", "patch"]
-    version = "0.1.6"
+    version = "0.1.7"
 
     mode= ''
     path = ''
