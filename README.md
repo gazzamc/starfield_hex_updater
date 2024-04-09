@@ -12,15 +12,21 @@ Be vigilant of the hex table name `hex_table_{game_version}_{commit_id}.json`, i
 > Python 3.11 
 
 ## Notes
+
+### Patcher
 * As of `v0.1.3` the script can patch without providing the path, if placed in the root of the SFSE repo folder.
 
-* Added a script to auto generate the hex table using the Address Libraries
+* As of `v0.2.0`, the script can now verify the files patched via md5 checksums
+
+### CLI
 
 * Added support for Powershell 7
 
 * As of `v1.5.6`, the powershell CLI can now install a standalone python version, this can be helpful if you're having issues detecting your install.
 
-* As of `v0.2.0`, the script can now verify the files patched via md5 checksums
+### Misc
+
+* Added a script to auto generate the hex table using the Address Libraries
 
 ## Usage
         hex_updater.py -m <mode> <options>
