@@ -1,3 +1,5 @@
+import hashlib
+import os
 import glob, json, sys, json, re, getopt
 from tempfile import mkstemp
 from shutil import move, copymode, copy
@@ -9,6 +11,10 @@ def warning_msg(msg):
 
 def error_msg(msg):
     print("\033[91m {}\033[00m\n".format(msg))
+
+
+def success_msg(msg):
+    print("\033[92m {}\033[00m\n".format(msg))
 
 def get_replacement_hex(hex_to_find, dictionary):
     try:
@@ -29,9 +35,15 @@ def get_full_path(path, filename):
 
 def move_file(old_file, new_file, backup, patched):
     copymode(old_file, new_file)
+
     if backup and patched:
         copy(old_file, "{}.bak".format(old_file))
-    move(new_file, old_file)
+
+    # Only replace if patched
+    if patched:
+        move(new_file, old_file)
+        print("Patched {0}".format(ospath.basename(old_file)))
+
 
 def scrape_hex_values_from_file(file, silent):
     hex_list = []
@@ -52,6 +64,87 @@ def scrape_hex_values_from_file(file, silent):
     return hex_list
 
 
+def generate_checksum(file, silent):
+    checksum = hashlib.md5(open(file, 'rb').read()).hexdigest()
+    if checksum and not silent:
+        print('Checksum generated for: {0}'.format(file))
+
+    return checksum
+
+
+def generate_checksum_file(files, filename, silent):
+    md5FolderPath = get_full_path(ospath.abspath(
+        os.path.dirname(__file__)), 'md5')
+
+    generated_checksums = []
+    for file in files:
+        generated_checksums.append(generate_checksum(file, silent))
+
+    # Check checksum folder exists
+    md5FolderExists = ospath.exists(md5FolderPath)
+
+    if not md5FolderExists:
+        os.mkdir(md5FolderPath)
+
+    with open('md5/{}.md5'.format(filename), 'w') as md5_file:
+        for checksum in generated_checksums:
+            md5_file.write('{}\n'.format(checksum))
+
+
+def getPatchedChecksums(silent=False):
+    # check that md5 files exists
+    md5FolderPath = get_full_path(ospath.abspath(
+        os.path.dirname(__file__)), 'md5')
+
+    if ospath.exists(md5FolderPath):
+        if not silent:
+            print("md5 folder found, looking for md5 file...")
+    else:
+        error_msg(
+            "md5 folder not found in script directory!, re-download folder from repo to continue.")
+        sys.exit()
+
+    md5FileExists = ospath.exists(get_full_path(md5FolderPath, 'patched.md5'))
+
+    if md5FileExists:
+        if not silent:
+            print("md5 file found, comparing hashes!")
+    else:
+        error_msg(
+            "Patched md5 file not found in md5 directory!, re-download file from repo to continue.")
+        sys.exit()
+
+    patched_checksums = []
+    # add all patched checksum into list for easier lookup
+    with open(get_full_path(md5FolderPath, 'patched.md5'), 'r') as file:
+        patched_checksums = file.read().splitlines()
+
+    return patched_checksums
+
+
+def verifyMd5(files, silent):
+    print("Verifying Checksums!")
+
+    patched_checksums = getPatchedChecksums()
+    match_count = 0
+    # Iterate over files and verify md5 hash
+    for file in files:
+        checksum = generate_checksum(file, True)
+        isValid = checksum in patched_checksums
+
+        if not silent:
+            if isValid:
+                match_count += 1
+                success_msg('{}: md5 Match!'.format(ospath.basename(file)))
+            else:
+                error_msg('{}: md5 Mismatch!'.format(ospath.basename(file)))
+
+    if match_count == len(files):
+        success_msg('All files matched!')
+    else:
+        error_msg(
+            'Some or all files failed to patch correctly! {0}/{1} '.format(match_count, len(files)))
+
 def create_combined_dictionary(lookup_file, value_file):
     old_list = lookup_file
     new_list = value_file
@@ -66,8 +159,17 @@ def create_combined_dictionary(lookup_file, value_file):
 
     return dictionary
 
-
 def update(file_with_path, dictionary, backup):
+    # Prevent patcher from running on the same file twice
+    # potentially changing new addresses
+    patched_checksums = getPatchedChecksums(True)
+    checksum = generate_checksum(file_with_path, True)
+
+    if checksum in patched_checksums:
+        print('{} already patched, skipping!'.format(
+            ospath.basename(file_with_path)))
+        return
+
     regex = '(0[xX][0-9a-fA-F]{7,})'
     patched = False
 
@@ -118,14 +220,29 @@ def generate_hex_list_from_files(files_grabbed, path, silent):
     
     return full_hex_list
 
-def get_files(path, types=('*.cpp', '*.inl', '*.h')):
+
+def get_files(path, include_all=False, types=('*.cpp', '*.inl', '*.h')):
     # Grab files for the directory, should be identical for both
     files_grabbed = []
-    types_to_include = types
+    types_to_include = []
+    patched_dirs = ['sfse', 'sfse_loader']
 
-    for files in types_to_include:
-        # Strip path so we can add it later for scraping the hex values
-        files_grabbed.extend(ospath.basename(x) for x in glob.glob(get_full_path(path, files)))
+    if include_all:
+        # Grab the patched files and include them
+        for type in types:
+            for directory in patched_dirs:
+                types_to_include.append('{0}\{1}'.format(directory, type))
+    else:
+        types_to_include = types
+
+    for file in types_to_include:
+        if not include_all:
+            # Strip path so we can add it later for scraping the hex values
+            files_grabbed.extend(ospath.basename(x) for x in glob.glob(
+                get_full_path(path, file)))
+        else:
+            files_grabbed.extend(glob.glob(
+                get_full_path(path, file), recursive=True))
 
     return files_grabbed
 
@@ -283,11 +400,10 @@ def patch(path, silent, backup):
                         new_file.writelines(lines)
 
                 move_file(path_to_file, abs_path, backup, True)
-                print("patched {}".format(file))
 
 def main(argv):
-    modes = ["update", "generate", "patch"]
-    version = "0.1.7"
+    modes = ["update", "generate", "patch", "md5"]
+    version = "0.2.0"
 
     mode= ''
     path = ''
@@ -295,7 +411,9 @@ def main(argv):
     game_version = ''
     commit = ''
     silent = False
-    backup = True
+    backup = False
+    verify = False
+    filename = 'patched'
 
     help_info = """
         hex_updater.py -m <mode> <options>
@@ -304,28 +422,34 @@ def main(argv):
             generate: Creates a hex table for updating hex values
             update: Updates hex values using a hex dictionary
             patch: Patches out the error message preventing program from running
+            md5: Will generate a md5 checksum for the files to verify patch was successful
 
         <Options>
             -h, --help
             -m, --mode: Selects the mode to use
             -v, --version: script version number
+            -s, --silent: hides output of commands
                 generate:
                     -p, --path: Path of the old hex values, will be used as a reference (use full path)
                     -n, --path2: Path of the new hex values, will become the value of the old key (use full path)
                     -g, --starfield: Starfield game version, will be used in the filename
-                    -c, --commit: commit ID of a mod tool not to be named :?, will be used in the filename
-                    -s, --silent: hides any caught exceptions
+                    -c, --commit: Truncated commit ID of SFSE, will be used in the filename
                 update:
                     -p, --path: Path to the folder of files to be updated, files will be backed up by default (use full path)
                     -d, --dictfile: dictionary to be used for updating hex values (use full path)
-                    -b, --backup: Option to prevent backup files
+                    -b, --backup: Option to backup files
                 patch:
                     -p, --path: Path to the folder of files to be patched, files will be backed up by default (use full path)
-                    -b, --backup: Option to prevent backup files
+                    -b, --backup: Option to backup files
+                md5:
+                    -p, --path: Path to the folder containing the files
+                    -fn, --filename: Filename of the file generated
+                    --verify: Verify patch/update via md5 hash
     """
 
     #try:
-    opts, args = getopt.getopt(argv,"hvm:d:p:n:s:g:c:b:",["help", "mode=", "dictfile=", "path=", "path2=", "silence=", "starfield=", "commit=", "version", "backup="])
+    opts, args = getopt.getopt(argv, "hvm:d:p:n:s:g:c:b:fn:", [
+                               "help", "mode=", "dictfile=", "path=", "path2=", "silent", "starfield=", "commit=", "version", "backup", "filename=", "verify"])
     for opt, arg in opts:
         if opt in ('-h', "--help"):
                 print(help_info)
@@ -344,12 +468,14 @@ def main(argv):
                 print("Script Version: {}".format(version))
         elif opt in ("-c", "--commit"):
                 commit = arg
+        elif opt in ("-fn", "--filename"):
+            filename = arg
+        elif opt in ("--verify"):
+            verify = True
         elif opt in ("-b", "--backup"):
-            if arg.lower() == "false":
-                backup = False
-        elif opt in ("-s", "--silence"):
-            if arg.lower() == "true":
-                silent = True
+            backup = True
+        elif opt in ("-s", "--silent"):
+            silent = True
 
     if mode == modes[0]:
         if dict_file_name == '' or path == '':
@@ -383,6 +509,25 @@ def main(argv):
             sys.exit()
         
         patch(path, silent, backup)
+
+    elif mode == modes[3]:
+        currDirName = ospath.basename(getcwd())
+        if path == '' and currDirName != convert([115, 102, 115, 101]):
+            # Check if we're in the correct directory
+            error_msg(
+                "Be sure to either run the script within the repo folder or point to the folder using [-p, --path] arguments")
+            sys.exit()
+
+        files = get_files(path, True)
+        if len(files) == 0:
+            error_msg(
+                "No Files found in provided path")
+            sys.exit()
+
+        if verify:
+            verifyMd5(files, silent)
+        else:
+            generate_checksum_file(files, filename, silent)
     else:
         warning_msg("No mode selected, use -h, --help for usage")
 

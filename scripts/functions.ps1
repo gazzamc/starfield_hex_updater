@@ -13,7 +13,7 @@ $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
 $dateNow = $((Get-Date).ToString('yyyy.MM.dd_hh.mm.ss'))
 $logfileName = "logfile_$dateNow.log"
 $powershellVersion = $host.Version.Major
-$version = "1.5.6"
+$version = "1.5.7"
 
 $LogPath = Join-Path (Join-Path $rootPath 'logs') $logfileName
 
@@ -415,6 +415,7 @@ function patchFiles() {
     $pythonExe = 'python'
     $updateArgs = 'hex_updater.py', '-m', 'update', '-p', (getFullPath 'sfse/sfse'), '-d', "$dictFile"
     $patchArgs = 'hex_updater.py', '-m', 'patch', '-p', (getFullPath 'sfse')
+    $verifyArgs = 'hex_updater.py', '-m', 'md5', '-p', (getFullPath 'sfse'), '--verify'
 
     if (([System.Convert]::ToBoolean((getConfigProperty "standalonePython")))) {
         installStandalonePython
@@ -430,17 +431,20 @@ function patchFiles() {
     # Patch loader
     & $pythonExe $patchArgs | Out-File $LogPath -Append -Encoding UTF8
 
-    # Check if bak files were created
-    $backFiles = Get-ChildItem -Path (getFullPath "sfse/") -Filter *.bak -Recurse -File -Name
+    # Verify files were patched
+    $verifyPatch = & $pythonExe $verifyArgs
 
-    if ($backFiles.length -eq 34) {
+    # Log md5 comparison
+    $verifyPatch | Out-File $LogPath -Append -Encoding UTF8
+
+    if ( $verifyPatch[-2].SubString(6, 18) -eq "All files matched!") {
         writeToConsole "`n`t`tSuccessfully Patched SFSE" -logPath $LogPath
         if (![System.Convert]::ToBoolean((getConfigProperty "bypassPrompts"))) {
             pause
         }
     }
     else {
-        writeToConsole "`n`t`tUnsuccessfully Patched SFSE, backup files found ($($backFiles.length)/34) " -logPath $LogPath
+        writeToConsole "`n`t`tUnsuccessfully Patched SFSE, check log to see which files failed md5 comparison" -logPath $LogPath
         pause
     }
 }

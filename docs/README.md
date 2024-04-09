@@ -17,6 +17,7 @@ I understand that for someone without any dev experience this might seems a bit 
     - [Pulling the Script](#pulling-the-script)
     - [Patching](#patching)
     - [Updating Addresses](#update-addresses)
+    - [Verifying Patch](#verifying-patch)
     - [Building](#Building)
 - [Did it work?](#did-it-work)
 - [Supported Mods](#supported-mods)
@@ -282,7 +283,7 @@ Patching the exe is incredibly simple :)
 
 ```
 
-*Optionally you can prevent the backup of files touches with `-b false`
+*Optionally you can backup files touched with `-b` or `--backup`
 
 **Be sure the path is pointing to the folder specified in `-p`, the script expects this folder
 
@@ -309,7 +310,7 @@ Very similar to the last step
 
 ```
 
-*Optionally you can prevent the backup of files touches with `-b false`
+*Optionally you can backup files touched with `-b` or `--backup`
 
 **Be sure the path is pointing to the folder specified in `-p`, the script expects this folder
 
@@ -322,6 +323,26 @@ Note: The path should point to the sfse folder within the sfse root folder eg. `
   ![update output](./images/update_hex_output.png)
 
 </details>
+
+### Verifying Patch
+
+Once you have ran both the patch and the update commands you can verify all necessary files were correctly patched.
+
+- Open Command Prompt
+- `CD` to the `starfield_hex_updater` folder
+```
+    cd starfield_hex_updater
+```
+- Type the following *
+```
+
+    python hex_updater.py -m md5 -p </path/to/SFSE> --verify
+
+```
+
+**Be sure the path is pointing to the folder specified in `-p`, the script expects this folder
+
+Note: You can silence the individual file output by passing `--silent`
 
 ### Building
 
