@@ -179,6 +179,9 @@ function runProcessAndLog() {
                 break
             }
         }
+
+        # Clear progress bar
+        Write-Progress -Activity 'Building SFSE...' -Completed
     }
     
     $p.WaitForExit()
