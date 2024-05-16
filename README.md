@@ -56,5 +56,5 @@ Be vigilant of the hex table name `hex_table_{game_version}_{commit_id}.json`, i
                     -b, --backup: Option to backup files
                 md5:
                     -p, --path: Path to the folder containing the files
-                    -fn, --filename: Filename of the file generated
+                    -f, --filename: Filename of the file generated
                     --verify: Verify patch/update via md5 hash

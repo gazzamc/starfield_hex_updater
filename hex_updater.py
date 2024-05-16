@@ -1,6 +1,11 @@
 import hashlib
 import os
-import glob, json, sys, json, re, getopt
+import glob
+import json
+import sys
+import json
+import re
+import getopt
 from tempfile import mkstemp
 from shutil import move, copymode, copy
 from os import fdopen, getcwd, path as ospath
@@ -9,6 +14,7 @@ from os import fdopen, getcwd, path as ospath
 def warning_msg(msg):
     print("\033[93m {}\033[00m\n".format(msg))
 
+
 def error_msg(msg):
     print("\033[91m {}\033[00m\n".format(msg))
 
@@ -16,22 +22,27 @@ def error_msg(msg):
 def success_msg(msg):
     print("\033[92m {}\033[00m\n".format(msg))
 
+
 def get_replacement_hex(hex_to_find, dictionary):
     try:
         new_hex = dictionary[hex_to_find]
         return new_hex
     except KeyError as e:
-        warning_msg("No replacement found for {}, leaving it in place. Be Sure to check you have the correct hex table for this version".format(e))
+        warning_msg(
+            "No replacement found for {}, leaving it in place. Be Sure to check you have the correct hex table for this version".format(e))
+
 
 def convert(list):
     string = ''
-    for c in list: 
+    for c in list:
        string = string + chr(c)
-    
+
     return string
+
 
 def get_full_path(path, filename):
     return ospath.join(path, ''.join(filename))
+
 
 def move_file(old_file, new_file, backup, patched):
     copymode(old_file, new_file)
@@ -48,10 +59,10 @@ def move_file(old_file, new_file, backup, patched):
 def scrape_hex_values_from_file(file, silent):
     hex_list = []
 
-    #Read the lines of the files and create array for each
+    # Read the lines of the files and create array for each
     with open(r'{}'.format(file), 'r') as file:
         for line in file.readlines():
-            #check if valid hex before appending
+            # check if valid hex before appending
             try:
                 regex = '(0[xX][0-9a-fA-F]{7,})'
                 pattern = re.findall(regex, line)
@@ -60,7 +71,8 @@ def scrape_hex_values_from_file(file, silent):
                     hex_list.append(pattern[0])
             except ValueError:
                 if not silent:
-                    warning_msg("Invalid hex, won't be added to the list: ", line)
+                    warning_msg(
+                        "Invalid hex, won't be added to the list: ", line)
     return hex_list
 
 
@@ -149,7 +161,7 @@ def create_combined_dictionary(lookup_file, value_file):
     old_list = lookup_file
     new_list = value_file
 
-    #compare list size and throw error if differnt
+    # compare list size and throw error if different
     if len(old_list) != len(new_list):
        error_msg('The two files do not have the same length of lines, please check')
        sys.exit()
@@ -158,6 +170,7 @@ def create_combined_dictionary(lookup_file, value_file):
         dictionary = {"{}".format(old_list[i]): new_list[i] for i in range(len(old_list))}
 
     return dictionary
+
 
 def update(file_with_path, dictionary, backup):
     # Prevent patcher from running on the same file twice
@@ -173,9 +186,9 @@ def update(file_with_path, dictionary, backup):
     regex = '(0[xX][0-9a-fA-F]{7,})'
     patched = False
 
-    #Create temp file
+    # Create temp file
     fh, abs_path = mkstemp()
-    with fdopen(fh,'r+') as new_file:
+    with fdopen(fh, 'r+') as new_file:
         with open(file_with_path, "r+") as old_file:
             for line in old_file:
                 # replace single hex value
@@ -197,7 +210,8 @@ def update(file_with_path, dictionary, backup):
                     new_line = line
 
                     for hex_in_pattern in pattern:
-                        new_hex = get_replacement_hex(hex_in_pattern, dictionary)
+                        new_hex = get_replacement_hex(
+                            hex_in_pattern, dictionary)
 
                         # no hex, leave it alone
                         if new_hex is not None:
@@ -205,11 +219,12 @@ def update(file_with_path, dictionary, backup):
                             patched = True
 
                     new_file.write(new_line)
-                else:  
-                    # keep old line if nothing found  
+                else:
+                    # keep old line if nothing found
                     new_file.write(line)
 
     move_file(file_with_path, abs_path, backup, patched)
+
 
 def generate_hex_list_from_files(files_grabbed, path, silent):
     full_hex_list = []
@@ -403,7 +418,7 @@ def patch(path, silent, backup):
 
 def main(argv):
     modes = ["update", "generate", "patch", "md5"]
-    version = "0.2.0"
+    version = "0.2.1"
 
     mode= ''
     path = ''
@@ -443,13 +458,14 @@ def main(argv):
                     -b, --backup: Option to backup files
                 md5:
                     -p, --path: Path to the folder containing the files
-                    -fn, --filename: Filename of the file generated
+                    -f, --filename: Filename of the file generated
                     --verify: Verify patch/update via md5 hash
     """
 
     #try:
-    opts, args = getopt.getopt(argv, "hvm:d:p:n:s:g:c:b:fn:", [
-                               "help", "mode=", "dictfile=", "path=", "path2=", "silent", "starfield=", "commit=", "version", "backup", "filename=", "verify"])
+    opts, args = getopt.getopt(argv, "hvm:d:p:n:s:g:c:b:f:", [
+                               "help", "mode=", "dictfile=", "path=", "path2=", "silent", "starfield=",
+                               "commit=", "version", "backup", "filename=", "verify"])
     for opt, arg in opts:
         if opt in ('-h', "--help"):
                 print(help_info)
@@ -468,7 +484,7 @@ def main(argv):
                 print("Script Version: {}".format(version))
         elif opt in ("-c", "--commit"):
                 commit = arg
-        elif opt in ("-fn", "--filename"):
+        elif opt in ("-f", "--filename"):
             filename = arg
         elif opt in ("--verify"):
             verify = True
