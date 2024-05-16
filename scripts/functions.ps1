@@ -13,7 +13,7 @@ $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
 $dateNow = $((Get-Date).ToString('yyyy.MM.dd_hh.mm.ss'))
 $logfileName = "logfile_$dateNow.log"
 $powershellVersion = $host.Version.Major
-$version = "1.5.7"
+$version = "1.5.8"
 
 $LogPath = Join-Path (Join-Path $rootPath 'logs') $logfileName
 
@@ -333,9 +333,15 @@ function buildRepo() {
     Clear-Host
 
     try {
+        # Clean build files before running, if exists
+        if (fileExists $rootPath "sfse\build") {
+            Remove-Item -Force -Recurse (Join-Path $rootPath "sfse\build")
+        }
+
         # Split build commands to reduce hanging
         runProcessAndLog $poweshellExe $rootPath "-command cmake -B sfse/build -S sfse"
         runProcessAndLog $poweshellExe $rootPath "-command cmake --build sfse/build --config Release" 60
+        Clear-Host
 
         writeToConsole "`n`t`tBuild finished, verifying!" -logPath $LogPath
 
@@ -510,6 +516,10 @@ function moveGameEXE() {
     checkForPStools
 
     try {
+        if (fileExists $newGamePath 'Starfield.exe') {
+            throw [System.Exception] "`n`tStarfield.exe was not copied as it already exists in $newGamePath!";
+        }
+
         # We can't copy directly from game folder so we need to move and copy back
         if (fileExists $gamePath 'Starfield.exe') {
             writeToConsole "`n`tCopying Starfield.exe to new game folder!" -logPath $LogPath
@@ -542,12 +552,13 @@ function moveGameEXE() {
             writeToConsole "`n`tStarfield.exe cannot be found in the folder specified, check log for more information!" -logPath $LogPath
         }
         else {
-            writeToConsole "`n`tFailed to copy Starfield.exe for unknown reason, try manually copying the exe. (CTRL + X | CTRL + V)" -logPath $LogPath
+            writeToConsole "`n`tFailed to copy Starfield.exe, check log for more information!" -logPath $LogPath
         }
 
-        logToFile $_.Exception $LogPath
-        logToFile $_.Exception.GetType().Name $LogPath
+        logToFile $_.Exception.GetType() $LogPath
+        logToFile $_.Exception.Message $LogPath
         pause
+        Clear-Host
     }
 }
 
@@ -572,6 +583,7 @@ function moveGameFiles() {
         exit 
     }
 
+    Clear-Host
     
     # Get path of game install and new location for files
     $gamePath = getConfigProperty "gamePath"
@@ -583,7 +595,21 @@ function moveGameFiles() {
         writeToConsole "`n`tCopying files to new location!" -logPath $LogPath
 
         # Copy over files
-        ROBOCOPY $gamePath $newGamePath /E /XF (Join-Path $gamePath "Starfield.exe") | Out-File $LogPath -Append -Encoding UTF8
+        ROBOCOPY $gamePath $newGamePath /E /XF (Join-Path $gamePath "Starfield.exe") /MIR /NDL /NJH /NJS | 
+        ForEach-Object { 
+            $data = $_.Split([char]9); if ("$($data[4])" -ne "") { $file = "$($data[4])" }; 
+
+            if ($data[0] -eq '' -and ($file -ne '' -or $null)) {
+                #  Log files to be copied
+                Out-File $LogPath -InputObject "Copying File: $file" -Append -Encoding UTF8
+            }
+
+            Write-Progress "Percentage $($data[0])" -Activity "Robocopy" -CurrentOperation "$($file)" -ErrorAction SilentlyContinue; 
+        }
+
+        # Clear progress bar when completed
+        Write-Progress -Activity "Robocopy" -Completed
+
     }
     elseif ($type -eq 2) {
         writeToConsole "`n`tHardlinking files to new location!" -logPath $LogPath

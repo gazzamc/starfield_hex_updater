@@ -46,6 +46,7 @@ Do {
                     }
                 }
             
+                Clear-Host
                 Write-Host 
                 
                 "
@@ -70,7 +71,7 @@ Do {
             from within it's original installation folder, to bypass this issue 
             we need to link/copy the game files to a place that gives the user full control.
             
-            `n`t`tCopy Files - Additional space required, but will not break when the game updates.
+            `n`t`tCopy Files - Additional space required, but will not break when the game updates (Time limited).
             `n`t`tHardlink - Saves space, but certain files will be modified when the game updates.
             "
 
@@ -89,7 +90,8 @@ Do {
                     Default {
                     }
                 }
-            
+
+                Clear-Host
                 Write-Host 
                 
                 "
@@ -138,6 +140,7 @@ Do {
                 Write-Host "`tStandalone Python: $(getConfigProperty "standalonePython" )"
                 Write-Host "`t"
 
+                Clear-Host
                 Write-Host 
                 "
                     1. Set Paths
