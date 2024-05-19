@@ -36,24 +36,47 @@ Incompatible Info:
 
 
 #### A
+
+* [Auto Unlock SFSE](https://www.nexusmods.com/starfield/mods/5571)
+
 #### B
+
+* [Baka Achievement Enabler](https://www.nexusmods.com/starfield/mods/658)
+* [Baka Quick Full Saves](https://www.nexusmods.com/starfield/mods/1750)
+* [BetterConsole - Console Replacer and MOD Menu](https://www.nexusmods.com/starfield/mods/3683)
+
 #### C
 #### D
+
+* [Discord Rich Presence](https://www.nexusmods.com/starfield/mods/2545)
+
 #### E
 #### F
 #### G
+
+* [Gravity Affects Weight](https://www.nexusmods.com/starfield/mods/3048)
+
 #### H
 #### I
 #### J
 #### K
 #### L
 #### M
+
+* [MONSTERaider - Weightless Items](https://www.nexusmods.com/starfield/mods/5610)
+
 #### N
 #### O
 #### P
+
+* [Plugins.txt Enabler](https://www.nexusmods.com/starfield/mods/4157)
+
 #### Q
 #### R
 #### S
+
+* [Smart Aiming](https://www.nexusmods.com/starfield/mods/1302)
+
 #### T
 #### U
 #### V
@@ -62,6 +85,8 @@ Incompatible Info:
 #### Y
 #### Z
 
+* [Zero Weight](https://www.nexusmods.com/starfield/mods/3475)
+
 
 # Incompatible
 
@@ -69,15 +94,11 @@ Incompatible Info:
 
 * ** [ADS FOV Removed](https://www.nexusmods.com/starfield/mods/2192)
 * \* [Auto Recent Save Load](https://www.nexusmods.com/starfield/mods/2962)
-* ***** [Auto Unlock SFSE](https://www.nexusmods.com/starfield/mods/5571)
 
 #### B
 
-* ***** [Baka Achievement Enabler](https://www.nexusmods.com/starfield/mods/658)
 * **** [Baka Disable My Games Folder](https://www.nexusmods.com/starfield/mods/1599)
 * **** [Baka Quit Game Fix](https://www.nexusmods.com/starfield/mods/1662)
-* ***** [Baka Quick Full Saves](https://www.nexusmods.com/starfield/mods/1750)
-* ***** [BetterConsole - Console Replacer and MOD Menu](https://www.nexusmods.com/starfield/mods/3683)
 
 #### C
 
@@ -88,7 +109,6 @@ Incompatible Info:
 
 * *** [Detailed Reference Info](https://www.nexusmods.com/starfield/mods/7589)
 * ***** [Disable Dialogue Camera](https://www.nexusmods.com/starfield/mods/7157)
-* ***** [Discord Rich Presence](https://www.nexusmods.com/starfield/mods/2545)
 
 #### E
 
@@ -99,8 +119,6 @@ Incompatible Info:
 * \* [Fast Travel Restrictions](https://www.nexusmods.com/starfield/mods/3220)
 
 #### G
-
-* ***** [Gravity Affects Weight](https://www.nexusmods.com/starfield/mods/3048)
 
 #### H
 
@@ -114,14 +132,10 @@ Incompatible Info:
 
 #### L
 #### M
-
-* [MONSTERaider - Weightless Items](https://www.nexusmods.com/starfield/mods/5610)
-
 #### N
 #### O
 #### P
 
-* ***** [Plugins.txt Enabler](https://www.nexusmods.com/starfield/mods/4157)
 * ***** [powerofthree's Tweaks](https://www.nexusmods.com/starfield/mods/3621)
 
 #### Q
@@ -131,7 +145,6 @@ Incompatible Info:
 * [SFSE ASI Loader](https://www.nexusmods.com/starfield/mods/857)
 * ***** [Simple Offence Suppression](https://www.nexusmods.com/starfield/mods/4456)
 * ** [SlowerThanLight - Fly in a star system](https://www.nexusmods.com/starfield/mods/3541)
-* ***** [Smart Aiming](https://www.nexusmods.com/starfield/mods/1302)
 * ***** [Starfield Community Patch](https://www.nexusmods.com/starfield/mods/1)
 * ***** [Sprint Stuttering Fix](https://www.nexusmods.com/starfield/mods/884)
 
@@ -145,8 +158,6 @@ Incompatible Info:
 #### X
 #### Y
 #### Z
-
-* ***** [Zero Weight](https://www.nexusmods.com/starfield/mods/3475)
 
 # Obsolete 
 
