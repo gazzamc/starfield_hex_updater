@@ -196,6 +196,15 @@ You'll probably get an error when trying to move `Starfield.exe` manually, if th
 
 You will notice that the icon of the exe will change to the starfield logo, this is good.
 
+If the above fails, you can try:
+
+1. Right-Click > Delete
+2. Open the Recycling bin
+3. Right-Click > Cut
+4. Paste `Starfield.exe` to the target folder (Right-click in folder > paste or `CTRL + V`)
+5. Copy it back to the original game folder
+
+
 <details>
   <summary>Icon:</summary>
 

@@ -61,7 +61,7 @@ function writeToConsole() {
         }
 
         if (!$bgcolor) {
-            $bgcolor = "Black"
+                $bgcolor = "Black"
         }
 
         Write-Host $msg -ForegroundColor $color -BackgroundColor $bgcolor
@@ -190,4 +190,33 @@ function runProcessAndLog() {
     logToFile "stdout: $stdout" $logPath
     logToFile "stderr: $stderr" $logPath
     logToFile ("exit code: " + $p.ExitCode) $logPath
+}
+
+function hasPermissions() {
+    param (
+        [Parameter(Mandatory = $true)] [String] $path,
+        [Parameter(Mandatory = $false)] [switch] $checkVersionInfo
+    )
+
+    if (!$path) {
+        return $false
+    }
+
+    # We can check the exe details to determine if we have full access, as it's hidden by default
+    if (!$checkVersionInfo) {
+        # Get current user
+        $user = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+
+        # Quick and dirty check to see if user has FullControl file system rights, returns null if not.
+        $permissions = (Get-Acl $path).Access | Where-Object { $_.IdentityReference -eq $user -and $_.FileSystemRights -eq "FullControl" }
+    }
+    else {
+        $permissions = (Get-Item $path).VersionInfo | Select-Object -ExpandProperty FileDescription
+    }
+
+    if ($permissions) {
+        return $true
+    }
+
+    return $false
 }

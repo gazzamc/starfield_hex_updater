@@ -24,6 +24,8 @@ Be vigilant of the hex table name `hex_table_{game_version}_{commit_id}.json`, i
 
 * As of `v1.5.6`, the powershell CLI can now install a standalone python version, this can be helpful if you're having issues detecting your install.
 
+* As of `v1.5.10`, when setting the newGamePath, the permissions will be checked to ensure there's less issues when moving the Starfield executable.
+
 ### Misc
 
 * Added a script to auto generate the hex table using the Address Libraries

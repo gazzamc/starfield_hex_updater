@@ -140,7 +140,6 @@ Do {
                 Write-Host "`tStandalone Python: $(getConfigProperty "standalonePython" )"
                 Write-Host "`t"
 
-                Clear-Host
                 Write-Host 
                 "
                     1. Set Paths
