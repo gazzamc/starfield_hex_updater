@@ -13,7 +13,7 @@ $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
 $dateNow = $((Get-Date).ToString('yyyy.MM.dd_hh.mm.ss'))
 $logfileName = "logfile_$dateNow.log"
 $powershellVersion = $host.Version.Major
-$version = "1.5.9"
+$version = "1.5.10"
 
 $LogPath = Join-Path (Join-Path $rootPath 'logs') $logfileName
 
@@ -513,6 +513,16 @@ function moveGameEXE() {
     $gamePath = getConfigProperty "gamePath"
     $newGamePath = getConfigProperty "newGamePath"
 
+    # Check for permissions before copying exe
+    if (!(hasPermissions $newGamePath)) {
+        writeToConsole "
+        `n`tStarfield.exe cannot be copied as you do not have the necessary permissions within the folder" -type -color red
+        writeToConsole "`n`t$newGamePath" -type -color yellow
+        writeToConsole "`n`tPlease copy the game files to a new location where you have FullControl of permissions." -type -color red
+        pause
+        exit
+    }
+
     checkForPStools
 
     try {
@@ -530,6 +540,14 @@ function moveGameEXE() {
             Move-Item (Join-Path $gamePath 'Starfield.exe') -Destination (Join-Path $newGamePath 'Starfield.exe') -Verbose -Force *>&1 | 
             Out-File -FilePath $LogPath -Append -Encoding UTF8"
             Start-Sleep -Seconds 5
+
+            # Check that permissions we're stripped from exe
+            if (hasPermissions (Join-Path $newGamePath 'Starfield.exe') -checkVersionInfo) {
+                writeToConsole "`n`tStarfield.exe moved successfully!" -logPath $LogPath
+            }
+            else {
+                throw [System.IO.Exception] "Starfield.exe permissions we're not removed, please try again or check docs for manual process"
+            }
         }
         else {
             throw [System.IO.FileNotFoundException] "Starfield.exe cannot be found in game path $gamePath"
@@ -537,11 +555,16 @@ function moveGameEXE() {
 
         if (fileExists $newGamePath 'Starfield.exe') {
             Copy-Item (Join-Path $newGamePath 'Starfield.exe') -Destination (Join-Path $gamePath 'Starfield.exe')
-            writeToConsole "`n`tStarfield.exe Copied back successfully!" -logPath $LogPath
+            
+            # check exe was copied back to starfield install folder
+            if (fileExists $gamePath 'Starfield.exe') {
+                writeToConsole "`n`tCopy of Starfield.exe created in original folder!" -logPath $LogPath
+            }
+
             Start-Sleep -Seconds 5
         }
         else {
-            throw [System.IO.FileNotFoundException] "Starfield.exe was not copied correctly as it cannot be found in $newGamePath"
+            throw [System.IO.FileNotFoundException] "Starfield.exe cannot be copied back to game folder as it cannot be found in $newGamePath"
         }
     }
     catch {
@@ -552,7 +575,9 @@ function moveGameEXE() {
             writeToConsole "`n`tStarfield.exe cannot be found in the folder specified, check log for more information!" -logPath $LogPath
         }
         else {
-            writeToConsole "`n`tFailed to copy Starfield.exe, check log for more information!" -logPath $LogPath
+            writeToConsole "`n`tFailed to copy Starfield.exe correctly, check log for more information!" -logPath $LogPath
+            $msg = $_.Exception.Message
+            writeToConsole "`n`t > $msg"
         }
 
         logToFile $_.Exception.GetType() $LogPath
@@ -664,37 +689,72 @@ function autoInstall() {
 }
 function setGamePaths() {
     Clear-Host
-    $paths = "`n`tGamePath", "`n`tNewGamePath"
+    $pathNames = "`n`tGamePath", "`n`tNewGamePath"
     $noPathMsg = "`n`tPath inputted does not exist, please check that it exists! [q to exit]"
+    $noPermissionMsg = "`n`tYou do not have the correct permissions for the path inputted, please use another! [q to exit]"
+    $samePathMsg = "`n`tThe Gamepath and NewGamePath cannot be the same! [q to exit]"
 
-    foreach ($pathName in $paths) {
+    function isSamePath() {
+        param (
+            [string]$path
+        )
+
+        $gamePath = (getConfigProperty "gamePath")
+
+        if ($path -eq $gamePath) {
+            return $true
+        }
+
+        if ((Join-Path $path "Content") -eq $gamePath) {
+            return $true
+        }
+
+        return $false
+    }
+
+    foreach ($pathName in $pathNames) {
         $continue = $true;
-        $inputtedPath = Read-Host $pathName
-        while ($continue) {
-            if (!(fileExists $inputtedPath)) {
-                if ($inputtedPath -eq 'q') { exit }
 
+        # Get initial input
+        $inputtedPath = Read-Host $pathName;
+        $inputtedPathTrimmed = $inputtedPath.trim()
+
+        while ($continue) {
+    
+            if (!(fileExists $inputtedPathTrimmed)) {
+                if ($inputtedPathTrimmed -eq 'q') { exit }
                 writeToConsole $noPathMsg
             }
+            elseif ($pathName -eq $pathNames[1] -and (isSamePath $inputtedPathTrimmed)) {
+                if ($inputtedPathTrimmed -eq 'q') { exit }
+                writeToConsole $samePathMsg
+            }
+            # check if user has full control permissions in newgamepath
+            elseif ($pathName -eq $pathNames[1] -and !(hasPermissions $inputtedPathTrimmed)) {
+                if ($inputtedPathTrimmed -eq 'q') { exit }
+                writeToConsole $noPermissionMsg
+            }
             else {
-                if ($pathName -eq $paths[0]) {
+                if ($pathName -eq $pathNames[0]) {
                     # Add a check for the content folder, add it if not present
-                    $splitPath = $inputtedPath.split('\')
+                    $splitPath = $inputtedPathTrimmed.split('\')
 
                     if ($splitPath[$splitPath.Length - 1].ToLower() -ne "content") {
-                        $inputtedPath = Join-Path $inputtedPath "Content"
+                        $fullGamePath = Join-Path $inputtedPathTrimmed "Content"
                     }
 
-                    setConfigProperty "gamePath" $inputtedPath
+                    setConfigProperty "gamePath" $fullGamePath
                 }
                 else {
-                    setConfigProperty "newGamePath" $inputtedPath
+                    setConfigProperty "newGamePath" $inputtedPathTrimmed
                 }
 
                 break
             }
 
+            # Get new inputs after message
             $inputtedPath = Read-Host $pathName
+            $inputtedPathTrimmed = $inputtedPath.trim()
         }
     }
 }
