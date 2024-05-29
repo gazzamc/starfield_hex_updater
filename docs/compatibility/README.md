@@ -46,18 +46,23 @@ Incompatible Info:
 * [BetterConsole - Console Replacer and MOD Menu](https://www.nexusmods.com/starfield/mods/3683)
 
 #### C
+* [Console Output To File](https://www.nexusmods.com/starfield/mods/3142)
 #### D
 
 * [Discord Rich Presence](https://www.nexusmods.com/starfield/mods/2545)
+* [Dynamic Inventory Models](https://www.nexusmods.com/starfield/mods/8875)
 
 #### E
+* [Extended Activation and NPC Interaction Distance](https://www.nexusmods.com/starfield/mods/6260)
 #### F
 #### G
+* [Get Reference Info](https://www.nexusmods.com/starfield/mods/7589)
 
 * [Gravity Affects Weight](https://www.nexusmods.com/starfield/mods/3048)
 
 #### H
 #### I
+* [Ships Need Gas and other immersive ship systems (Immersive Ship Systems)](https://www.nexusmods.com/starfield/mods/7197)
 #### J
 #### K
 #### L
@@ -73,9 +78,14 @@ Incompatible Info:
 
 #### Q
 #### R
+* [Real Time Form Patcher](https://www.nexusmods.com/starfield/mods/8324)
+* [Report Load Order](https://www.nexusmods.com/starfield/mods/6979)
 #### S
-
+* [Scanner Closest Path Highlighted (Scanner Path Improvements)](https://www.nexusmods.com/starfield/mods/6924)
 * [Smart Aiming](https://www.nexusmods.com/starfield/mods/1302)
+* [Simple Offence Suppression](https://www.nexusmods.com/starfield/mods/4456)
+* [SlowerThanLight - Fly in a star system](https://www.nexusmods.com/starfield/mods/3541)
+* [Starfield Community Patch](https://www.nexusmods.com/starfield/mods/1)
 
 #### T
 #### U
@@ -103,7 +113,7 @@ Incompatible Info:
 #### C
 
 * ***** [Console Command Runner](https://www.nexusmods.com/starfield/mods/2740)
-* *** | \* [Console Output To File](https://www.nexusmods.com/starfield/mods/3142)
+*  [CharGen Menu](https://www.nexusmods.com/starfield/mods/6850)
 
 #### D
 
@@ -143,9 +153,6 @@ Incompatible Info:
 #### S
 
 * [SFSE ASI Loader](https://www.nexusmods.com/starfield/mods/857)
-* ***** [Simple Offence Suppression](https://www.nexusmods.com/starfield/mods/4456)
-* ** [SlowerThanLight - Fly in a star system](https://www.nexusmods.com/starfield/mods/3541)
-* ***** [Starfield Community Patch](https://www.nexusmods.com/starfield/mods/1)
 * ***** [Sprint Stuttering Fix](https://www.nexusmods.com/starfield/mods/884)
 
 #### T
