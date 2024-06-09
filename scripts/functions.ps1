@@ -13,7 +13,7 @@ $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
 $dateNow = $((Get-Date).ToString('yyyy.MM.dd_hh.mm.ss'))
 $logfileName = "logfile_$dateNow.log"
 $powershellVersion = $host.Version.Major
-$version = "1.5.10"
+$version = "1.5.11"
 
 $LogPath = Join-Path (Join-Path $rootPath 'logs') $logfileName
 
@@ -740,10 +740,10 @@ function setGamePaths() {
                     $splitPath = $inputtedPathTrimmed.split('\')
 
                     if ($splitPath[$splitPath.Length - 1].ToLower() -ne "content") {
-                        $fullGamePath = Join-Path $inputtedPathTrimmed "Content"
+                        $inputtedPath = Join-Path $inputtedPathTrimmed "Content"
                     }
 
-                    setConfigProperty "gamePath" $fullGamePath
+                    setConfigProperty "gamePath" $inputtedPath
                 }
                 else {
                     setConfigProperty "newGamePath" $inputtedPathTrimmed
