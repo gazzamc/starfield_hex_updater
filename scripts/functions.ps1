@@ -13,7 +13,7 @@ $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
 $dateNow = $((Get-Date).ToString('yyyy.MM.dd_hh.mm.ss'))
 $logfileName = "logfile_$dateNow.log"
 $powershellVersion = $host.Version.Major
-$version = "1.5.11"
+$version = "1.5.12"
 
 $LogPath = Join-Path (Join-Path $rootPath 'logs') $logfileName
 
@@ -655,8 +655,6 @@ function moveGameFiles() {
             logToFile $_.Exception $LogPath
         }
     }
-
-    moveGameEXE
 }
 
 function autoInstall() {

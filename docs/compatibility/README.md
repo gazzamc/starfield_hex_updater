@@ -2,7 +2,7 @@
 
     Any SFSE Mod utilizing the Address Library should work on this version of SFSE. 
 
-    If the mods has updated for Starfield `v1.11.36 +` then it should be good, 
+    If the mods has updated for Starfield `v1.12.30 +` then it should be good, 
     otherwise get in contact with me and I'll add it to the incompatible list below.
 
     **NOTE** 
@@ -18,7 +18,7 @@
 
 #
 
-### Updated as of Starfield `v1.11.36`
+### Updated as of Starfield `v1.12.30`
 
 Incompatible Info:
 
@@ -36,57 +36,24 @@ Incompatible Info:
 
 
 #### A
-
-* [Auto Unlock SFSE](https://www.nexusmods.com/starfield/mods/5571)
-
 #### B
-
-* [Baka Achievement Enabler](https://www.nexusmods.com/starfield/mods/658)
-* [Baka Quick Full Saves](https://www.nexusmods.com/starfield/mods/1750)
-* [BetterConsole - Console Replacer and MOD Menu](https://www.nexusmods.com/starfield/mods/3683)
-
 #### C
-* [Console Output To File](https://www.nexusmods.com/starfield/mods/3142)
 #### D
-
-* [Discord Rich Presence](https://www.nexusmods.com/starfield/mods/2545)
-* [Dynamic Inventory Models](https://www.nexusmods.com/starfield/mods/8875)
-
 #### E
-* [Extended Activation and NPC Interaction Distance](https://www.nexusmods.com/starfield/mods/6260)
 #### F
 #### G
-* [Get Reference Info](https://www.nexusmods.com/starfield/mods/7589)
-
-* [Gravity Affects Weight](https://www.nexusmods.com/starfield/mods/3048)
-
 #### H
 #### I
-* [Ships Need Gas and other immersive ship systems (Immersive Ship Systems)](https://www.nexusmods.com/starfield/mods/7197)
 #### J
 #### K
 #### L
 #### M
-
-* [MONSTERaider - Weightless Items](https://www.nexusmods.com/starfield/mods/5610)
-
 #### N
 #### O
 #### P
-
-* [Plugins.txt Enabler](https://www.nexusmods.com/starfield/mods/4157)
-
 #### Q
 #### R
-* [Real Time Form Patcher](https://www.nexusmods.com/starfield/mods/8324)
-* [Report Load Order](https://www.nexusmods.com/starfield/mods/6979)
 #### S
-* [Scanner Closest Path Highlighted (Scanner Path Improvements)](https://www.nexusmods.com/starfield/mods/6924)
-* [Smart Aiming](https://www.nexusmods.com/starfield/mods/1302)
-* [Simple Offence Suppression](https://www.nexusmods.com/starfield/mods/4456)
-* [SlowerThanLight - Fly in a star system](https://www.nexusmods.com/starfield/mods/3541)
-* [Starfield Community Patch](https://www.nexusmods.com/starfield/mods/1)
-
 #### T
 #### U
 #### V
@@ -95,34 +62,40 @@ Incompatible Info:
 #### Y
 #### Z
 
-* [Zero Weight](https://www.nexusmods.com/starfield/mods/3475)
-
 
 # Incompatible
 
 #### A
 
+* ***** [Auto Unlock SFSE](https://www.nexusmods.com/starfield/mods/5571)
 * ** [ADS FOV Removed](https://www.nexusmods.com/starfield/mods/2192)
 * \* [Auto Recent Save Load](https://www.nexusmods.com/starfield/mods/2962)
 
 #### B
 
+* ***** [Baka Achievement Enabler](https://www.nexusmods.com/starfield/mods/658)
 * **** [Baka Disable My Games Folder](https://www.nexusmods.com/starfield/mods/1599)
+* ***** [Baka Quick Full Saves](https://www.nexusmods.com/starfield/mods/1750)
 * **** [Baka Quit Game Fix](https://www.nexusmods.com/starfield/mods/1662)
+* ***** [BetterConsole - Console Replacer and MOD Menu](https://www.nexusmods.com/starfield/mods/3683)
 
 #### C
 
+* ***** [CharGen Menu](https://www.nexusmods.com/starfield/mods/6850)
 * ***** [Console Command Runner](https://www.nexusmods.com/starfield/mods/2740)
-*  [CharGen Menu](https://www.nexusmods.com/starfield/mods/6850)
+* ***** [Console Output To File](https://www.nexusmods.com/starfield/mods/3142)
 
 #### D
 
 * *** [Detailed Reference Info](https://www.nexusmods.com/starfield/mods/7589)
 * ***** [Disable Dialogue Camera](https://www.nexusmods.com/starfield/mods/7157)
+* ***** [Discord Rich Presence](https://www.nexusmods.com/starfield/mods/2545)
+* ***** [Dynamic Inventory Models](https://www.nexusmods.com/starfield/mods/8875)
 
 #### E
 
 * ***** [Enemy Friendly Fire](https://www.nexusmods.com/starfield/mods/614)
+* ***** [Extended Activation and NPC Interaction Distance](https://www.nexusmods.com/starfield/mods/6260)
 
 #### F
 
@@ -130,11 +103,17 @@ Incompatible Info:
 
 #### G
 
+* ***** [Get Reference Info](https://www.nexusmods.com/starfield/mods/7589)
+* ***** [Gravity Affects Weight](https://www.nexusmods.com/starfield/mods/3048)
+
 #### H
 
 * ***** [Height Randomizer](https://www.nexusmods.com/starfield/mods/2525)
 
 #### I
+
+* ***** [Ships Need Gas and other immersive ship systems (Immersive Ship Systems)](https://www.nexusmods.com/starfield/mods/7197)
+
 #### J
 #### K
 
@@ -142,17 +121,30 @@ Incompatible Info:
 
 #### L
 #### M
+
+* ***** [MONSTERaider - Weightless Items](https://www.nexusmods.com/starfield/mods/5610)
+
 #### N
 #### O
 #### P
 
+* ***** [Plugins.txt Enabler](https://www.nexusmods.com/starfield/mods/4157)
 * ***** [powerofthree's Tweaks](https://www.nexusmods.com/starfield/mods/3621)
 
 #### Q
 #### R
+
+* ***** [Real Time Form Patcher](https://www.nexusmods.com/starfield/mods/8324)
+* ***** [Report Load Order](https://www.nexusmods.com/starfield/mods/6979)
+
 #### S
 
 * [SFSE ASI Loader](https://www.nexusmods.com/starfield/mods/857)
+* ***** [Scanner Closest Path Highlighted (Scanner Path Improvements)](https://www.nexusmods.com/starfield/mods/6924)
+* ***** [Smart Aiming](https://www.nexusmods.com/starfield/mods/1302)
+* ***** [Simple Offence Suppression](https://www.nexusmods.com/starfield/mods/4456)
+* ***** [SlowerThanLight - Fly in a star system](https://www.nexusmods.com/starfield/mods/3541)
+* ***** [Starfield Community Patch](https://www.nexusmods.com/starfield/mods/1)
 * ***** [Sprint Stuttering Fix](https://www.nexusmods.com/starfield/mods/884)
 
 #### T
@@ -165,6 +157,8 @@ Incompatible Info:
 #### X
 #### Y
 #### Z
+
+* ***** [Zero Weight](https://www.nexusmods.com/starfield/mods/3475)
 
 # Obsolete 
 
