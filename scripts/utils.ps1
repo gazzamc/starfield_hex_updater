@@ -204,6 +204,13 @@ function hasPermissions() {
 
     # We can check the exe details to determine if we have full access, as it's hidden by default
     if (!$checkVersionInfo) {
+        # Allows the user to bypass the folder permissions check, not recommended.
+        getConfigProperty "bypassFolderPermissionCheck" $bypassPerms
+
+        if ($bypassPerms) {
+            return $true
+        }
+
         # Get current user
         $user = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
 
