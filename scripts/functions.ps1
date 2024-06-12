@@ -13,7 +13,7 @@ $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
 $dateNow = $((Get-Date).ToString('yyyy.MM.dd_hh.mm.ss'))
 $logfileName = "logfile_$dateNow.log"
 $powershellVersion = $host.Version.Major
-$version = "1.5.13"
+$version = "1.5.14"
 
 $LogPath = Join-Path (Join-Path $rootPath 'logs') $logfileName
 
@@ -673,6 +673,7 @@ function autoInstall() {
         buildRepo
         moveGameFiles
         moveSFSEFiles
+        moveGameEXE
 
         Clear-Host
         writeToConsole "`n`tYou're ready to start using SFSE mods!"
