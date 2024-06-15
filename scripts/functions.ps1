@@ -13,7 +13,7 @@ $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
 $dateNow = $((Get-Date).ToString('yyyy.MM.dd_hh.mm.ss'))
 $logfileName = "logfile_$dateNow.log"
 $powershellVersion = $host.Version.Major
-$version = "1.5.14"
+$version = "1.5.15"
 
 $LogPath = Join-Path (Join-Path $rootPath 'logs') $logfileName
 
@@ -461,6 +461,8 @@ function checkSpaceReq() {
         [string]$newPath
     )
 
+    $hasSpace = $true
+
     $driveLetter = (Get-Item $newPath).PSDrive.Name + ":"
     $drives = Get-CimInstance -ClassName Win32_LogicalDisk | Select-Object -Property DeviceID, FreeSpace
     
@@ -473,6 +475,8 @@ function checkSpaceReq() {
         $folderSize = (Get-ChildItem -Path $gamePath -Recurse | Measure-Object -Property Length -Sum).sum
 
         if ($folderSize -gt $space) {
+            $hasSpace = $false
+
             writeToConsole "
             Not enough space on drive to copy the game: 
 
@@ -482,7 +486,7 @@ function checkSpaceReq() {
             pause
         }
     }
-    
+    return $hasSpace
 }
 
 function checkForPStools() {
@@ -616,7 +620,12 @@ function moveGameFiles() {
 
     if ($type -eq 1) {
         # Check that we have enough space if copying
-        checkSpaceReq $gamePath $newGamePath
+        $suffSpace = checkSpaceReq $gamePath $newGamePath
+
+        if (!$suffSpace) {
+            return
+        }
+        
         writeToConsole "`n`tCopying files to new location!" -logPath $LogPath
 
         # Copy over files

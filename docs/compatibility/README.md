@@ -2,7 +2,7 @@
 
     Any SFSE Mod utilizing the Address Library should work on this version of SFSE. 
 
-    If the mods has updated for Starfield `v1.12.30 +` then it should be good, 
+    If the mods has updated for Starfield `v1.12.32` then it should be good, 
     otherwise get in contact with me and I'll add it to the incompatible list below.
 
     **NOTE** 
@@ -18,7 +18,7 @@
 
 #
 
-### Updated as of Starfield `v1.12.30`
+### Updated as of Starfield `v1.12.32`
 
 Incompatible Info:
 
@@ -107,9 +107,6 @@ Incompatible Info:
 * ***** [Gravity Affects Weight](https://www.nexusmods.com/starfield/mods/3048)
 
 #### H
-
-* ***** [Height Randomizer](https://www.nexusmods.com/starfield/mods/2525)
-
 #### I
 
 * ***** [Ships Need Gas and other immersive ship systems (Immersive Ship Systems)](https://www.nexusmods.com/starfield/mods/7197)
@@ -128,7 +125,6 @@ Incompatible Info:
 #### O
 #### P
 
-* ***** [Plugins.txt Enabler](https://www.nexusmods.com/starfield/mods/4157)
 * ***** [powerofthree's Tweaks](https://www.nexusmods.com/starfield/mods/3621)
 
 #### Q
@@ -139,7 +135,6 @@ Incompatible Info:
 
 #### S
 
-* [SFSE ASI Loader](https://www.nexusmods.com/starfield/mods/857)
 * ***** [Scanner Closest Path Highlighted (Scanner Path Improvements)](https://www.nexusmods.com/starfield/mods/6924)
 * ***** [Smart Aiming](https://www.nexusmods.com/starfield/mods/1302)
 * ***** [Simple Offence Suppression](https://www.nexusmods.com/starfield/mods/4456)
@@ -171,6 +166,7 @@ Incompatible Info:
 #### G
 #### H
 
+* [Height Randomizer](https://www.nexusmods.com/starfield/mods/2525) (Abandoned?)
 * [Hold To Equip Extended](https://www.nexusmods.com/starfield/mods/1956)
 
 #### I
@@ -181,10 +177,14 @@ Incompatible Info:
 #### N
 #### O
 #### P
+
+* [Plugins.txt Enabler](https://www.nexusmods.com/starfield/mods/4157) (No longer needed after introduction of CK)
+
 #### Q
 #### R
 #### S
 
+* [SFSE ASI Loader](https://www.nexusmods.com/starfield/mods/857)
 * [Streamline Native (Frame Gen - DLSS - Reflex Integration)](https://www.nexusmods.com/starfield/mods/2751)
 
 #### T
