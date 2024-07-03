@@ -2,7 +2,7 @@
 
     Any SFSE Mod utilizing the Address Library should work on this version of SFSE. 
 
-    If the mods has updated for Starfield `v1.12.32` then it should be good, 
+    If the mods has updated for Starfield `v1.12.36` then it should be good, 
     otherwise get in contact with me and I'll add it to the incompatible list below.
 
     **NOTE** 
@@ -18,7 +18,7 @@
 
 #
 
-### Updated as of Starfield `v1.12.32`
+### Updated as of Starfield `v1.12.36`
 
 Incompatible Info:
 
