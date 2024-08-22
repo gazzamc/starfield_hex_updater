@@ -3,7 +3,6 @@
 # A PS script to patch/install Gamepass SFSE in one click
 
 #URLs for tools needed
-$vsWhereURL = "https://github.com/microsoft/vswhere/releases/download/3.1.7/vswhere.exe"
 $pstools = "https://download.sysinternals.com/files/PSTools.zip"
 $python = "https://www.python.org/ftp/python/3.11.8/python-3.11.8-embed-amd64.zip"
 
@@ -51,9 +50,9 @@ function installProg() {
             Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -ArgumentList "-command choco install python311 -y | Out-File $LogPath -Append -Encoding UTF8"
             Break
         }
-        "vs" {
+        "compiler" {
             writeToConsole "`n`t`tInstalling C++ Build Tools, This might take a while.." -logPath $LogPath
-            Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -ArgumentList "-command choco install visualstudio2019-workload-vctools --passive -y | Out-File $LogPath -Append -Encoding UTF8"
+            Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -ArgumentList "-command choco install visualstudio2019buildtools visualstudio2019-workload-vctools --passive -y --force | Out-File $LogPath -Append -Encoding UTF8"
             Break
         }
         "chocolatey" {
@@ -147,9 +146,8 @@ function isInstalled() {
         "python" {
             return checkCommand python
         }
-        "vs" {
-            return checkCommand (Invoke-Expression "($(Join-Path (Join-Path $rootPath 'tools') vswhere.exe) -products Microsoft.VisualStudio.Product.Community -format json | 
-            ConvertFrom-Json).productId -eq `"Microsoft.VisualStudio.Product.Community`"")
+        "compiler" {
+            return checkForBuildTools
         }
         "chocolatey" {
             return checkCommand choco
@@ -183,32 +181,15 @@ function askAndDownload() {
     Invoke-WebRequest -Uri $downloadURL -OutFile $filePath
 }
 
-function checkVsCodeInstalled() {
+function checkForBuildTools() {
     #Check if we already downloaded it
-    if (!(fileExists $rootPath "tools/vswhere.exe")) {
-        try {
-            askAndDownload "`n`t`tDo you want to download the tool to check if vs studio is installed? [y/n]" $vsWhereURL "vswhere.exe" ([System.Convert]::ToBoolean((getConfigProperty "bypassPrompts")))
-        }
-        catch {
-            writeToConsole "`n`t`t`t> Failed to download vswhere.exe!" -logPath $LogPath
-            logToFile $_.Exception $LogPath
-            pause
-            exit
-        }
+    if ($progsToInstall.contains("cmake")) {
+        writeToConsole "`n`t`t`t> Cmake not installed, cannot check for compiler..." -logPath $LogPath
+        return $false
     }
 
-    writeToConsole "`n`t`t`t> Checking for Compiler and/or VS2022, this might take a sec..." -logPath $LogPath
-
-    #Check if already installed
-    if ((isInstalled "vs") -and !(checkForCompiler)) {
-        writeToConsole "`n`t`t`t> Visual studio was found, but check for compiler was not successful" -logPath $LogPath
-        return $true
-    }
-    elseif (isInstalled "vs") {
-        writeToConsole "`n`t`t`t> Visual studio and C++ compiler found" -logPath $LogPath
-        return $true
-    }
-    elseif (checkForCompiler) {
+    writeToConsole "`n`t`t`t> Checking for Compiler, this might take a sec..." -logPath $LogPath
+    if (checkForCompiler) {
         writeToConsole "`n`t`t`t> C++ compiler found" -logPath $LogPath
         return $true
     }
@@ -236,7 +217,7 @@ function checkDependencies() {
 
     writeToConsole ("`n`t`tGit [https://git-scm.com/] ...." + (& { if (isInstalled "git") { "`tInstalled" } else { "`tNot Found"; $progsToInstall.Add("Git") } })) -logPath $LogPath
 
-    writeToConsole ("`n`t`tVisual Studio 2022 [https://visualstudio.microsoft.com/vs/] / C++ Build Tools ...." + (& { if (checkVsCodeInstalled) { "`tInstalled" } else { "`tNot Found"; $progsToInstall.Add("vs") } })) -logPath $LogPath
+    writeToConsole ("`n`t`tC++ Build Tools ...." + (& { if (checkForBuildTools) { "`tInstalled" } else { "`tNot Found"; $progsToInstall.Add("compiler") } })) -logPath $LogPath
 
     if (![System.Convert]::ToBoolean((getConfigProperty "bypassPrompts"))) {
         pause
