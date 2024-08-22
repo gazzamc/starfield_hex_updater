@@ -1,3 +1,4 @@
+from enum import Enum
 import hashlib
 import os
 import glob
@@ -422,8 +423,13 @@ def patch(path, silent, backup):
                 move_file(path_to_file, abs_path, backup, True)
 
 def main(argv):
-    modes = ["update", "generate", "patch", "md5"]
-    version = "0.2.2"
+    class MODE(str, Enum):
+        UPDATE = "update",
+        GENERATE = "generate",
+        PATCH = "patch",
+        MD5 = "md5"
+
+    version = "0.2.3"
 
     mode= ''
     path = ''
@@ -498,7 +504,7 @@ def main(argv):
         elif opt in ("-s", "--silent"):
             silent = True
 
-    if mode == modes[0]:
+    if mode == MODE.UPDATE:
         if dict_file_name == '' or path == '':
             error_msg("No paths provided for generating hex table")
             sys.exit()
@@ -514,7 +520,7 @@ def main(argv):
         for file in files:
             update(get_full_path(path, file), hex_dict, backup)
 
-    elif mode == modes[1]:
+    elif mode == MODE.GENERATE:
         if path == '' or path2 == '':
             error_msg("No paths provided for generating hex table")
             sys.exit()
@@ -522,7 +528,7 @@ def main(argv):
         hex_file_name = "hex_table_{0}_{1}.json".format(game_version, commit)
         generate_hex_dict_for_dir(path, path2, hex_file_name, silent)
 
-    elif mode == modes[2]:
+    elif mode == MODE.PATCH:
         currDirName = ospath.basename(getcwd())
         if path == '' and currDirName != convert([115, 102, 115, 101]):
             # Check if we're in the correct directory
@@ -531,7 +537,7 @@ def main(argv):
         
         patch(path, silent, backup)
 
-    elif mode == modes[3]:
+    elif mode == MODE.MD5:
         currDirName = ospath.basename(getcwd())
         if path == '' and currDirName != convert([115, 102, 115, 101]):
             # Check if we're in the correct directory
