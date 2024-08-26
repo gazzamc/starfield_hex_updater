@@ -12,7 +12,7 @@ $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
 $dateNow = $((Get-Date).ToString('yyyy.MM.dd_hh.mm.ss'))
 $logfileName = "logfile_$dateNow.log"
 $powershellVersion = $host.Version.Major
-$version = "1.5.16"
+$version = "1.5.17"
 
 $LogPath = Join-Path (Join-Path $rootPath 'logs') $logfileName
 
@@ -37,17 +37,17 @@ function installProg() {
     Switch ($name) {
         "git" {
             writeToConsole "`n`t`tInstalling Git..." -logPath $LogPath
-            Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -ArgumentList "-command choco install git -y | Out-File $LogPath -Append -Encoding UTF8"
+            Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -ArgumentList "-command choco install git -y --force | Out-File $LogPath -Append -Encoding UTF8"
             Break
         }
         "cmake" {
             writeToConsole "`n`t`tInstalling CMake..." -logPath $LogPath
-            Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -ArgumentList "-command choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y | Out-File $LogPath -Append -Encoding UTF8"
+            Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -ArgumentList "-command choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y --force | Out-File $LogPath -Append -Encoding UTF8"
             Break
         }
         "python" {
             writeToConsole "`n`t`tInstalling Python 3..." -logPath $LogPath
-            Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -ArgumentList "-command choco install python311 -y | Out-File $LogPath -Append -Encoding UTF8"
+            Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -ArgumentList "-command choco install python311 -y  --force | Out-File $LogPath -Append -Encoding UTF8"
             Break
         }
         "compiler" {
@@ -66,6 +66,13 @@ function installProg() {
             Invoke-Expression (
                 (New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1')) | Out-File $LogPath -Append -Encoding UTF8;"
 
+            Break
+        }
+        "uninstall" {
+            writeToConsole "`n`t`tUninstalling choco packages..." -logPath $LogPath
+
+            Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -ArgumentList "-command 
+            choco uninstall git cmake python311 visualstudio2019buildtools visualstudio2019-workload-vctools -y | Out-File $LogPath -Append -Encoding UTF8"
             Break
         }
     }

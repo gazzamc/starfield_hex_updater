@@ -123,6 +123,11 @@ Do {
                         setPythonChoice
                         break
                     }
+                    4 { 
+                        Clear-Host
+                        installProg "Uninstall Dependencies (Choco Packages only)"
+                        break
+                    }
                     Default {
                     }
                 }
@@ -145,6 +150,7 @@ Do {
                     1. Set Paths
                     2. Set Bypass Choice
                     3. Set Python Choice
+                    4. Uninstall Choco Packages
                     q. Return
                 "
                 $setConfigOption = Read-Host "Choose an option"
