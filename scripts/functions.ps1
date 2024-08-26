@@ -260,6 +260,10 @@ function installMissing() {
         if ($progsToInstall.contains("chocolatey")) {
             $progsToInstall.Remove("chocolatey")
             installProg "chocolatey"
+
+            # Import choco for refreshenv command
+            $env:ChocolateyInstall = Convert-Path "$((Get-Command choco).Path)\..\.."   
+            Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
         }
 
         foreach ($prog in $progsToInstall) {
@@ -270,7 +274,7 @@ function installMissing() {
         Start-Sleep 2
 
         # We need to refresh the env to detect new installs
-        $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+        refreshenv
 
         writeToConsole "`n`t`tRe-checking dependencies" -logPath $LogPath
         checkDependencies
