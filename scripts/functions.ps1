@@ -72,7 +72,7 @@ function installProg() {
             writeToConsole "`n`t`tUninstalling choco packages..." -logPath $LogPath
 
             Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -ArgumentList "-command 
-            choco uninstall git cmake python311 visualstudio2019buildtools visualstudio2019-workload-vctools -y | Out-File $LogPath -Append -Encoding UTF8"
+            choco uninstall git git.install cmake cmake.install python311 visualstudio2019buildtools visualstudio2019-workload-vctools --confirm | Out-File $LogPath -Append -Encoding UTF8"
             Break
         }
     }
@@ -824,7 +824,7 @@ function welcomeScreen() {
 
 
 # Show warning about spaced Path
-if($rootPath.Contains(" ")){
+if ($rootPath.Contains(" ")) {
     writeToConsole "
     It looks like you're running the script from a path that contains spaces: 
     `n`t'$rootPath'`n
