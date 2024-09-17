@@ -1,3 +1,7 @@
+# Paths
+$rootPath = $PSScriptRoot | Split-Path
+$configPath = (Join-Path $rootPath 'config.json')
+
 function testPath() {
     param (
         [string]$path
@@ -7,12 +11,7 @@ function testPath() {
         return $false
     }
 
-    if (Test-Path -Path $path) {
-        return $true
-    }
-    else {
-        return $false
-    }
+    return Test-Path -LiteralPath $path
 }
 
 function fileExists() {
@@ -21,13 +20,12 @@ function fileExists() {
         [Parameter(Mandatory = $false)] [String] $fileName
     )
 
-    $exists = $false
-
-    if (testPath (Join-Path $path $fileName)) {
-        $exists = $true
+    if ($fileName) {
+        $path = Join-Path $path $fileName
     }
 
-    return $exists
+
+    return testPath $path
 }
 
 function getFullPath() {
@@ -61,7 +59,7 @@ function writeToConsole() {
         }
 
         if (!$bgcolor) {
-                $bgcolor = "Black"
+            $bgcolor = "Black"
         }
 
         Write-Host $msg -ForegroundColor $color -BackgroundColor $bgcolor
@@ -109,16 +107,17 @@ function getConfigProperty() {
         [string]$property
     )
 
-    if (fileExists $rootPath "config.json") {
-        $config = Get-Content -Raw (Join-Path $rootPath "config.json") | ConvertFrom-Json
+    if (fileExists $configPath) {
+        $config = Get-Content -Raw $configPath | ConvertFrom-Json
 
         if ($config.$property) {
             return $config.$property.toString()
         }
     }
     else {
+        logToFile "config not found - Path: $configPath" $LogPath
         return
-    } 
+    }
 }
 
 function setConfigProperty() {
@@ -126,23 +125,26 @@ function setConfigProperty() {
         [string]$property,
         [string]$value
     )
-
-
-    if (!(fileExists $rootPath "config.json")) { 
-        $config = @{$property = $value }
-    }
-    else {
-        $config = Get-Content -Raw (Join-Path $rootPath "config.json") | ConvertFrom-Json
-    
-        if (!$config.$property) {
-            $config | Add-Member @{$property = $value }
+    try {
+        if (!(fileExists $configPath)) { 
+            $config = @{$property = $value }
         }
         else {
-            $config.$property = $value
+            $config = Get-Content -Raw $configPath | ConvertFrom-Json
+    
+            if (!$config.$property) {
+                $config | Add-Member @{$property = $value }
+            }
+            else {
+                $config.$property = $value
+            }
         }
-    }
 
-    ConvertTo-Json $config -Depth 1 | Out-File "$rootPath\config.json" -Force
+        ConvertTo-Json $config -Depth 1 | Out-File $configPath -Force
+    }
+    catch {
+        logToFile $_.Exception $LogPath
+    }
 }
 
 function runProcessAndLog() {
@@ -215,10 +217,10 @@ function hasPermissions() {
         $user = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
 
         # Quick and dirty check to see if user has FullControl file system rights, returns null if not.
-        $permissions = (Get-Acl $path).Access | Where-Object { $_.IdentityReference -eq $user -and $_.FileSystemRights -eq "FullControl" }
+        $permissions = (Get-Acl -LiteralPath $path).Access | Where-Object { $_.IdentityReference -eq $user -and $_.FileSystemRights -eq "FullControl" }
     }
     else {
-        $permissions = (Get-Item $path).VersionInfo | Select-Object -ExpandProperty FileDescription
+        $permissions = (Get-Item -LiteralPath $path).VersionInfo | Select-Object -ExpandProperty FileDescription
     }
 
     if ($permissions) {

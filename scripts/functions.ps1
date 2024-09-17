@@ -6,15 +6,24 @@
 $pstools = "https://download.sysinternals.com/files/PSTools.zip"
 $python = "https://www.python.org/ftp/python/3.11.8/python-3.11.8-embed-amd64.zip"
 
-$ErrorActionPreference = "Stop"
-$rootPath = $PSScriptRoot | Split-Path # Root
 $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
 $dateNow = $((Get-Date).ToString('yyyy.MM.dd_hh.mm.ss'))
 $logfileName = "logfile_$dateNow.log"
 $powershellVersion = $host.Version.Major
-$version = "1.5.17"
+$version = "1.5.18"
 
-$LogPath = Join-Path (Join-Path $rootPath 'logs') $logfileName
+# Paths
+$logFolderPath = Join-Path $rootPath 'logs'
+$LogPath = Join-Path $logFolderPath $logfileName
+$sfsePath = Join-Path $rootPath 'sfse'
+$sfseBuildPath = (Join-Path $sfsePath 'build')
+$toolsPath = (Join-Path $rootPath 'tools')
+$pythonPath = (Join-Path $toolsPath 'python')
+$pythonZipPath = (Join-Path $toolsPath 'python.zip')
+$psToolsPath = Join-Path $toolsPath 'pstools'
+$psToolsZipPath = Join-Path $toolsPath 'pstools.zip'
+$psExecPath = (Join-Path $psToolsPath 'psexec.exe')
+
 
 # Change powershell executable depending on version
 if ($powershellVersion -eq 5) {
@@ -25,8 +34,8 @@ else {
 }
 
 # Check if log folder exist
-if (!(testPath (Join-Path $rootPath 'logs'))) {
-    mkdir (Join-Path $rootPath "logs" )
+if (!(testPath $logFolderPath)) {
+    mkdir $logFolderPath
 }
 
 function installProg() {
@@ -179,12 +188,12 @@ function askAndDownload() {
         }
     }
     # Check if folder exists, create if not
-    if (!(fileExists $rootPath "tools" )) {
-        mkdir (getFullPath "tools" )
+    if (!(fileExists $toolsPath )) {
+        mkdir $toolsPath
     }
 
     # Proceed with download
-    $filePath = getFullPath("tools/" + $fileName)
+    $filePath = Join-Path $toolsPath $fileName
     Invoke-WebRequest -Uri $downloadURL -OutFile $filePath
 }
 
@@ -232,17 +241,17 @@ function checkDependencies() {
 }
 
 function installStandalonePython() {
-    if (!(fileExists $rootPath "tools/Python/python.exe")) {
+    if (!(fileExists (Join-Path $pythonPath "python.exe"))) {
         try {
             $question = "`n`tPython has not been detected on your system, do you want to download a standalone version? [y/n]"
             askAndDownload $question $python "python.zip" ([System.Convert]::ToBoolean((getConfigProperty "bypassPrompts")))
 
-            if (fileExists $rootPath "tools/python.zip") {
+            if (fileExists $pythonZipPath) {
                 #Extract to folder
-                Expand-Archive -LiteralPath (getFullPath 'tools/python.zip') -DestinationPath (getFullPath 'tools/python')
+                Expand-Archive -LiteralPath $pythonZipPath -DestinationPath $pythonPath
 
                 #Clean up zip
-                Remove-Item (getFullPath 'tools/python.zip')
+                Remove-Item $pythonZipPath
             }
 
         }
@@ -297,9 +306,9 @@ function cloneRepo() {
     $commit = getLatestCommitId
     try {
         # Delete SFSE if already preset
-        if (fileExists $rootPath "sfse") {
+        if (fileExists $sfsePath) {
             writeToConsole "`n`t`tSFSE already exists, removing first" -logPath $LogPath
-            Remove-Item -Force -Recurse (Join-Path $rootPath "sfse")
+            Remove-Item -Force -Recurse $sfsePath
         }
 
         writeToConsole "`n`t`tCloning SFSE and Checking out CommitID!" -logPath $LogPath
@@ -309,7 +318,7 @@ function cloneRepo() {
         git checkout $commit
 
         # Verify sfse exist before continuing
-        if (!(fileExists $rootPath "sfse")) {
+        if (!(fileExists $sfsePath)) {
             throw "There was a problem cloning sfse repo"
         }
     }
@@ -317,7 +326,6 @@ function cloneRepo() {
         # Catch exception to prevent script failure
         writeToConsole "`n`t`tFailed trying to checkout SFSE" -logPath $LogPath
         logToFile $_.Exception $LogPath
-        pause
     }
 }
 
@@ -326,18 +334,18 @@ function buildRepo() {
 
     try {
         # Clean build files before running, if exists
-        if (fileExists $rootPath "sfse\build") {
-            Remove-Item -Force -Recurse (Join-Path $rootPath "sfse\build")
+        if (fileExists $sfseBuildPath) {
+            Remove-Item -Force -Recurse $sfseBuildPath
         }
 
         # Split build commands to reduce hanging
-        runProcessAndLog $poweshellExe $rootPath "-command cmake -B sfse/build -S sfse"
-        runProcessAndLog $poweshellExe $rootPath "-command cmake --build sfse/build --config Release" 60
+        runProcessAndLog $poweshellExe $rootPath "-command cmake -B '$sfseBuildPath' -S sfse"
+        runProcessAndLog $poweshellExe $rootPath "-command cmake --build '$sfseBuildPath' --config Release" 60
         Clear-Host
 
         writeToConsole "`n`t`tBuild finished, verifying!" -logPath $LogPath
 
-        if (fileExists $rootPath "sfse\build") {
+        if (fileExists $sfseBuildPath) {
             writeToConsole "`n`t`tSuccessfully built" -logPath $LogPath
             if (![System.Convert]::ToBoolean((getConfigProperty "bypassPrompts"))) {
                 pause
@@ -369,9 +377,9 @@ function moveSFSEFiles() {
 
     try {
         # Find files in build folder and copy to user provided path
-        if (fileExists $rootPath "sfse/build") {
+        if (fileExists $sfseBuildPath) {
             foreach ($file in $filesToCopy) {
-                Get-ChildItem -Path (getFullPath "sfse/build/") -Filter $file -Recurse | Copy-Item -Destination $gamePath  -Verbose *>&1 | Out-File -FilePath $LogPath -Append -Encoding UTF8
+                Get-ChildItem -Path $sfseBuildPath -Filter $file -Recurse | Copy-Item -Destination $gamePath  -Verbose *>&1 | Out-File -FilePath $LogPath -Append -Encoding UTF8
             }
     
             # Check files exist
@@ -409,41 +417,46 @@ function patchFiles() {
     # Reset path
     Set-Location $rootPath
 
-    $dictFile = getFullPath ('/hex_tables/' + (getLatestFileName))
-    $pythonExe = 'python'
-    $updateArgs = 'hex_updater.py', '-m', 'update', '-p', (getFullPath 'sfse/sfse'), '-d', "$dictFile"
-    $patchArgs = 'hex_updater.py', '-m', 'patch', '-p', (getFullPath 'sfse')
-    $verifyArgs = 'hex_updater.py', '-m', 'md5', '-p', (getFullPath 'sfse'), '--verify'
+    try {
+        $fileName = getLatestFileName
+        $dictFile = (Join-Path $rootPath (Join-Path 'hex_tables' $fileName))
+        $pythonExe = 'python'
+        $updateArgs = 'hex_updater.py', '-m', 'update', '-p', (Join-Path $SFSEPath 'sfse'), '-d', "$dictFile"
+        $patchArgs = 'hex_updater.py', '-m', 'patch', '-p', $SFSEPath
+        $verifyArgs = 'hex_updater.py', '-m', 'md5', '-p', $SFSEPath, '--verify'
 
-    if (([System.Convert]::ToBoolean((getConfigProperty "standalonePython")))) {
-        installStandalonePython
+        if (([System.Convert]::ToBoolean((getConfigProperty "standalonePython")))) {
+            installStandalonePython
+            $pythonExe = Join-Path $pythonPath 'python.exe'
+        }
 
-        $pythonExe = 'tools/python/python.exe'
-    }
+        writeToConsole "`n`tPatching SFSE" -logPath $LogPath
 
-    writeToConsole "`n`tPatching SFSE" -logPath $LogPath
+        # Update hex values
+        & $pythonExe $updateArgs | Out-File $LogPath -Append -Encoding UTF8
 
-    # Update hex values
-    & $pythonExe $updateArgs | Out-File $LogPath -Append -Encoding UTF8
+        # Patch loader
+        & $pythonExe $patchArgs | Out-File $LogPath -Append -Encoding UTF8
 
-    # Patch loader
-    & $pythonExe $patchArgs | Out-File $LogPath -Append -Encoding UTF8
+        # Verify files were patched
+        $verifyPatch = & $pythonExe $verifyArgs
 
-    # Verify files were patched
-    $verifyPatch = & $pythonExe $verifyArgs
+        # Log md5 comparison
+        $verifyPatch | Out-File $LogPath -Append -Encoding UTF8
 
-    # Log md5 comparison
-    $verifyPatch | Out-File $LogPath -Append -Encoding UTF8
-
-    if ( $verifyPatch[-2].SubString(6, 18) -eq "All files matched!") {
-        writeToConsole "`n`t`tSuccessfully Patched SFSE" -logPath $LogPath
-        if (![System.Convert]::ToBoolean((getConfigProperty "bypassPrompts"))) {
+        if ($verifyPatch[-2].SubString(6, 18) -eq "All files matched!") {
+            writeToConsole "`n`t`tSuccessfully Patched SFSE" -logPath $LogPath
+            if (![System.Convert]::ToBoolean((getConfigProperty "bypassPrompts"))) {
+                pause
+            }
+        }
+        else {
+            writeToConsole "`n`t`tUnsuccessfully Patched SFSE, check log to see which files failed md5 comparison" -logPath $LogPath
             pause
         }
     }
-    else {
-        writeToConsole "`n`t`tUnsuccessfully Patched SFSE, check log to see which files failed md5 comparison" -logPath $LogPath
-        pause
+    catch {
+        logToFile $_.Exception $LogPath
     }
 }
 
@@ -482,17 +495,17 @@ function checkSpaceReq() {
 }
 
 function checkForPStools() {
-    if (!(fileExists $rootPath "tools/PSTools/PsExec.exe")) {
+    if (!(fileExists $psExecPath)) {
         try {
             $question = "`n`tIn order to move the secured game exe we need to use PSTools, download? [y/n]"
             askAndDownload $question $pstools "pstools.zip" ([System.Convert]::ToBoolean((getConfigProperty "bypassPrompts")))
     
-            if (fileExists $rootPath "tools/PSTools.zip") {
+            if (fileExists $psToolsZipPath) {
                 #Extract to folder
-                Expand-Archive -LiteralPath (getFullPath 'tools/PSTools.zip') -DestinationPath (getFullPath 'tools/PSTools')
+                Expand-Archive -LiteralPath $psToolsZipPath -DestinationPath $psToolsPath
     
                 #Clean up zip
-                Remove-Item (getFullPath 'tools/PSTools.zip')
+                Remove-Item $psToolsZipPath
             }
     
         }
@@ -529,12 +542,11 @@ function moveGameEXE() {
         # We can't copy directly from game folder so we need to move and copy back
         if (fileExists $gamePath 'Starfield.exe') {
             writeToConsole "`n`tCopying Starfield.exe to new game folder!" -logPath $LogPath
-         
+
             # Calling powershell 7 from within psexec.exe does not seem to work, leaving it as powershell for now
             # as it's built-in to windows it should not cause issues as it's being called with system permissions anyway
-            Start-Process -Wait -WindowStyle Hidden -Verb RunAs $rootPath/tools/PSTools/psexec.exe "-s -i -nobanner -accepteula powershell 
-            Move-Item (Join-Path $gamePath 'Starfield.exe') -Destination (Join-Path $newGamePath 'Starfield.exe') -Verbose -Force *>&1 | 
-            Out-File -FilePath $LogPath -Append -Encoding UTF8"
+            Start-Process -Wait -Verb RunAs $psExecPath "-s -i -nobanner -accepteula powershell 
+            Move-Item (Join-Path '$gamePath' 'Starfield.exe') -Destination (Join-Path '$newGamePath' 'Starfield.exe')"
             Start-Sleep -Seconds 5
 
             # Check that permissions we're stripped from exe
@@ -550,7 +562,9 @@ function moveGameEXE() {
         }
 
         if (fileExists $newGamePath 'Starfield.exe') {
-            Copy-Item (Join-Path $newGamePath 'Starfield.exe') -Destination (Join-Path $gamePath 'Starfield.exe')
+            Start-Process -Wait -Verb RunAs $psExecPath "-s -i -nobanner -accepteula powershell 
+            Copy-Item (Join-Path '$newGamePath' 'Starfield.exe') -Destination (Join-Path '$gamePath' 'Starfield.exe')"
+            Start-Sleep -Seconds 5
             
             # check exe was copied back to starfield install folder
             if (fileExists $gamePath 'Starfield.exe') {
@@ -572,11 +586,10 @@ function moveGameEXE() {
         }
         else {
             writeToConsole "`n`tFailed to copy Starfield.exe correctly, check log for more information!" -logPath $LogPath
-            $msg = $_.Exception.Message
+            $msg = $_.Exception
             writeToConsole "`n`t > $msg"
         }
 
-        logToFile $_.Exception.GetType() $LogPath
         logToFile $_.Exception.Message $LogPath
         pause
         Clear-Host
@@ -594,15 +607,7 @@ function moveGameFiles() {
 
     Choose the type of operation"
 
-    # Return to menu
-    if ($type -eq 'q') {
-        return
-    }
 
-    if ($type -eq "" -or ($type -gt 2 -or $type -lt 1)) {
-        writeToConsole "`n`tInvalid Option, exiting!"
-        exit 
-    }
 
     Clear-Host
     
@@ -684,6 +689,7 @@ function autoInstall() {
     }
     else {
         writeToConsole "`n`tFailed to install dependencies: [$progsToInstall], exiting!" -logPath $LogPath
+        pause
         exit
     }
 }
@@ -721,7 +727,7 @@ function setGamePaths() {
 
         while ($continue) {
     
-            if (!(fileExists $inputtedPathTrimmed)) {
+            if (!$inputtedPathTrimmed -or !(fileExists $inputtedPathTrimmed)) {
                 if ($inputtedPathTrimmed -eq 'q') { exit }
                 writeToConsole $noPathMsg
             }
@@ -823,20 +829,12 @@ function welcomeScreen() {
 }
 
 
-# Show warning about spaced Path
-if ($rootPath.Contains(" ")) {
-    writeToConsole "
-    It looks like you're running the script from a path that contains spaces: 
-    `n`t'$rootPath'`n
-    I would recommend moving and running the script from a location without spaces as they are known the cause issues. 
-    I'm currently looking into this issue and hope to find a solution soon."
-
-    pause
+#  Prevent errors from being suppressed
+if (![System.Convert]::ToBoolean((getConfigProperty "debug"))) {
+    $ErrorActionPreference = "Stop"
 }
 
-# Display start message/ set paths if config exist
-if (!(fileExists $rootPath "config.json") -or 
-    (!(testPath (getConfigProperty "gamePath")) -and 
-    !(testPath (getConfigProperty "newGamePath")))) {
+# Display start message/ set paths if missing
+if (!(testPath (getConfigProperty "gamePath")) -and !(testPath (getConfigProperty "newGamePath"))) { 
     welcomeScreen
 }
