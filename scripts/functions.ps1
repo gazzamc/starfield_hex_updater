@@ -667,31 +667,26 @@ function autoInstall() {
     # Check for all dependencies
     checkDependencies
 
-    # If any dependencies are missing try to install them
+    # Check if dependencies are installed otherwise redirect user back to main menu
     if ($progsToInstall.ToArray().Count -gt 0) {
-        installMissing
-    }
-
-    # Check condition again in case missing deps were installed in last step
-    if ($progsToInstall.ToArray().Count -eq 0) {
-        cloneRepo   
-        patchFiles
-        buildRepo
-        moveGameFiles
-        moveSFSEFiles
-        moveGameEXE
-
         Clear-Host
-        writeToConsole "`n`tYou're ready to start using SFSE mods!"
-        writeToConsole "`n`t`tCheck out the list of compatible mods here: 
-        `n`t`thttps://github.com/gazzamc/starfield_hex_updater/blob/main/docs/compatibility"
+        writeToConsole "`n`tMissing dependencies, install all dependencies before proceeding: [$progsToInstall]" -logPath $LogPath
         pause
+        return
     }
-    else {
-        writeToConsole "`n`tFailed to install dependencies: [$progsToInstall], exiting!" -logPath $LogPath
-        pause
-        exit
-    }
+
+    cloneRepo   
+    patchFiles
+    buildRepo
+    moveGameFiles
+    moveSFSEFiles
+    moveGameEXE
+
+    Clear-Host
+    writeToConsole "`n`tYou're ready to start using SFSE mods!"
+    writeToConsole "`n`t`tCheck out the list of compatible mods here: 
+    `n`t`thttps://github.com/gazzamc/starfield_hex_updater/blob/main/docs/compatibility"
+    pause
 }
 function setGamePaths() {
     Clear-Host

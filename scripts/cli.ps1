@@ -173,7 +173,7 @@ Do {
     Write-Host 
     
     "
-        1. Auto Install
+        1. Auto
         2. Check Installed Dependencies
         3. Install Dependencies
         4. SFSE
