@@ -1,3 +1,7 @@
+# Paths
+$rootPath = $PSScriptRoot | Split-Path
+$configPath = (Join-Path $rootPath 'config.json')
+
 function testPath() {
     param (
         [string]$path
@@ -7,12 +11,7 @@ function testPath() {
         return $false
     }
 
-    if (Test-Path -Path $path) {
-        return $true
-    }
-    else {
-        return $false
-    }
+    return Test-Path -LiteralPath $path
 }
 
 function fileExists() {
@@ -21,13 +20,12 @@ function fileExists() {
         [Parameter(Mandatory = $false)] [String] $fileName
     )
 
-    $exists = $false
-
-    if (testPath (Join-Path $path $fileName)) {
-        $exists = $true
+    if ($fileName) {
+        $path = Join-Path $path $fileName
     }
 
-    return $exists
+
+    return testPath $path
 }
 
 function getFullPath() {
@@ -42,11 +40,15 @@ function logToFile() {
         [Parameter(Mandatory = $true)] [String] $content,
         [Parameter(Mandatory = $true)] [String] $filePath
     )
-    
+
     "$((Get-Date).ToString()) $content" | Out-File $filePath -Append -Encoding UTF8
 }
 
 function writeToConsole() {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSAvoidUsingWriteHost', '',
+        Justification = 'Color options')
+    ]
     param (
         [Parameter(Mandatory = $true)] [String] $msg,
         [Parameter(Mandatory = $false)] [switch] $type,
@@ -61,33 +63,33 @@ function writeToConsole() {
         }
 
         if (!$bgcolor) {
-                $bgcolor = "Black"
+            $bgcolor = "Black"
         }
 
         Write-Host $msg -ForegroundColor $color -BackgroundColor $bgcolor
     }
     elseif ($logPath) {
-        Write-Information s -MessageData $msg -InformationAction Continue -InformationVariable 'InfoMsg'
+        Write-Information -MessageData $msg -InformationAction Continue -InformationVariable 'InfoMsg'
         logToFile $InfoMsg $logPath
     }
     else {
-        Write-Information s -MessageData $msg -InformationAction Continue
+        Write-Information -MessageData $msg -InformationAction Continue
     }
 }
 
 function getLatestFileName() {
     try {
-        $files = Get-ChildItem -Path (getFullPath 'hex_tables') -filter *.json | ForEach-Object { $_.Name }
+        $files = Get-ChildItem -Path (getFullPath 'hex_tables') -Filter *.json | ForEach-Object { $_.Name }
 
         $versionUnsorted = $files | ForEach-Object { $_.toString().Split("_")[2] }
         $versionSorted = $versionUnsorted | Sort-Object { [version]$_ } -Descending
         $latestVersionidx = [array]::IndexOf($versionUnsorted, $versionSorted[0])
-    
+
         return $files[$latestVersionidx]
     }
     catch {
         logToFile $_.Exception $LogPath
-        pause
+        Pause
     }
 }
 
@@ -109,16 +111,17 @@ function getConfigProperty() {
         [string]$property
     )
 
-    if (fileExists $rootPath "config.json") {
-        $config = Get-Content -Raw (Join-Path $rootPath "config.json") | ConvertFrom-Json
+    if (fileExists $configPath) {
+        $config = Get-Content -Raw $configPath | ConvertFrom-Json
 
         if ($config.$property) {
             return $config.$property.toString()
         }
     }
     else {
+        logToFile "config not found - Path: $configPath" $LogPath
         return
-    } 
+    }
 }
 
 function setConfigProperty() {
@@ -126,23 +129,26 @@ function setConfigProperty() {
         [string]$property,
         [string]$value
     )
-
-
-    if (!(fileExists $rootPath "config.json")) { 
-        $config = @{$property = $value }
-    }
-    else {
-        $config = Get-Content -Raw (Join-Path $rootPath "config.json") | ConvertFrom-Json
-    
-        if (!$config.$property) {
-            $config | Add-Member @{$property = $value }
+    try {
+        if (!(fileExists $configPath)) { 
+            $config = @{$property = $value }
         }
         else {
-            $config.$property = $value
+            $config = Get-Content -Raw $configPath | ConvertFrom-Json
+    
+            if (!$config.$property) {
+                $config | Add-Member @{$property = $value }
+            }
+            else {
+                $config.$property = $value
+            }
         }
-    }
 
-    ConvertTo-Json $config -Depth 1 | Out-File "$rootPath\config.json" -Force
+        ConvertTo-Json $config -Depth 1 | Out-File $configPath -Force
+    }
+    catch {
+        logToFile $_.Exception $LogPath
+    }
 }
 
 function runProcessAndLog() {
@@ -167,12 +173,13 @@ function runProcessAndLog() {
     $p = New-Object System.Diagnostics.Process
     $p.StartInfo = $pinfo
     $p.Start() | Out-Null
-    
+
     if ($timeout) {
         $Seconds = $timeout
         $EndTime = [datetime]::UtcNow.AddSeconds($Seconds)
+        $TimeRemaining = ($EndTime - [datetime]::UtcNow)
 
-        while (($TimeRemaining = ($EndTime - [datetime]::UtcNow)) -gt 0) {
+        while ($TimeRemaining -gt 0) {
             Write-Progress -Activity 'Building SFSE...' -Status Building -SecondsRemaining $TimeRemaining.TotalSeconds
             Start-Sleep 1
             if ($p.ExitCode -eq 0) {
@@ -183,7 +190,7 @@ function runProcessAndLog() {
         # Clear progress bar
         Write-Progress -Activity 'Building SFSE...' -Completed
     }
-    
+
     $p.WaitForExit()
     $stdout = $p.StandardOutput.ReadToEnd()
     $stderr = $p.StandardError.ReadToEnd()
@@ -215,10 +222,10 @@ function hasPermissions() {
         $user = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
 
         # Quick and dirty check to see if user has FullControl file system rights, returns null if not.
-        $permissions = (Get-Acl $path).Access | Where-Object { $_.IdentityReference -eq $user -and $_.FileSystemRights -eq "FullControl" }
+        $permissions = (Get-Acl -LiteralPath $path).Access | Where-Object { $_.IdentityReference -eq $user -and $_.FileSystemRights -eq "FullControl" }
     }
     else {
-        $permissions = (Get-Item $path).VersionInfo | Select-Object -ExpandProperty FileDescription
+        $permissions = (Get-Item -LiteralPath $path).VersionInfo | Select-Object -ExpandProperty FileDescription
     }
 
     if ($permissions) {
