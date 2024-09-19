@@ -40,11 +40,15 @@ function logToFile() {
         [Parameter(Mandatory = $true)] [String] $content,
         [Parameter(Mandatory = $true)] [String] $filePath
     )
-    
+
     "$((Get-Date).ToString()) $content" | Out-File $filePath -Append -Encoding UTF8
 }
 
 function writeToConsole() {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSAvoidUsingWriteHost', '',
+        Justification = 'Color options')
+    ]
     param (
         [Parameter(Mandatory = $true)] [String] $msg,
         [Parameter(Mandatory = $false)] [switch] $type,
@@ -65,27 +69,27 @@ function writeToConsole() {
         Write-Host $msg -ForegroundColor $color -BackgroundColor $bgcolor
     }
     elseif ($logPath) {
-        Write-Information s -MessageData $msg -InformationAction Continue -InformationVariable 'InfoMsg'
+        Write-Information -MessageData $msg -InformationAction Continue -InformationVariable 'InfoMsg'
         logToFile $InfoMsg $logPath
     }
     else {
-        Write-Information s -MessageData $msg -InformationAction Continue
+        Write-Information -MessageData $msg -InformationAction Continue
     }
 }
 
 function getLatestFileName() {
     try {
-        $files = Get-ChildItem -Path (getFullPath 'hex_tables') -filter *.json | ForEach-Object { $_.Name }
+        $files = Get-ChildItem -Path (getFullPath 'hex_tables') -Filter *.json | ForEach-Object { $_.Name }
 
         $versionUnsorted = $files | ForEach-Object { $_.toString().Split("_")[2] }
         $versionSorted = $versionUnsorted | Sort-Object { [version]$_ } -Descending
         $latestVersionidx = [array]::IndexOf($versionUnsorted, $versionSorted[0])
-    
+
         return $files[$latestVersionidx]
     }
     catch {
         logToFile $_.Exception $LogPath
-        pause
+        Pause
     }
 }
 
@@ -169,12 +173,13 @@ function runProcessAndLog() {
     $p = New-Object System.Diagnostics.Process
     $p.StartInfo = $pinfo
     $p.Start() | Out-Null
-    
+
     if ($timeout) {
         $Seconds = $timeout
         $EndTime = [datetime]::UtcNow.AddSeconds($Seconds)
+        $TimeRemaining = ($EndTime - [datetime]::UtcNow)
 
-        while (($TimeRemaining = ($EndTime - [datetime]::UtcNow)) -gt 0) {
+        while ($TimeRemaining -gt 0) {
             Write-Progress -Activity 'Building SFSE...' -Status Building -SecondsRemaining $TimeRemaining.TotalSeconds
             Start-Sleep 1
             if ($p.ExitCode -eq 0) {
@@ -185,7 +190,7 @@ function runProcessAndLog() {
         # Clear progress bar
         Write-Progress -Activity 'Building SFSE...' -Completed
     }
-    
+
     $p.WaitForExit()
     $stdout = $p.StandardOutput.ReadToEnd()
     $stderr = $p.StandardError.ReadToEnd()

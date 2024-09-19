@@ -2,42 +2,42 @@
 
 Do {
     switch ($mainMenuOption) {
-        1 { 
+        1 {
             Clear-Host
             autoInstall
             break
         }
-        2 { 
+        2 {
             Clear-Host
             checkDependencies
             break
         }
-        3 { 
+        3 {
             checkDependencies
             Clear-Host
             installMissing
             break
         }
-        4 { 
+        4 {
             Clear-Host
             Do {
                 switch ($repoMenuOption) {
-                    1 { 
+                    1 {
                         Clear-Host
                         cloneRepo
                         break
                     }
-                    2 { 
+                    2 {
                         Clear-Host
                         patchFiles
                         break
                     }
-                    3 { 
+                    3 {
                         Clear-Host
                         buildRepo
                         break
                     }
-                    4 { 
+                    4 {
                         Clear-Host
                         moveSFSEFiles
                         break
@@ -45,10 +45,9 @@ Do {
                     Default {
                     }
                 }
-            
+
                 Clear-Host
-                Write-Host 
-                
+                Write-Host
                 "
                     1. Clone Repo
                     2. Patch Files
@@ -56,33 +55,31 @@ Do {
                     4. Move files to game folder
                     q. Return
                 "
-            
                 $repoMenuOption = Read-Host "Choose an option"
             }
             while ($repoMenuOption -ne "q")
             break
         }
-        5 { 
+        5 {
             Clear-Host
-            Write-Host 
-                
+            Write-Host
             "
-            Due to security permissions SFSE cannot be injected into the Starfield.exe 
-            from within it's original installation folder, to bypass this issue 
+            Due to security permissions SFSE cannot be injected into the Starfield.exe
+            from within it's original installation folder, to bypass this issue
             we need to link/copy the game files to a place that gives the user full control.
-            
+
             `n`t`tCopy Files - Additional space required, but will not break when the game updates (Time limited).
             `n`t`tHardlink - Saves space, but certain files will be modified when the game updates.
             "
 
             Do {
                 switch ($moveGameFilesOption) {
-                    1 { 
+                    1 {
                         Clear-Host
                         moveGameFiles
                         break
                     }
-                    2 { 
+                    2 {
                         Clear-Host
                         moveGameEXE
                         break
@@ -92,38 +89,36 @@ Do {
                 }
 
                 Clear-Host
-                Write-Host 
-                
+                Write-Host
                 "
                     1. Copy/Hardlink Game Files
                     2. Copy Game EXE Only
                     q. Return
                 "
-            
                 $moveGameFilesOption = Read-Host "Choose an option"
             }
             while ($moveGameFilesOption -ne "q")
             break
         }
-        6 { 
+        6 {
             Do {
                 switch ($setConfigOption) {
-                    1 { 
+                    1 {
                         Clear-Host
                         setGamePaths
                         break
                     }
-                    2 { 
+                    2 {
                         Clear-Host
                         setBypassChoice
                         break
                     }
-                    3 { 
+                    3 {
                         Clear-Host
                         setPythonChoice
                         break
                     }
-                    4 { 
+                    4 {
                         Clear-Host
                         installProg "Uninstall"
                         break
@@ -145,7 +140,7 @@ Do {
                 Write-Host "`tStandalone Python: $(getConfigProperty "standalonePython" )"
                 Write-Host "`t"
 
-                Write-Host 
+                Write-Host
                 "
                     1. Set Paths
                     2. Set Bypass Choice
@@ -170,8 +165,7 @@ Do {
     }
 
     Clear-Host
-    Write-Host 
-    
+    Write-Host
     "
         1. Auto
         2. Check Installed Dependencies

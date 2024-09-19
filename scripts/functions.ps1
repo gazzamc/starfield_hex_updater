@@ -42,7 +42,7 @@ function installProg() {
     param (
         [Parameter(Mandatory = $true)] [String] $name
     )
- 
+
     Switch ($name) {
         "git" {
             writeToConsole "`n`t`tInstalling Git..." -logPath $LogPath
@@ -68,10 +68,10 @@ function installProg() {
             writeToConsole "`n`t`tInstalling chocolatey..." -logPath $LogPath
 
             # Choco requires admin rights to install properly
-            Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -ArgumentList "-command 
+            Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -ArgumentList "-command
 
-            Set-ExecutionPolicy Bypass -Scope Process -Force; 
-            [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; 
+            Set-ExecutionPolicy Bypass -Scope Process -Force;
+            [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072;
             Invoke-Expression (
                 (New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1')) | Out-File $LogPath -Append -Encoding UTF8;"
 
@@ -80,7 +80,7 @@ function installProg() {
         "uninstall" {
             writeToConsole "`n`t`tUninstalling choco packages..." -logPath $LogPath
 
-            Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -ArgumentList "-command 
+            Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -ArgumentList "-command
             choco uninstall git git.install cmake cmake.install python311 visualstudio2019buildtools visualstudio2019-workload-vctools --confirm | Out-File $LogPath -Append -Encoding UTF8"
             Break
         }
@@ -124,7 +124,7 @@ function checkCommand() {
 function checkForCompiler() {
     # Check if we have a c++ compiler installed/configured
     # Requires CMake
-    
+
     try {
         $output = (cmake --system-information 2>$null | Where-Object { $_ -match "CMAKE_CXX_COMPILER ==" }).Split('==').Trim()
 
@@ -154,10 +154,10 @@ function isInstalled() {
     )
     Switch ($softwareName) {
         "git" {
-            return checkCommand git 
+            return checkCommand git
         }
         "cmake" {
-            return checkCommand cmake 
+            return checkCommand cmake
         }
         "python" {
             return checkCommand python
@@ -173,9 +173,9 @@ function isInstalled() {
 
 function askAndDownload() {
     param (
-        [Parameter(Mandatory = $true)] [String] $question, 
-        [Parameter(Mandatory = $true)] [String] $downloadURL, 
-        [Parameter(Mandatory = $true)] [String] $fileName, 
+        [Parameter(Mandatory = $true)] [String] $question,
+        [Parameter(Mandatory = $true)] [String] $downloadURL,
+        [Parameter(Mandatory = $true)] [String] $fileName,
         [Parameter(Mandatory = $false)] [String] $bypass = $true
     )
 
@@ -236,7 +236,7 @@ function checkDependencies() {
     writeToConsole ("`n`t`tC++ Build Tools ...." + (& { if (checkForBuildTools) { "`tInstalled" } else { "`tNot Found"; $progsToInstall.Add("compiler") } })) -logPath $LogPath
 
     if (![System.Convert]::ToBoolean((getConfigProperty "bypassPrompts"))) {
-        pause
+        Pause
     }
 }
 
@@ -244,7 +244,11 @@ function installStandalonePython() {
     if (!(fileExists (Join-Path $pythonPath "python.exe"))) {
         try {
             $question = "`n`tPython has not been detected on your system, do you want to download a standalone version? [y/n]"
-            askAndDownload $question $python "python.zip" ([System.Convert]::ToBoolean((getConfigProperty "bypassPrompts")))
+            askAndDownload
+            -question $question
+            -downloadURL $python
+            -fileName "python.zip"
+            -bypass ([System.Convert]::ToBoolean((getConfigProperty "bypassPrompts")))
 
             if (fileExists $pythonZipPath) {
                 #Extract to folder
@@ -258,8 +262,8 @@ function installStandalonePython() {
         catch {
             writeToConsole "`n`tFailed to download Python, exiting!" -logPath $LogPath
             logToFile $_.Exception $LogPath
-            pause
-            exit 
+            Pause
+            exit
         }
     }
 }
@@ -278,7 +282,7 @@ function installMissing() {
             installProg "chocolatey"
 
             # Import choco for refreshenv command
-            $env:ChocolateyInstall = Convert-Path "$((Get-Command choco).Path)\..\.."   
+            $env:ChocolateyInstall = Convert-Path "$((Get-Command choco).Path)\..\.."
             Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
         }
 
@@ -348,19 +352,19 @@ function buildRepo() {
         if (fileExists $sfseBuildPath) {
             writeToConsole "`n`t`tSuccessfully built" -logPath $LogPath
             if (![System.Convert]::ToBoolean((getConfigProperty "bypassPrompts"))) {
-                pause
+                Pause
             }
         }
         else {
             writeToConsole "`n`t`tCould not verify build, check manually!" -logPath $LogPath
-            pause
+            Pause
         }
     }
     catch {
         # Catch exception to prevent script failure
         writeToConsole "`n`t`tError Building SFSE, check that you have C++ dev tools installed!" -logPath $LogPath
         logToFile $_.Exception $LogPath
-        pause
+        Pause
     }
 }
 
@@ -381,7 +385,7 @@ function moveSFSEFiles() {
             foreach ($file in $filesToCopy) {
                 Get-ChildItem -Path $sfseBuildPath -Filter $file -Recurse | Copy-Item -Destination $gamePath  -Verbose *>&1 | Out-File -FilePath $LogPath -Append -Encoding UTF8
             }
-    
+
             # Check files exist
             foreach ($file in $filesToCopy) {
                 if (Test-Path -Path $gamePath -Filter $file) {
@@ -391,7 +395,7 @@ function moveSFSEFiles() {
                     writeToConsole "`n`t`tThere was an issue copying $file!" -logPath $LogPath
                 }
             }
-    
+
             Start-Sleep 5
         }
         else {
@@ -407,7 +411,7 @@ function moveSFSEFiles() {
         }
 
         logToFile $_.Exception $LogPath
-        pause
+        Pause
     }
 }
 
@@ -470,7 +474,7 @@ function checkSpaceReq() {
 
     $driveLetter = (Get-Item $newPath).PSDrive.Name + ":"
     $drives = Get-CimInstance -ClassName Win32_LogicalDisk | Select-Object -Property DeviceID, FreeSpace
-    
+
     if ($drives.DeviceID -contains $driveLetter) {
         # Get free space of drive
         $idx = $drives.DeviceID.IndexOf($driveLetter)
@@ -483,12 +487,12 @@ function checkSpaceReq() {
             $hasSpace = $false
 
             writeToConsole "
-            Not enough space on drive to copy the game: 
+            Not enough space on drive to copy the game:
 
                 Space Required: $([Math]::Round($folderSize / 1Gb, 2)) Gb
                 Free Disk Space ($driveLetter): $([Math]::Round($space / 1Gb, 2)) Gb
             " -logPath $LogPath
-            pause
+            Pause
         }
     }
     return $hasSpace
@@ -507,13 +511,13 @@ function checkForPStools() {
                 #Clean up zip
                 Remove-Item $psToolsZipPath
             }
-    
+
         }
         catch {
             writeToConsole "`n`tFailed to download PSTools, exiting!" -logPath $LogPath
             logToFile $_.Exception $LogPath
-            pause
-            exit 
+            Pause
+            exit
         }
     }
 }
@@ -528,7 +532,7 @@ function moveGameEXE() {
         `n`tStarfield.exe cannot be copied as you do not have the necessary permissions within the folder" -type -color red
         writeToConsole "`n`t$newGamePath" -type -color yellow
         writeToConsole "`n`tPlease copy the game files to a new location where you have FullControl of permissions." -type -color red
-        pause
+        Pause
         exit
     }
 
@@ -591,7 +595,7 @@ function moveGameEXE() {
         }
 
         logToFile $_.Exception.Message $LogPath
-        pause
+        Pause
         Clear-Host
     }
 }
@@ -601,7 +605,7 @@ function moveGameFiles() {
     writeToConsole "`n`tMove/Hardlink Game Files.." -logPath $LogPath
 
     $type = Read-Host -Prompt "
-    1. Copy Files 
+    1. Copy Files
     2. Hardlink Files (Does not work across drives)
     q. Return
 
@@ -610,7 +614,7 @@ function moveGameFiles() {
 
 
     Clear-Host
-    
+
     # Get path of game install and new location for files
     $gamePath = getConfigProperty "gamePath"
     $newGamePath = getConfigProperty "newGamePath"
@@ -622,20 +626,20 @@ function moveGameFiles() {
         if (!$suffSpace) {
             return
         }
-        
+
         writeToConsole "`n`tCopying files to new location!" -logPath $LogPath
 
         # Copy over files
-        ROBOCOPY $gamePath $newGamePath /E /XF (Join-Path $gamePath "Starfield.exe") /MIR /NDL /NJH /NJS | 
-        ForEach-Object { 
-            $data = $_.Split([char]9); if ("$($data[4])" -ne "") { $file = "$($data[4])" }; 
+        ROBOCOPY $gamePath $newGamePath /E /XF (Join-Path $gamePath "Starfield.exe") /MIR /NDL /NJH /NJS |
+        ForEach-Object {
+            $data = $_.Split([char]9); if ("$($data[4])" -ne "") { $file = "$($data[4])" };
 
             if ($data[0] -eq '' -and ($file -ne '' -or $null)) {
                 #  Log files to be copied
                 Out-File $LogPath -InputObject "Copying File: $file" -Append -Encoding UTF8
             }
 
-            Write-Progress "Percentage $($data[0])" -Activity "Robocopy" -CurrentOperation "$($file)" -ErrorAction SilentlyContinue; 
+            Write-Progress "Percentage $($data[0])" -Activity "Robocopy" -CurrentOperation "$($file)" -ErrorAction SilentlyContinue;
         }
 
         # Clear progress bar when completed
@@ -646,11 +650,11 @@ function moveGameFiles() {
         writeToConsole "`n`tHardlinking files to new location!" -logPath $LogPath
 
         try {
-            Get-ChildItem -Path $gamePath | ForEach-Object { 
+            Get-ChildItem -Path $gamePath | ForEach-Object {
                 if ($_.PSIsContainer) {
                     New-Item -ItemType Junction -Path "$($newGamePath)\$($_.Name)" -Value $_.FullName | Out-File $LogPath -Append -Encoding UTF8
                 }
-                else { 
+                else {
                     if ($_.Name -ne "Starfield.exe") {
                         New-Item -ItemType HardLink -Path "$($newGamePath)\$($_.Name)" -Value $_.FullName | Out-File $LogPath -Append -Encoding UTF8
                     }
@@ -764,7 +768,7 @@ function setBypassChoice() {
     Clear-Host
     $question = "Would you like to bypass all future prompts? [y/n]"
     $confirmation = Read-Host $question
-    while ($confirmation -ne "y" -and $confirmation -ne "n") {  
+    while ($confirmation -ne "y" -and $confirmation -ne "n") {
         $confirmation = Read-Host $question
     }
 
@@ -784,7 +788,7 @@ function setPythonChoice() {
     $question = "
         Would you like to use a standalone python install? [y/n]"
     $confirmation = Read-Host $question
-    while ($confirmation -ne "y" -and $confirmation -ne "n") {  
+    while ($confirmation -ne "y" -and $confirmation -ne "n") {
         $confirmation = Read-Host $question
     }
 
@@ -799,25 +803,25 @@ function setPythonChoice() {
 function welcomeScreen() {
     Clear-Host
     $title = (Get-Content -Raw "header.txt").Replace('x.x.x', $version).Replace('[at]', '@')
-    
+
     writeToConsole $title
     writeToConsole "`n`tIn order to make the auto-install process as smooth as possible we'll set the path now, `n`tThis can be changed from the options menu." -type -color yellow -bgcolor black
     writeToConsole "`n`tOnce the path is set, you won't see this screen again on start-up." -type -color yellow -bgcolor black
 
-    writeToConsole "`n`n`tGamePath: 
+    writeToConsole "`n`n`tGamePath:
     `n`tThe original location installed by xbox app eg. C:\XboxGames\Starfield,
-    `n`tIf you have not set the install folder in 'Options > Install Options' within the Xbox app, `n`tplease do so now and restart the script." 
+    `n`tIf you have not set the install folder in 'Options > Install Options' within the Xbox app, `n`tplease do so now and restart the script."
 
-    writeToConsole "`n`n`tNewGamePath: 
+    writeToConsole "`n`n`tNewGamePath:
     `n`tThe new path that we will copy/hardlink the game files to in order to use SFSE,
     `n`tThis can be anywhere you choose but Hardlinking cannot be done across drives.
 
     `tOptions:
     `n`t`t Hardlinking: `n`n`t`t`tSaves space but will be modified when game updates (or deleted)
-    `n`t`t Copying: `n`n`t`t`tRequires more space but will avoid issues after game updates, 
-                    `n`t`t`thas continued to work after updates so far.`n" 
+    `n`t`t Copying: `n`n`t`t`tRequires more space but will avoid issues after game updates,
+                    `n`t`t`thas continued to work after updates so far.`n"
 
-    pause
+    Pause
     setGamePaths
     setPythonChoice
     setBypassChoice
