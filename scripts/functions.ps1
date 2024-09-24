@@ -10,7 +10,7 @@ $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
 $dateNow = $((Get-Date).ToString('yyyy.MM.dd_hh.mm.ss'))
 $logfileName = "logfile_$dateNow.log"
 $powershellVersion = $host.Version.Major
-$version = "1.5.18"
+$version = "1.5.19"
 
 # Paths
 $logFolderPath = Join-Path $rootPath 'logs'
