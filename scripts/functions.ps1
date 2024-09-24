@@ -275,7 +275,7 @@ function installMissing() {
     }
     else {
         # Install chocolatey as it's a dependency for the rest
-        # Unless it's the only dependecy not installed (others installed externally)
+        # Unless it's the only dependency not installed (others installed externally)
         if ($progsToInstall.contains("chocolatey") -and !$chocoOnlyDep) {
             $progsToInstall.Remove("chocolatey")
             installProg "chocolatey"
