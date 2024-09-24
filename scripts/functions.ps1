@@ -244,11 +244,7 @@ function installStandalonePython() {
     if (!(fileExists (Join-Path $pythonPath "python.exe"))) {
         try {
             $question = "`n`tPython has not been detected on your system, do you want to download a standalone version? [y/n]"
-            askAndDownload
-            -question $question
-            -downloadURL $python
-            -fileName "python.zip"
-            -bypass ([System.Convert]::ToBoolean((getConfigProperty "bypassPrompts")))
+            askAndDownload -question $question -downloadURL $python -fileName "python.zip" -bypass ([System.Convert]::ToBoolean((getConfigProperty "bypassPrompts")))
 
             if (fileExists $pythonZipPath) {
                 #Extract to folder
@@ -271,13 +267,16 @@ function installStandalonePython() {
 function installMissing() {
     Clear-Host
 
-    if ($progsToInstall.ToArray().Count -eq 0) {
+    $chocoOnlyDep = $progsToInstall.contains("chocolatey") -and $progsToInstall.ToArray().Count -eq 1
+
+    if ($progsToInstall.ToArray().Count -eq 0 -or $chocoOnlyDep) {
         writeToConsole "`n`t`tNothing to install, returning to menu..." -logPath $LogPath
         Start-Sleep 5
     }
     else {
         # Install chocolatey as it's a dependency for the rest
-        if ($progsToInstall.contains("chocolatey")) {
+        # Unless it's the only dependecy not installed (others installed externally)
+        if ($progsToInstall.contains("chocolatey") -and !$chocoOnlyDep) {
             $progsToInstall.Remove("chocolatey")
             installProg "chocolatey"
 
@@ -383,7 +382,7 @@ function moveSFSEFiles() {
         # Find files in build folder and copy to user provided path
         if (fileExists $sfseBuildPath) {
             foreach ($file in $filesToCopy) {
-                Get-ChildItem -Path $sfseBuildPath -Filter $file -Recurse | Copy-Item -Destination $gamePath  -Verbose *>&1 | Out-File -FilePath $LogPath -Append -Encoding UTF8
+                Get-ChildItem -Path $sfseBuildPath -Filter $file -Recurse | Copy-Item -Destination $gamePath -Verbose *>&1 | Out-File -FilePath $LogPath -Append -Encoding UTF8
             }
 
             # Check files exist
@@ -451,12 +450,12 @@ function patchFiles() {
         if ($verifyPatch[-2].SubString(6, 18) -eq "All files matched!") {
             writeToConsole "`n`t`tSuccessfully Patched SFSE" -logPath $LogPath
             if (![System.Convert]::ToBoolean((getConfigProperty "bypassPrompts"))) {
-                pause
+                Pause
             }
         }
         else {
             writeToConsole "`n`t`tUnsuccessfully Patched SFSE, check log to see which files failed md5 comparison" -logPath $LogPath
-            pause
+            Pause
         }
     }
     catch {
@@ -502,12 +501,12 @@ function checkForPStools() {
     if (!(fileExists $psExecPath)) {
         try {
             $question = "`n`tIn order to move the secured game exe we need to use PSTools, download? [y/n]"
-            askAndDownload $question $pstools "pstools.zip" ([System.Convert]::ToBoolean((getConfigProperty "bypassPrompts")))
-    
+            askAndDownload -question $question -downloadURL $pstools -fileName "pstools.zip" -bypass ([System.Convert]::ToBoolean((getConfigProperty "bypassPrompts")))
+
             if (fileExists $psToolsZipPath) {
                 #Extract to folder
                 Expand-Archive -LiteralPath $psToolsZipPath -DestinationPath $psToolsPath
-    
+
                 #Clean up zip
                 Remove-Item $psToolsZipPath
             }
