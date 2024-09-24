@@ -10,7 +10,7 @@ $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
 $dateNow = $((Get-Date).ToString('yyyy.MM.dd_hh.mm.ss'))
 $logfileName = "logfile_$dateNow.log"
 $powershellVersion = $host.Version.Major
-$version = "1.5.19"
+$version = "1.5.20"
 
 # Paths
 $logFolderPath = Join-Path $rootPath 'logs'
@@ -670,15 +670,17 @@ function autoInstall() {
     # Check for all dependencies
     checkDependencies
 
+    $chocoOnlyDep = $progsToInstall.contains("chocolatey") -and $progsToInstall.ToArray().Count -eq 1
+
     # Check if dependencies are installed otherwise redirect user back to main menu
-    if ($progsToInstall.ToArray().Count -gt 0) {
+    if ($progsToInstall.ToArray().Count -gt 0 -and !$chocoOnlyDep) {
         Clear-Host
         writeToConsole "`n`tMissing dependencies, install all dependencies before proceeding: [$progsToInstall]" -logPath $LogPath
-        pause
+        Pause
         return
     }
 
-    cloneRepo   
+    cloneRepo
     patchFiles
     buildRepo
     moveGameFiles
@@ -689,7 +691,7 @@ function autoInstall() {
     writeToConsole "`n`tYou're ready to start using SFSE mods!"
     writeToConsole "`n`t`tCheck out the list of compatible mods here: 
     `n`t`thttps://github.com/gazzamc/starfield_hex_updater/blob/main/docs/compatibility"
-    pause
+    Pause
 }
 function setGamePaths() {
     Clear-Host
@@ -724,7 +726,6 @@ function setGamePaths() {
         $inputtedPathTrimmed = $inputtedPath.trim()
 
         while ($continue) {
-    
             if (!$inputtedPathTrimmed -or !(fileExists $inputtedPathTrimmed)) {
                 if ($inputtedPathTrimmed -eq 'q') { exit }
                 writeToConsole $noPathMsg
