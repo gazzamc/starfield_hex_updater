@@ -1,4 +1,4 @@
-. .\functions.ps1
+Import-Module (Join-Path $PSScriptRoot functions.ps1)
 
 Do {
     switch ($mainMenuOption) {
@@ -157,12 +157,6 @@ Do {
         }
     }
 
-    # Check paths were set, or exit
-    if (!(getConfigProperty "gamePath") -or !(getConfigProperty "newGamePath")) {
-        Read-Host "Cannot find game paths, delete config.json and re-run script."
-        pause
-        exit
-    }
 
     Clear-Host
     Write-Host
