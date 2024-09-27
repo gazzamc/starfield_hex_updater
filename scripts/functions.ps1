@@ -1,4 +1,4 @@
-. .\utils.ps1
+Import-Module (Join-Path $PSScriptRoot utils.psm1)
 
 # A PS script to patch/install Gamepass SFSE in one click
 
@@ -13,6 +13,7 @@ $powershellVersion = $host.Version.Major
 $version = "1.5.20"
 
 # Paths
+$rootPath = $PSScriptRoot | Split-Path
 $logFolderPath = Join-Path $rootPath 'logs'
 $LogPath = Join-Path $logFolderPath $logfileName
 $sfsePath = Join-Path $rootPath 'sfse'
@@ -568,7 +569,7 @@ function moveGameEXE() {
             Start-Process -Wait -Verb RunAs $psExecPath "-s -i -nobanner -accepteula powershell 
             Copy-Item (Join-Path '$newGamePath' 'Starfield.exe') -Destination (Join-Path '$gamePath' 'Starfield.exe')"
             Start-Sleep -Seconds 5
-            
+
             # check exe was copied back to starfield install folder
             if (fileExists $gamePath 'Starfield.exe') {
                 writeToConsole "`n`tCopy of Starfield.exe created in original folder!" -logPath $LogPath
@@ -833,7 +834,14 @@ if (![System.Convert]::ToBoolean((getConfigProperty "debug"))) {
     $ErrorActionPreference = "Stop"
 }
 
-# Display start message/ set paths if missing
-if (!(testPath (getConfigProperty "gamePath")) -and !(testPath (getConfigProperty "newGamePath"))) { 
+# Display start message/ set paths if missing/invalid
+$pathsExistAndValid = $True
+if (getConfigProperty "gamePath" -and getConfigProperty "newGamePath") {
+    if (!(testPath (getConfigProperty "gamePath")) -or !(testPath (getConfigProperty "newGamePath"))) {
+        $pathsExistAndValid = $False
+    }
+}
+
+if (!$pathsExistAndValid) {
     welcomeScreen
 }

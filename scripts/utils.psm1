@@ -4,41 +4,47 @@ $configPath = (Join-Path $rootPath 'config.json')
 
 function testPath() {
     param (
+        [Parameter(Mandatory)]
         [string]$path
     )
-
-    if (!$path) {
-        return $false
-    }
 
     return Test-Path -LiteralPath $path
 }
 
 function fileExists() {
+    [CmdletBinding(DefaultParameterSetName = 'Path')]
     param (
-        [Parameter(Mandatory = $true)] [String] $path,
-        [Parameter(Mandatory = $false)] [String] $fileName
+        [Parameter(Mandatory, ParameterSetName = 'Path', Position = 0)]
+        [Parameter(Mandatory, ParameterSetName = 'PathAll', Position = 0)]
+        [string]$Path,
+
+        [Parameter(ParameterSetName = 'PathAll')]
+        [string]$FileName
     )
 
-    if ($fileName) {
+    if ($FileName.Length -gt 0) {
         $path = Join-Path $path $fileName
     }
 
 
-    return testPath $path
+    return testPath $Path
 }
 
 function getFullPath() {
     param (
-        [Parameter(Mandatory = $true)] [String] $file
+        [Parameter(Mandatory)] [String] $file
     )
     return (Join-Path $rootPath $file)
 }
 
 function logToFile() {
+    [CmdletBinding(DefaultParameterSetName = 'log')]
     param (
-        [Parameter(Mandatory = $true)] [String] $content,
-        [Parameter(Mandatory = $true)] [String] $filePath
+        [Parameter(Mandatory, ParameterSetName = 'log', Position = 0)]
+        [String] $content,
+
+        [Parameter(Mandatory, ParameterSetName = 'log', Position = 1)]
+        [String] $filePath
     )
 
     "$((Get-Date).ToString()) $content" | Out-File $filePath -Append -Encoding UTF8
@@ -49,12 +55,24 @@ function writeToConsole() {
         'PSAvoidUsingWriteHost', '',
         Justification = 'Color options')
     ]
+    [CmdletBinding(DefaultParameterSetName = 'Message-Host')]
     param (
-        [Parameter(Mandatory = $true)] [String] $msg,
-        [Parameter(Mandatory = $false)] [switch] $type,
-        [Parameter(Mandatory = $false)] [String] $color,
-        [Parameter(Mandatory = $false)] [String] $bgcolor,
-        [Parameter(Mandatory = $false)] [String] $logPath
+        [Parameter(Mandatory, ParameterSetName = 'Message-Host', Position = 0)]
+        [Parameter(Mandatory, ParameterSetName = 'Message-Host-Color', Position = 0)]
+        [Parameter(Mandatory, ParameterSetName = 'Message-Log', Position = 0)]
+        [String] $msg,
+
+        [Parameter(Mandatory, ParameterSetName = 'Message-Host-Color')]
+        [switch] $type,
+
+        [Parameter(Mandatory, ParameterSetName = 'Message-Host-Color')]
+        [String] $color,
+
+        [Parameter(ParameterSetName = 'Message-Host-Color')]
+        [String] $bgcolor,
+
+        [Parameter(Mandatory, ParameterSetName = 'Message-Log')]
+        [String] $logPath
     )
 
     if ($type) {
@@ -69,8 +87,8 @@ function writeToConsole() {
         Write-Host $msg -ForegroundColor $color -BackgroundColor $bgcolor
     }
     elseif ($logPath) {
-        Write-Information -MessageData $msg -InformationAction Continue -InformationVariable 'InfoMsg'
-        logToFile $InfoMsg $logPath
+        Write-Information -MessageData $msg -InformationAction Continue
+        logToFile $msg $logPath
     }
     else {
         Write-Information -MessageData $msg -InformationAction Continue
@@ -89,7 +107,6 @@ function getLatestFileName() {
     }
     catch {
         logToFile $_.Exception $LogPath
-        Pause
     }
 }
 
@@ -130,12 +147,12 @@ function setConfigProperty() {
         [string]$value
     )
     try {
-        if (!(fileExists $configPath)) { 
+        if (!(fileExists $configPath)) {
             $config = @{$property = $value }
         }
         else {
             $config = Get-Content -Raw $configPath | ConvertFrom-Json
-    
+
             if (!$config.$property) {
                 $config | Add-Member @{$property = $value }
             }

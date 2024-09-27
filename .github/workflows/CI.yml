@@ -3,19 +3,40 @@ on:
   pull_request:
       branches:
         - main
+        - dev
 
 jobs:
   PSScriptAnalyzer:
     runs-on: windows-latest
     steps:       
     - uses: actions/checkout@v4
-
-    - name: Install PSScriptAnalyzer
+    - name: PSScriptAnalyzer
       shell: pwsh
       run: |
         Install-Module -Name PSScriptAnalyzer -Force
-
-    - name: Run PSScriptAnalyzer
-      shell: pwsh
-      run: |
         Invoke-ScriptAnalyzer -Path ./ -Recurse -Severity Error -EnableExit
+
+  Pester-pwsh:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Pester tests (pwsh)
+        run: |
+          Write-host $PSVersionTable.PSVersion.Major $PSVersionTable.PSRemotingProtocolVersion.Minor
+          Set-PSRepository psgallery -InstallationPolicy trusted
+          Install-Module -Name Pester -RequiredVersion 5.6.1 -confirm:$false -Force
+          Invoke-Pester -Path ./       
+        shell: pwsh
+
+  Pester-posh:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Run Pester tests (PowerShell)
+      run: |
+        Write-host $PSVersionTable.PSVersion.Major $PSVersionTable.PSRemotingProtocolVersion.Minor
+        Set-PSRepository psgallery -InstallationPolicy trusted
+        Install-Module -Name Pester -RequiredVersion 5.6.1 -Confirm:$false -Force
+        Invoke-Pester -Path ./
+        if ($Error[0].Fullyqualifiederrorid -eq 'PesterAssertionFailed') {exit 1}    
+      shell: powershell
