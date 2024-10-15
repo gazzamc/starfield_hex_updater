@@ -120,7 +120,17 @@ Do {
                     }
                     4 {
                         Clear-Host
+                        setFilesChoice
+                        break
+                    }
+                    5 {
+                        Clear-Host
                         installProg "Uninstall"
+                        break
+                    }
+                    6 {
+                        Clear-Host
+                        refresh
                         break
                     }
                     Default {
@@ -135,6 +145,8 @@ Do {
                 Write-Host "`t"
                 Write-Host "`tCopied/Hardlinked Path: $(getConfigProperty "newGamePath" )"
                 Write-Host "`t"
+                Write-Host "`t[Hardlink = 1, Copy = 2] : $(getConfigProperty "hardlinkOrCopy" )"
+                Write-Host "`t"
                 Write-Host "`tBypass Prompts: $(getConfigProperty "bypassPrompts" )"
                 Write-Host "`t"
                 Write-Host "`tStandalone Python: $(getConfigProperty "standalonePython" )"
@@ -145,7 +157,9 @@ Do {
                     1. Set Paths
                     2. Set Bypass Choice
                     3. Set Python Choice
-                    4. Uninstall Dependencies (Choco Packages only)
+                    4. Set Game File Choice
+                    5. Uninstall Dependencies (Choco Packages only)
+                    6. Refresh Environment (If Choco Packages are not detected)
                     q. Return
                 "
                 $setConfigOption = Read-Host "Choose an option"
