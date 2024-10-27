@@ -81,7 +81,7 @@ Going on the assumption that you have a clean windows install with absolutely no
 - [Python 3.11](https://www.python.org/ftp/python/3.11.0/python-3.11.0-amd64.exe)
 - [Git](https://github.com/git-for-windows/git/releases/download/v2.42.0.windows.2/Git-2.42.0.2-64-bit.exe)
 - [CMake](https://github.com/Kitware/CMake/releases/download/v3.27.6/cmake-3.27.6-windows-x86_64.msi)
-- [Windows Visual Studio Community](https://visualstudio.microsoft.com/downloads/)
+- [C++ Build Tools](https://aka.ms/vs/16/release/vs_buildtools.exe)
     - Select `Desktop development with C++` on installation, no need for the others
     - Ensure you have at least `VS 2019 C++ Build Tools` (`MSVC v142`)
 
@@ -281,14 +281,14 @@ It's almost identical the above without the checkout part.
 Patching the exe is incredibly simple :)
 
 - Open Command Prompt
-- `CD` to the `starfield_hex_updater` folder
+- `CD` to the `starfield_hex_updater/src/patcher` folder
 ```
     cd starfield_hex_updater
 ```
 - Type the following *
 ```
 
-    python hex_updater.py -m patch -p /path/to/SFSE
+    python patcher.py -m patch -p /path/to/SFSE
 
 ```
 
@@ -308,14 +308,14 @@ Patching the exe is incredibly simple :)
 Very similar to the last step
 
 - Open Command Prompt
-- `CD` to the `starfield_hex_updater` folder
+- `CD` to the `starfield_hex_updater/src/patcher` folder
 ```
     cd starfield_hex_updater
 ```
 - Type the following *
 ```
 
-    python hex_updater.py -m update -p </path/to/SFSE>/sfse -d /path/to/hex_tables/<latest-hex-table-json>
+    python patcher.py -m update -p </path/to/SFSE>/sfse -d /path/to/hex_tables/<latest-hex-table-json>
 
 ```
 
@@ -338,14 +338,14 @@ Note: The path should point to the sfse folder within the sfse root folder eg. `
 Once you have ran both the patch and the update commands you can verify all necessary files were correctly patched.
 
 - Open Command Prompt
-- `CD` to the `starfield_hex_updater` folder
+- `CD` to the `starfield_hex_updater/src/patcher` folder
 ```
     cd starfield_hex_updater
 ```
 - Type the following *
 ```
 
-    python hex_updater.py -m md5 -p </path/to/SFSE> --verify
+    python patcher.py -m md5 -p </path/to/SFSE> --verify
 
 ```
 

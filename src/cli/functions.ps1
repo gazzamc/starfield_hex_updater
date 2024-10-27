@@ -22,6 +22,8 @@ $pythonZipPath = (Join-Path $toolsPath 'python.zip')
 $psToolsPath = Join-Path $toolsPath 'pstools'
 $psToolsZipPath = Join-Path $toolsPath 'pstools.zip'
 $psExecPath = (Join-Path $psToolsPath 'psexec.exe')
+$patcherFolderPath = (Join-Path $rootPath 'patcher')
+$patcherPath = (Join-Path $patcherFolderPath 'patcher.py')
 
 
 # Change powershell executable depending on version
@@ -418,9 +420,9 @@ function patchFiles() {
         $fileName = getLatestFileName
         $dictFile = (Join-Path $rootPath (Join-Path 'hex_tables' $fileName))
         $pythonExe = 'python'
-        $updateArgs = 'hex_updater.py', '-m', 'update', '-p', (Join-Path $SFSEPath 'sfse'), '-d', "$dictFile"
-        $patchArgs = 'hex_updater.py', '-m', 'patch', '-p', $SFSEPath
-        $verifyArgs = 'hex_updater.py', '-m', 'md5', '-p', $SFSEPath, '--verify'
+        $updateArgs = $patcherPath, '-m', 'update', '-p', (Join-Path $SFSEPath 'sfse'), '-d', "$dictFile"
+        $patchArgs = $patcherPath, '-m', 'patch', '-p', $SFSEPath
+        $verifyArgs = $patcherPath, '-m', 'md5', '-p', $SFSEPath, '--verify'
 
         if (([System.Convert]::ToBoolean((getConfigProperty "standalonePython")))) {
             installStandalonePython
@@ -851,7 +853,11 @@ if (![System.Convert]::ToBoolean((getConfigProperty "debug"))) {
 
 # Display start message/ set paths if missing/invalid
 $pathsExistAndValid = $True
-if (getConfigProperty "gamePath" -and getConfigProperty "newGamePath") {
+
+if (!(testPath (getConfigPath))) {
+    $pathsExistAndValid = $False
+}
+elseif (getConfigProperty "gamePath" -and getConfigProperty "newGamePath") {
     if (!(testPath (getConfigProperty "gamePath")) -or !(testPath (getConfigProperty "newGamePath"))) {
         $pathsExistAndValid = $False
     }

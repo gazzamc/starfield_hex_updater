@@ -1,1 +1,1 @@
-powershell -command " Start-Process PowerShell -Verb RunAs \""-noexit -command `\""cd '%cd%\scripts'; & '.\cli.ps1';`\""\""   "
+powershell -command " Start-Process PowerShell -Verb RunAs \""-noexit -command `\""cd '%cd%\src\cli'; & '.\cli.ps1';`\""\""   "
