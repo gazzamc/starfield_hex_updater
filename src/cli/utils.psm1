@@ -25,6 +25,10 @@ function getLogPath() {
     return $LogPath
 }
 
+function getConfigPath() {
+    return $configPath
+}
+
 function fileExists() {
     [CmdletBinding(DefaultParameterSetName = 'Path')]
     param (
@@ -148,7 +152,6 @@ function getConfigProperty() {
     }
     else {
         logToFile "config not found - Path: $configPath"
-        return
     }
 }
 
