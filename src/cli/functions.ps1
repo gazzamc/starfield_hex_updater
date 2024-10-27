@@ -1,4 +1,4 @@
-. .\utils.ps1
+Import-Module (Join-Path $PSScriptRoot utils.psm1)
 
 # A PS script to patch/install Gamepass SFSE in one click
 
@@ -7,14 +7,13 @@ $pstools = "https://download.sysinternals.com/files/PSTools.zip"
 $python = "https://www.python.org/ftp/python/3.11.8/python-3.11.8-embed-amd64.zip"
 
 $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
-$dateNow = $((Get-Date).ToString('yyyy.MM.dd_hh.mm.ss'))
-$logfileName = "logfile_$dateNow.log"
 $powershellVersion = $host.Version.Major
-$version = "1.5.20"
+$version = "1.5.21"
 
 # Paths
-$logFolderPath = Join-Path $rootPath 'logs'
-$LogPath = Join-Path $logFolderPath $logfileName
+$rootPath = getRootPath
+$logFolderPath = getLogPath | Split-Path
+$LogPath = getLogPath
 $sfsePath = Join-Path $rootPath 'sfse'
 $sfseBuildPath = (Join-Path $sfsePath 'build')
 $toolsPath = (Join-Path $rootPath 'tools')
@@ -23,6 +22,8 @@ $pythonZipPath = (Join-Path $toolsPath 'python.zip')
 $psToolsPath = Join-Path $toolsPath 'pstools'
 $psToolsZipPath = Join-Path $toolsPath 'pstools.zip'
 $psExecPath = (Join-Path $psToolsPath 'psexec.exe')
+$patcherFolderPath = (Join-Path $rootPath 'patcher')
+$patcherPath = (Join-Path $patcherFolderPath 'patcher.py')
 
 
 # Change powershell executable depending on version
@@ -45,27 +46,27 @@ function installProg() {
 
     Switch ($name) {
         "git" {
-            writeToConsole "`n`t`tInstalling Git..." -logPath $LogPath
+            writeToConsole "`n`t`tInstalling Git..." -log
             Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -ArgumentList "-command choco install git -y --force | Out-File $LogPath -Append -Encoding UTF8"
             Break
         }
         "cmake" {
-            writeToConsole "`n`t`tInstalling CMake..." -logPath $LogPath
+            writeToConsole "`n`t`tInstalling CMake..." -log
             Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -ArgumentList "-command choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y --force | Out-File $LogPath -Append -Encoding UTF8"
             Break
         }
         "python" {
-            writeToConsole "`n`t`tInstalling Python 3..." -logPath $LogPath
+            writeToConsole "`n`t`tInstalling Python 3..." -log
             Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -ArgumentList "-command choco install python311 -y  --force | Out-File $LogPath -Append -Encoding UTF8"
             Break
         }
         "compiler" {
-            writeToConsole "`n`t`tInstalling C++ Build Tools, This might take a while.." -logPath $LogPath
+            writeToConsole "`n`t`tInstalling C++ Build Tools, This might take a while.." -log
             Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -ArgumentList "-command choco install visualstudio2019buildtools visualstudio2019-workload-vctools --passive -y --force | Out-File $LogPath -Append -Encoding UTF8"
             Break
         }
         "chocolatey" {
-            writeToConsole "`n`t`tInstalling chocolatey..." -logPath $LogPath
+            writeToConsole "`n`t`tInstalling chocolatey..." -log
 
             # Choco requires admin rights to install properly
             Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -ArgumentList "-command
@@ -78,7 +79,7 @@ function installProg() {
             Break
         }
         "uninstall" {
-            writeToConsole "`n`t`tUninstalling choco packages..." -logPath $LogPath
+            writeToConsole "`n`t`tUninstalling choco packages..." -log
 
             Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -ArgumentList "-command
             choco uninstall git git.install cmake cmake.install python311 visualstudio2019buildtools visualstudio2019-workload-vctools --confirm | Out-File $LogPath -Append -Encoding UTF8"
@@ -113,7 +114,7 @@ function checkCommand() {
     }
     catch [System.Management.Automation.CommandNotFoundException] {
         # If we're here command not found, so software probably not installed
-        logToFile $_.Exception $LogPath
+        logToFile $_.Exception
 
         $isCommand = $false
     }
@@ -134,15 +135,15 @@ function checkForCompiler() {
     }
     catch {
         # Clean-up left over files from check if failed
-        if (fileExists $PSScriptRoot '__cmake_systeminformation') {
+        if (fileExists -Path $PSScriptRoot -FileName '__cmake_systeminformation') {
             Remove-Item '__cmake_systeminformation' -Recurse
         }
 
         if ($output) {
-            logToFile $output $LogPath
+            logToFile $output
         }
 
-        logToFile $_.Exception $LogPath
+        logToFile $_.Exception
 
         return $False
     }
@@ -200,13 +201,13 @@ function askAndDownload() {
 function checkForBuildTools() {
     #Check if we already downloaded it
     if ($progsToInstall.contains("cmake")) {
-        writeToConsole "`n`t`t`t> Cmake not installed, cannot check for compiler..." -logPath $LogPath
+        writeToConsole "`n`t`t`t> Cmake not installed, cannot check for compiler..." -log
         return $false
     }
 
-    writeToConsole "`n`t`t`t> Checking for Compiler, this might take a sec..." -logPath $LogPath
+    writeToConsole "`n`t`t`t> Checking for Compiler, this might take a sec..." -log
     if (checkForCompiler) {
-        writeToConsole "`n`t`t`t> C++ compiler found" -logPath $LogPath
+        writeToConsole "`n`t`t`t> C++ compiler found" -log
         return $true
     }
 }
@@ -219,21 +220,21 @@ function checkDependencies() {
     "`n`tChecking to ensure all prerequisites are met..."
     "`n`tVisit the links for more info on each software"
 
-    writeToConsole ("`n`t`tChocolatey [https://chocolatey.org/] ...." + (& { if (isInstalled "chocolatey") { "`tInstalled" } else { "`tNot Found"; $progsToInstall.Add("chocolatey") } })) -logPath $LogPath
+    writeToConsole ("`n`t`tChocolatey [https://chocolatey.org/] ...." + (& { if (isInstalled "chocolatey") { "`tInstalled" } else { "`tNot Found"; $progsToInstall.Add("chocolatey") } })) -log
 
     if (![System.Convert]::ToBoolean((getConfigProperty "standalonePython"))) {
-        writeToConsole ("`n`t`tPython [https://www.python.org/] ...." + (& { if (isInstalled "python") { "`tInstalled" } else { "`tNot Found"; $progsToInstall.Add("python") } })) -logPath $LogPath
+        writeToConsole ("`n`t`tPython [https://www.python.org/] ...." + (& { if (isInstalled "python") { "`tInstalled" } else { "`tNot Found"; $progsToInstall.Add("python") } })) -log
     }
     else {
         installStandalonePython
-        writeToConsole ("`n`t`tPython [https://www.python.org/] .... Installed [Using Standalone]") -logPath $LogPath
+        writeToConsole ("`n`t`tPython [https://www.python.org/] .... Installed [Using Standalone]") -log
     }
 
-    writeToConsole ("`n`t`tCMake [https://cmake.org/] ...." + (& { if (isInstalled "cmake") { "`tInstalled" } else { "`tNot Found"; $progsToInstall.Add("CMake") } })) -logPath $LogPath
+    writeToConsole ("`n`t`tCMake [https://cmake.org/] ...." + (& { if (isInstalled "cmake") { "`tInstalled" } else { "`tNot Found"; $progsToInstall.Add("CMake") } })) -log
 
-    writeToConsole ("`n`t`tGit [https://git-scm.com/] ...." + (& { if (isInstalled "git") { "`tInstalled" } else { "`tNot Found"; $progsToInstall.Add("Git") } })) -logPath $LogPath
+    writeToConsole ("`n`t`tGit [https://git-scm.com/] ...." + (& { if (isInstalled "git") { "`tInstalled" } else { "`tNot Found"; $progsToInstall.Add("Git") } })) -log
 
-    writeToConsole ("`n`t`tC++ Build Tools ...." + (& { if (checkForBuildTools) { "`tInstalled" } else { "`tNot Found"; $progsToInstall.Add("compiler") } })) -logPath $LogPath
+    writeToConsole ("`n`t`tC++ Build Tools ...." + (& { if (checkForBuildTools) { "`tInstalled" } else { "`tNot Found"; $progsToInstall.Add("compiler") } })) -log
 
     if (![System.Convert]::ToBoolean((getConfigProperty "bypassPrompts"))) {
         Pause
@@ -241,7 +242,7 @@ function checkDependencies() {
 }
 
 function installStandalonePython() {
-    if (!(fileExists (Join-Path $pythonPath "python.exe"))) {
+    if (!(fileExists -Path $pythonPath -FileName "python.exe")) {
         try {
             $question = "`n`tPython has not been detected on your system, do you want to download a standalone version? [y/n]"
             askAndDownload -question $question -downloadURL $python -fileName "python.zip" -bypass ([System.Convert]::ToBoolean((getConfigProperty "bypassPrompts")))
@@ -256,8 +257,8 @@ function installStandalonePython() {
 
         }
         catch {
-            writeToConsole "`n`tFailed to download Python, exiting!" -logPath $LogPath
-            logToFile $_.Exception $LogPath
+            writeToConsole "`n`tFailed to download Python, exiting!" -log
+            logToFile $_.Exception
             Pause
             exit
         }
@@ -270,7 +271,7 @@ function installMissing() {
     $chocoOnlyDep = $progsToInstall.contains("chocolatey") -and $progsToInstall.ToArray().Count -eq 1
 
     if ($progsToInstall.ToArray().Count -eq 0 -or $chocoOnlyDep) {
-        writeToConsole "`n`t`tNothing to install, returning to menu..." -logPath $LogPath
+        writeToConsole "`n`t`tNothing to install, returning to menu..." -log
         Start-Sleep 5
     }
     else {
@@ -279,23 +280,19 @@ function installMissing() {
         if ($progsToInstall.contains("chocolatey") -and !$chocoOnlyDep) {
             $progsToInstall.Remove("chocolatey")
             installProg "chocolatey"
-
-            # Import choco for refreshenv command
-            $env:ChocolateyInstall = Convert-Path "$((Get-Command choco).Path)\..\.."
-            Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
         }
 
         foreach ($prog in $progsToInstall) {
             installProg $prog
         }
 
-        writeToConsole "`n`t`tRefreshing Environment" -logPath $LogPath
+        writeToConsole "`n`t`tRefreshing Environment" -log
         Start-Sleep 2
 
         # We need to refresh the env to detect new installs
-        refreshenv
+        refresh
 
-        writeToConsole "`n`t`tRe-checking dependencies" -logPath $LogPath
+        writeToConsole "`n`t`tRe-checking dependencies" -log
         checkDependencies
     }
 }
@@ -310,11 +307,11 @@ function cloneRepo() {
     try {
         # Delete SFSE if already preset
         if (fileExists $sfsePath) {
-            writeToConsole "`n`t`tSFSE already exists, removing first" -logPath $LogPath
+            writeToConsole "`n`t`tSFSE already exists, removing first" -log
             Remove-Item -Force -Recurse $sfsePath
         }
 
-        writeToConsole "`n`t`tCloning SFSE and Checking out CommitID!" -logPath $LogPath
+        writeToConsole "`n`t`tCloning SFSE and Checking out CommitID!" -log
 
         git clone https://github.com/gazzamc/sfse.git
         Set-Location "sfse"
@@ -327,8 +324,8 @@ function cloneRepo() {
     }
     catch {
         # Catch exception to prevent script failure
-        writeToConsole "`n`t`tFailed trying to checkout SFSE" -logPath $LogPath
-        logToFile $_.Exception $LogPath
+        writeToConsole "`n`t`tFailed trying to checkout SFSE" -log
+        logToFile $_.Exception
     }
 }
 
@@ -346,34 +343,33 @@ function buildRepo() {
         runProcessAndLog $poweshellExe $rootPath "-command cmake --build '$sfseBuildPath' --config Release" 60
         Clear-Host
 
-        writeToConsole "`n`t`tBuild finished, verifying!" -logPath $LogPath
+        writeToConsole "`n`t`tBuild finished, verifying!" -log
 
         if (fileExists $sfseBuildPath) {
-            writeToConsole "`n`t`tSuccessfully built" -logPath $LogPath
+            writeToConsole "`n`t`tSuccessfully built" -log
             if (![System.Convert]::ToBoolean((getConfigProperty "bypassPrompts"))) {
                 Pause
             }
         }
         else {
-            writeToConsole "`n`t`tCould not verify build, check manually!" -logPath $LogPath
+            writeToConsole "`n`t`tCould not verify build, check manually!" -log
             Pause
         }
     }
     catch {
         # Catch exception to prevent script failure
-        writeToConsole "`n`t`tError Building SFSE, check that you have C++ dev tools installed!" -logPath $LogPath
-        logToFile $_.Exception $LogPath
+        writeToConsole "`n`t`tError Building SFSE, check that you have C++ dev tools installed!" -log
+        logToFile -Content $_.Exception
         Pause
     }
 }
-
 function moveSFSEFiles() {
     # Reset path
     Clear-Host
     Set-Location $rootPath
 
     $gamePath = getConfigProperty "newGamePath"
-    writeToConsole "`n`t`tCopying SFSE Files to $gamePath..." -logPath $LogPath
+    writeToConsole "`n`t`tCopying SFSE Files to $gamePath..." -log
 
     $gameVersion = getGameVersion
     $filesToCopy = "sfse_loader.exe", "sfse_$gameVersion.dll"
@@ -388,10 +384,10 @@ function moveSFSEFiles() {
             # Check files exist
             foreach ($file in $filesToCopy) {
                 if (Test-Path -Path $gamePath -Filter $file) {
-                    writeToConsole "`n`t`t$file Successfully Copied!" -logPath $LogPath
+                    writeToConsole "`n`t`t$file Successfully Copied!" -log
                 }
                 else {
-                    writeToConsole "`n`t`tThere was an issue copying $file!" -logPath $LogPath
+                    writeToConsole "`n`t`tThere was an issue copying $file!" -log
                 }
             }
 
@@ -403,13 +399,13 @@ function moveSFSEFiles() {
     }
     catch {
         if ($_.Exception.GetType().Name -eq "RuntimeException") {
-            writeToConsole "`n`t`tFiles not found, please run build before trying to copy" -logPath $LogPath
+            writeToConsole "`n`t`tFiles not found, please run build before trying to copy" -log
         }
         else {
-            writeToConsole "`n`t`tAn Error occured during the copying of files, check log for more details" -logPath $LogPath
+            writeToConsole "`n`t`tAn Error occured during the copying of files, check log for more details" -log
         }
 
-        logToFile $_.Exception $LogPath
+        logToFile $_.Exception
         Pause
     }
 }
@@ -424,16 +420,16 @@ function patchFiles() {
         $fileName = getLatestFileName
         $dictFile = (Join-Path $rootPath (Join-Path 'hex_tables' $fileName))
         $pythonExe = 'python'
-        $updateArgs = 'hex_updater.py', '-m', 'update', '-p', (Join-Path $SFSEPath 'sfse'), '-d', "$dictFile"
-        $patchArgs = 'hex_updater.py', '-m', 'patch', '-p', $SFSEPath
-        $verifyArgs = 'hex_updater.py', '-m', 'md5', '-p', $SFSEPath, '--verify'
+        $updateArgs = $patcherPath, '-m', 'update', '-p', (Join-Path $SFSEPath 'sfse'), '-d', "$dictFile"
+        $patchArgs = $patcherPath, '-m', 'patch', '-p', $SFSEPath
+        $verifyArgs = $patcherPath, '-m', 'md5', '-p', $SFSEPath, '--verify'
 
         if (([System.Convert]::ToBoolean((getConfigProperty "standalonePython")))) {
             installStandalonePython
             $pythonExe = Join-Path $pythonPath 'python.exe'
         }
 
-        writeToConsole "`n`tPatching SFSE" -logPath $LogPath
+        writeToConsole "`n`tPatching SFSE" -log
 
         # Update hex values
         & $pythonExe $updateArgs | Out-File $LogPath -Append -Encoding UTF8
@@ -448,18 +444,18 @@ function patchFiles() {
         $verifyPatch | Out-File $LogPath -Append -Encoding UTF8
 
         if ($verifyPatch[-2].SubString(6, 18) -eq "All files matched!") {
-            writeToConsole "`n`t`tSuccessfully Patched SFSE" -logPath $LogPath
+            writeToConsole "`n`t`tSuccessfully Patched SFSE" -log
             if (![System.Convert]::ToBoolean((getConfigProperty "bypassPrompts"))) {
                 Pause
             }
         }
         else {
-            writeToConsole "`n`t`tUnsuccessfully Patched SFSE, check log to see which files failed md5 comparison" -logPath $LogPath
+            writeToConsole "`n`t`tUnsuccessfully Patched SFSE, check log to see which files failed md5 comparison" -log
             Pause
         }
     }
     catch {
-        logToFile $_.Exception $LogPath
+        logToFile $_.Exception
     }
 }
 
@@ -490,7 +486,7 @@ function checkSpaceReq() {
 
                 Space Required: $([Math]::Round($folderSize / 1Gb, 2)) Gb
                 Free Disk Space ($driveLetter): $([Math]::Round($space / 1Gb, 2)) Gb
-            " -logPath $LogPath
+            " -log
             Pause
         }
     }
@@ -513,8 +509,8 @@ function checkForPStools() {
 
         }
         catch {
-            writeToConsole "`n`tFailed to download PSTools, exiting!" -logPath $LogPath
-            logToFile $_.Exception $LogPath
+            writeToConsole "`n`tFailed to download PSTools, exiting!" -log
+            logToFile $_.Exception
             Pause
             exit
         }
@@ -538,13 +534,13 @@ function moveGameEXE() {
     checkForPStools
 
     try {
-        if (fileExists $newGamePath 'Starfield.exe') {
+        if (fileExists -Path $newGamePath -FileName 'Starfield.exe') {
             throw [System.Exception] "`n`tStarfield.exe was not copied as it already exists in $newGamePath!";
         }
 
         # We can't copy directly from game folder so we need to move and copy back
-        if (fileExists $gamePath 'Starfield.exe') {
-            writeToConsole "`n`tCopying Starfield.exe to new game folder!" -logPath $LogPath
+        if (fileExists -Path $gamePath -FileName 'Starfield.exe') {
+            writeToConsole "`n`tCopying Starfield.exe to new game folder!" -log
 
             # Calling powershell 7 from within psexec.exe does not seem to work, leaving it as powershell for now
             # as it's built-in to windows it should not cause issues as it's being called with system permissions anyway
@@ -554,7 +550,7 @@ function moveGameEXE() {
 
             # Check that permissions we're stripped from exe
             if (hasPermissions (Join-Path $newGamePath 'Starfield.exe') -checkVersionInfo) {
-                writeToConsole "`n`tStarfield.exe moved successfully!" -logPath $LogPath
+                writeToConsole "`n`tStarfield.exe moved successfully!" -log
             }
             else {
                 throw [System.IO.Exception] "Starfield.exe permissions we're not removed, please try again or check docs for manual process"
@@ -564,14 +560,14 @@ function moveGameEXE() {
             throw [System.IO.FileNotFoundException] "Starfield.exe cannot be found in game path $gamePath"
         }
 
-        if (fileExists $newGamePath 'Starfield.exe') {
+        if (fileExists -Path $newGamePath -FileName 'Starfield.exe') {
             Start-Process -Wait -Verb RunAs $psExecPath "-s -i -nobanner -accepteula powershell 
             Copy-Item (Join-Path '$newGamePath' 'Starfield.exe') -Destination (Join-Path '$gamePath' 'Starfield.exe')"
             Start-Sleep -Seconds 5
-            
+
             # check exe was copied back to starfield install folder
-            if (fileExists $gamePath 'Starfield.exe') {
-                writeToConsole "`n`tCopy of Starfield.exe created in original folder!" -logPath $LogPath
+            if (fileExists -Path $gamePath -FileName 'Starfield.exe') {
+                writeToConsole "`n`tCopy of Starfield.exe created in original folder!" -log
             }
 
             Start-Sleep -Seconds 5
@@ -582,18 +578,18 @@ function moveGameEXE() {
     }
     catch {
         if ($_.Exception.GetType().Name -eq "InvalidOperationException") {
-            writeToConsole "`n`tCannot find PsExec.exe, please check that PSTools has been downloaded to the tools folder." -logPath $LogPath
+            writeToConsole "`n`tCannot find PsExec.exe, please check that PSTools has been downloaded to the tools folder." -log
         }
         elseif ($_.Exception.GetType().Name -eq "FileNotFoundException") {
-            writeToConsole "`n`tStarfield.exe cannot be found in the folder specified, check log for more information!" -logPath $LogPath
+            writeToConsole "`n`tStarfield.exe cannot be found in the folder specified, check log for more information!" -log
         }
         else {
-            writeToConsole "`n`tFailed to copy Starfield.exe correctly, check log for more information!" -logPath $LogPath
+            writeToConsole "`n`tFailed to copy Starfield.exe correctly, check log for more information!" -log
             $msg = $_.Exception
             writeToConsole "`n`t > $msg"
         }
 
-        logToFile $_.Exception.Message $LogPath
+        logToFile $_.Exception.Message
         Pause
         Clear-Host
     }
@@ -601,16 +597,21 @@ function moveGameEXE() {
 
 function moveGameFiles() {
     Clear-Host
-    writeToConsole "`n`tMove/Hardlink Game Files.." -logPath $LogPath
+    writeToConsole "`n`tMove/Hardlink Game Files.." -log
 
-    $type = Read-Host -Prompt "
-    1. Copy Files
-    2. Hardlink Files (Does not work across drives)
-    q. Return
+    $choice = getConfigProperty "hardlinkOrCopy"
 
-    Choose the type of operation"
+    if ($choice -ne $null) {
+        $type = $choice
+    }
+    else {
+        $type = Read-Host -Prompt "
+        1. Copy Files
+        2. Hardlink Files (Does not work across drives)
+        q. Return
 
-
+        Choose the type of operation"
+    }
 
     Clear-Host
 
@@ -626,7 +627,7 @@ function moveGameFiles() {
             return
         }
 
-        writeToConsole "`n`tCopying files to new location!" -logPath $LogPath
+        writeToConsole "`n`tCopying files to new location!" -log
 
         # Copy over files
         ROBOCOPY $gamePath $newGamePath /E /XF (Join-Path $gamePath "Starfield.exe") /MIR /NDL /NJH /NJS |
@@ -646,7 +647,7 @@ function moveGameFiles() {
 
     }
     elseif ($type -eq 2) {
-        writeToConsole "`n`tHardlinking files to new location!" -logPath $LogPath
+        writeToConsole "`n`tHardlinking files to new location!" -log
 
         try {
             Get-ChildItem -Path $gamePath | ForEach-Object {
@@ -661,7 +662,7 @@ function moveGameFiles() {
             }
         }
         catch {
-            logToFile $_.Exception $LogPath
+            logToFile $_.Exception
         }
     }
 }
@@ -675,7 +676,7 @@ function autoInstall() {
     # Check if dependencies are installed otherwise redirect user back to main menu
     if ($progsToInstall.ToArray().Count -gt 0 -and !$chocoOnlyDep) {
         Clear-Host
-        writeToConsole "`n`tMissing dependencies, install all dependencies before proceeding: [$progsToInstall]" -logPath $LogPath
+        writeToConsole "`n`tMissing dependencies, install all dependencies before proceeding: [$progsToInstall]" -log
         Pause
         return
     }
@@ -800,6 +801,22 @@ function setPythonChoice() {
     }
 }
 
+function setFilesChoice() {
+    Clear-Host
+    $question = "Hardlink (same drive as original) or Copy Game files? [1/2]"
+    $confirmation = Read-Host $question
+    while ($confirmation -ne "1" -and $confirmation -ne "2") {
+        $confirmation = Read-Host $question
+    }
+
+    if ($confirmation -eq '1') {
+        setConfigProperty "hardlinkOrCopy" 1
+    }
+    elseif ($confirmation -eq '2') {
+        setConfigProperty "hardlinkOrCopy" 2
+    }
+}
+
 function welcomeScreen() {
     Clear-Host
     $title = (Get-Content -Raw "header.txt").Replace('x.x.x', $version).Replace('[at]', '@')
@@ -825,6 +842,7 @@ function welcomeScreen() {
     setGamePaths
     setPythonChoice
     setBypassChoice
+    setFilesChoice
 }
 
 
@@ -833,7 +851,18 @@ if (![System.Convert]::ToBoolean((getConfigProperty "debug"))) {
     $ErrorActionPreference = "Stop"
 }
 
-# Display start message/ set paths if missing
-if (!(testPath (getConfigProperty "gamePath")) -and !(testPath (getConfigProperty "newGamePath"))) { 
+# Display start message/ set paths if missing/invalid
+$pathsExistAndValid = $True
+
+if (!(testPath (getConfigPath))) {
+    $pathsExistAndValid = $False
+}
+elseif (getConfigProperty "gamePath" -and getConfigProperty "newGamePath") {
+    if (!(testPath (getConfigProperty "gamePath")) -or !(testPath (getConfigProperty "newGamePath"))) {
+        $pathsExistAndValid = $False
+    }
+}
+
+if (!$pathsExistAndValid) {
     welcomeScreen
 }

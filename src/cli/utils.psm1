@@ -2,46 +2,67 @@
 $rootPath = $PSScriptRoot | Split-Path
 $configPath = (Join-Path $rootPath 'config.json')
 
+# Log
+$dateNow = $((Get-Date).ToString('yyyy.MM.dd_hh.mm.ss'))
+$logfileName = "logfile_$dateNow.log"
+$logFolderPath = Join-Path $rootPath 'logs'
+$LogPath = Join-Path $logFolderPath $logfileName
+
 function testPath() {
     param (
+        [Parameter(Mandatory)]
         [string]$path
     )
-
-    if (!$path) {
-        return $false
-    }
 
     return Test-Path -LiteralPath $path
 }
 
+function getRootPath() {
+    return $rootPath
+}
+
+function getLogPath() {
+    return $LogPath
+}
+
+function getConfigPath() {
+    return $configPath
+}
+
 function fileExists() {
+    [CmdletBinding(DefaultParameterSetName = 'Path')]
     param (
-        [Parameter(Mandatory = $true)] [String] $path,
-        [Parameter(Mandatory = $false)] [String] $fileName
+        [Parameter(Mandatory, ParameterSetName = 'Path', Position = 0)]
+        [Parameter(Mandatory, ParameterSetName = 'PathAll', Position = 0)]
+        [string]$Path,
+
+        [Parameter(ParameterSetName = 'PathAll', Position = 1)]
+        [string]$FileName
     )
 
-    if ($fileName) {
+    if ($FileName.Length -gt 0) {
         $path = Join-Path $path $fileName
     }
 
 
-    return testPath $path
+    return testPath $Path
 }
 
 function getFullPath() {
     param (
-        [Parameter(Mandatory = $true)] [String] $file
+        [Parameter(Mandatory)] [String] $file
     )
     return (Join-Path $rootPath $file)
 }
 
 function logToFile() {
+    [CmdletBinding(DefaultParameterSetName = 'log')]
     param (
-        [Parameter(Mandatory = $true)] [String] $content,
-        [Parameter(Mandatory = $true)] [String] $filePath
+        [Parameter(Mandatory, ParameterSetName = 'log', Position = 0)]
+        [String] $content
     )
 
-    "$((Get-Date).ToString()) $content" | Out-File $filePath -Append -Encoding UTF8
+    "$((Get-Date).ToString()) $content" | Out-File $LogPath -Append -Encoding UTF8
 }
 
 function writeToConsole() {
@@ -49,12 +70,24 @@ function writeToConsole() {
         'PSAvoidUsingWriteHost', '',
         Justification = 'Color options')
     ]
+    [CmdletBinding(DefaultParameterSetName = 'Message-Host')]
     param (
-        [Parameter(Mandatory = $true)] [String] $msg,
-        [Parameter(Mandatory = $false)] [switch] $type,
-        [Parameter(Mandatory = $false)] [String] $color,
-        [Parameter(Mandatory = $false)] [String] $bgcolor,
-        [Parameter(Mandatory = $false)] [String] $logPath
+        [Parameter(Mandatory, ParameterSetName = 'Message-Host', Position = 0)]
+        [Parameter(Mandatory, ParameterSetName = 'Message-Host-Color', Position = 0)]
+        [Parameter(Mandatory, ParameterSetName = 'Message-Log', Position = 0)]
+        [String] $msg,
+
+        [Parameter(Mandatory, ParameterSetName = 'Message-Host-Color')]
+        [switch] $type,
+
+        [Parameter(Mandatory, ParameterSetName = 'Message-Host-Color')]
+        [String] $color,
+
+        [Parameter(ParameterSetName = 'Message-Host-Color')]
+        [String] $bgcolor,
+
+        [Parameter(Mandatory, ParameterSetName = 'Message-Log')]
+        [switch] $log
     )
 
     if ($type) {
@@ -68,9 +101,9 @@ function writeToConsole() {
 
         Write-Host $msg -ForegroundColor $color -BackgroundColor $bgcolor
     }
-    elseif ($logPath) {
-        Write-Information -MessageData $msg -InformationAction Continue -InformationVariable 'InfoMsg'
-        logToFile $InfoMsg $logPath
+    elseif ($log) {
+        Write-Information -MessageData $msg -InformationAction Continue
+        logToFile $msg
     }
     else {
         Write-Information -MessageData $msg -InformationAction Continue
@@ -88,8 +121,7 @@ function getLatestFileName() {
         return $files[$latestVersionidx]
     }
     catch {
-        logToFile $_.Exception $LogPath
-        Pause
+        logToFile $_.Exception
     }
 }
 
@@ -119,8 +151,7 @@ function getConfigProperty() {
         }
     }
     else {
-        logToFile "config not found - Path: $configPath" $LogPath
-        return
+        logToFile "config not found - Path: $configPath"
     }
 }
 
@@ -130,12 +161,12 @@ function setConfigProperty() {
         [string]$value
     )
     try {
-        if (!(fileExists $configPath)) { 
+        if (!(fileExists $configPath)) {
             $config = @{$property = $value }
         }
         else {
             $config = Get-Content -Raw $configPath | ConvertFrom-Json
-    
+
             if (!$config.$property) {
                 $config | Add-Member @{$property = $value }
             }
@@ -147,7 +178,7 @@ function setConfigProperty() {
         ConvertTo-Json $config -Depth 1 | Out-File $configPath -Force
     }
     catch {
-        logToFile $_.Exception $LogPath
+        logToFile $_.Exception
     }
 }
 
@@ -194,9 +225,9 @@ function runProcessAndLog() {
     $p.WaitForExit()
     $stdout = $p.StandardOutput.ReadToEnd()
     $stderr = $p.StandardError.ReadToEnd()
-    logToFile "stdout: $stdout" $logPath
-    logToFile "stderr: $stderr" $logPath
-    logToFile ("exit code: " + $p.ExitCode) $logPath
+    logToFile -Content "stdout: $stdout"
+    logToFile -Content "stderr: $stderr"
+    logToFile -Content ("exit code: " + $p.ExitCode)
 }
 
 function hasPermissions() {
@@ -233,4 +264,18 @@ function hasPermissions() {
     }
 
     return $false
+}
+
+function refresh() {
+    # Check if choco is installed, if so use it's command otherwise fallback to manual refresh
+    try {
+        # Import choco for refreshenv command
+        $env:ChocolateyInstall = Convert-Path "$((Get-Command choco).Path)\..\.."
+        Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
+
+        refreshenv
+    }
+    catch {
+        $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+    }
 }

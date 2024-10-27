@@ -1,1 +1,1 @@
-pwsh -command " Start-Process pwsh -Verb RunAs \""-noexit -command `\""cd '%cd%\scripts'; & '.\cli.ps1';`\""\""   "
+pwsh -command " Start-Process pwsh -Verb RunAs \""-noexit -command `\""cd '%cd%\src\cli'; & '.\cli.ps1';`\""\""   "
