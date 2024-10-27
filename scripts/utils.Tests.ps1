@@ -105,9 +105,9 @@ Describe "writeToConsole" {
             Get-Command writeToConsole | Should -HaveParameter bgcolor -Type String
             Get-Command writeToConsole | Should -HaveParameter bgcolor -Mandatory:$false
         }
-        It "should have an optional parameter named logPath" {
-            Get-Command writeToConsole | Should -HaveParameter logPath -Type String
-            Get-Command writeToConsole | Should -HaveParameter logPath -Mandatory:$false
+        It "should have an optional parameter named log" {
+            Get-Command writeToConsole | Should -HaveParameter log -Type switch
+            Get-Command writeToConsole | Should -HaveParameter log -Mandatory:$false
         }
     }
 
@@ -117,11 +117,11 @@ Describe "writeToConsole" {
             Should -Invoke Write-Information -ModuleName utils -Times 1
         }
 
-        It "should call Write-Information & logToFile when passing msg and logPath" {
+        It "should call Write-Information & logToFile when passing msg and log param" {
             #Add global variable for logpath
             $global:LogPath = '/path/'
 
-            writeToConsole -msg "test" -logPath '/fake/path'
+            writeToConsole -msg "test" -log
             Should -Invoke Write-Information -ModuleName utils -Times 1
             Should -Invoke logToFile -ModuleName utils -Times 1
 
@@ -256,6 +256,9 @@ Describe "setConfigProperty" {
         $configJson = '{ "gamePath":  "C:\\XboxGames\\Starfield\\Content" }'
 
         Mock -ModuleName utils -CommandName 'Get-Content' -MockWith { return $configJson }
+        Mock -ModuleName utils -CommandName 'ConvertFrom-Json' -MockWith { return @{ "gamePath" = "C:\\XboxGames\\Starfield\\Content" } }
+        Mock -ModuleName utils -CommandName 'ConvertTo-Json' -MockWith { return $configJson }
+        Mock -ModuleName utils -CommandName 'Add-Member'
     }
 
     It "should have a setConfigProperty function" {
@@ -264,15 +267,37 @@ Describe "setConfigProperty" {
 
     Context "functionality" {
         It "should create a new config file, if it doesn't already exist and store the given prop/val" {
+            Mock -ModuleName utils -CommandName 'fileExists' -MockWith { return $False }
+
+            setConfigProperty "key" "val" |
+
+            Should -Invoke Get-Content -ModuleName utils -Times 0
+            Should -Invoke ConvertTo-Json -ModuleName utils -Times 1
+            Should -Invoke Out-File -ModuleName utils -Times 1
         }
 
-        It "should replace the value of the propert if it already exists in the config" {
+        It "should extend the config file if it exists and key/val does not" {
+            Mock -ModuleName utils -CommandName 'fileExists' -MockWith { return $True }
+
+            setConfigProperty "key" "val" |
+
+            Should -Invoke Get-Content -ModuleName utils -Times 1
+            Should -Invoke ConvertTo-Json -ModuleName utils -Times 1
+            Should -Invoke ConvertFrom-Json -ModuleName utils -Times 1
+            Should -Invoke Out-File -ModuleName utils -Times 1
+            Should -Invoke Add-Member -ModuleName utils -Times 1
         }
 
-        It "should add the prop/value to the end of the file if it does not exist in the config" {
-        }
+        It "should replace the value of the property if it already exists in the config" {
+            Mock -ModuleName utils -CommandName 'fileExists' -MockWith { return $True }
 
-        It "should log any errors encountered" {
+            setConfigProperty "gamePath" "C:\\XboxGames\\Starfield\\Content" |
+
+            Should -Invoke Get-Content -ModuleName utils -Times 1
+            Should -Invoke ConvertTo-Json -ModuleName utils -Times 1
+            Should -Invoke ConvertFrom-Json -ModuleName utils -Times 1
+            Should -Invoke Out-File -ModuleName utils -Times 1
+            Should -Invoke Add-Member -ModuleName utils -Times 0
         }
     }
 }
