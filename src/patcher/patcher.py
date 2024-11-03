@@ -330,7 +330,7 @@ def patch(path, silent, backup):
 
                         if file == files_to_patch[2]:
                             # Check if already patched
-                            if line_count != 348:
+                            if line_count != 386:
                                     already_patched = True
                             else:
                                 for idx, line in enumerate(lines):
@@ -339,7 +339,7 @@ def patch(path, silent, backup):
                                         new_line = "//{}".format(old_line)
                                         lines.insert(idx, new_line)
 
-                                    if idx == 308:
+                                    if idx == 346:
                                         new_line = line.replace(
                                             convert([83, 116, 101, 97, 109]), 
                                             convert([
@@ -347,21 +347,21 @@ def patch(path, silent, backup):
                                                 116, 111, 114, 101
                                             ])
                                             )
-                                        lines.insert(310, new_line)
+                                        lines.insert(347, new_line)
 
                         if file == files_to_patch[1]:
                             # Check if already patched
-                            if line_count != 482:
-                                if str(lines[321]).startswith('//'):
+                            if line_count != 487:
+                                if str(lines[326]).startswith('//'):
                                     already_patched = True
                             else:
                                 for idx, line in enumerate(lines):
-                                    if idx >= 320 and idx <= 324:
+                                    if idx >= 325 and idx <= 329:
                                         old_line = lines.pop(idx)
                                         new_line = "//{}".format(old_line)
                                         lines.insert(idx, new_line)
 
-                                    if idx == 361:
+                                    if idx == 366:
                                         new_line = line.replace(
                                             convert([83, 116, 101, 97, 109]), 
                                             convert([
@@ -369,9 +369,9 @@ def patch(path, silent, backup):
                                                 116, 111, 114, 101
                                             ])
                                             )
-                                        lines.insert(362, new_line)
+                                        lines.insert(367, new_line)
 
-                                    elif idx >= 374 and idx <= 379:
+                                    elif idx >= 379 and idx <= 384:
                                         old_line = lines.pop(idx)
                                         new_line = "//{}".format(old_line)
                                         lines.insert(idx, new_line)
@@ -429,7 +429,7 @@ def main(argv):
         PATCH = "patch",
         MD5 = "md5"
 
-    version = "0.2.4"
+    version = "0.2.5"
 
     mode= ''
     path = ''
