@@ -8,7 +8,7 @@ $python = "https://www.python.org/ftp/python/3.11.8/python-3.11.8-embed-amd64.zi
 
 $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
 $powershellVersion = $host.Version.Major
-$version = "1.5.22"
+$version = "1.6.0"
 
 # Paths
 $rootPath = getRootPath
@@ -368,7 +368,12 @@ function moveSFSEFiles() {
     Clear-Host
     Set-Location $rootPath
 
-    $gamePath = getConfigProperty "newGamePath"
+    if (sfseRegistryExists) {
+        $gamePath = getConfigProperty "gamePath"
+    }
+    else {
+        $gamePath = getConfigProperty "newGamePath"
+    }
 
     # Remove any existing sfse files before copying
     $sfseItems = Get-ChildItem -Path $gamePath | Where-Object { $_.extension -in @(".dll", ".exe") -and ( $_.Name -match 'sfse') }
@@ -528,7 +533,13 @@ function checkForPStools() {
 
 function moveGameEXE() {
     $gamePath = getConfigProperty "gamePath"
-    $newGamePath = getConfigProperty "newGamePath"
+
+    if (sfseRegistryExists) {
+        $newGamePath = $gamePath | Split-Path
+    }
+    else {
+        $newGamePath = getConfigProperty "newGamePath"
+    }
 
     # Check for permissions before copying exe
     if (!(hasPermissions $newGamePath)) {
@@ -693,7 +704,7 @@ function autoInstall() {
     cloneRepo
     patchFiles
     buildRepo
-    moveGameFiles
+    setSFSERegistry
     moveSFSEFiles
     moveGameEXE
 
@@ -703,9 +714,8 @@ function autoInstall() {
     `n`t`thttps://github.com/gazzamc/starfield_hex_updater/blob/main/docs/compatibility"
     Pause
 }
-function setGamePaths() {
+function setGamePath() {
     Clear-Host
-    $pathNames = "`n`tGamePath", "`n`tNewGamePath"
     $noPathMsg = "`n`tPath inputted does not exist, please check that it exists! [q to exit]"
     $noPermissionMsg = "`n`tYou do not have the correct permissions for the path inputted, please use another! [q to exit]"
     $samePathMsg = "`n`tThe Gamepath and NewGamePath cannot be the same! [q to exit]"
@@ -717,60 +727,47 @@ function setGamePaths() {
 
         $gamePath = (getConfigProperty "gamePath")
 
-        if ($path -eq $gamePath) {
-            return $true
+        if ($null -eq $gamePath) {
+            $gamePath = getStarfieldPath
+            $gamePathSymLink = getStarfieldPath -symlink
         }
 
-        if ((Join-Path $path "Content") -eq $gamePath) {
+        if ($path.Contains($gamePath) -or $path.Contains($gamePathSymLink)) {
             return $true
         }
 
         return $false
     }
 
-    foreach ($pathName in $pathNames) {
-        $continue = $true;
+    $continue = $true;
+    $inputMsg = "`n`tNewGamePath"
 
-        # Get initial input
-        $inputtedPath = Read-Host $pathName;
-        $inputtedPathTrimmed = $inputtedPath.trim()
+    # Get initial input
+    $inputtedPath = Read-Host $inputMsg;
+    $inputtedPathTrimmed = $inputtedPath.trim()
 
-        while ($continue) {
-            if (!$inputtedPathTrimmed -or !(fileExists $inputtedPathTrimmed)) {
-                if ($inputtedPathTrimmed -eq 'q') { exit }
-                writeToConsole $noPathMsg
-            }
-            elseif ($pathName -eq $pathNames[1] -and (isSamePath $inputtedPathTrimmed)) {
-                if ($inputtedPathTrimmed -eq 'q') { exit }
-                writeToConsole $samePathMsg
-            }
-            # check if user has full control permissions in newgamepath
-            elseif ($pathName -eq $pathNames[1] -and !(hasPermissions $inputtedPathTrimmed)) {
-                if ($inputtedPathTrimmed -eq 'q') { exit }
-                writeToConsole $noPermissionMsg
-            }
-            else {
-                if ($pathName -eq $pathNames[0]) {
-                    # Add a check for the content folder, add it if not present
-                    $splitPath = $inputtedPathTrimmed.split('\')
-
-                    if ($splitPath[$splitPath.Length - 1].ToLower() -ne "content") {
-                        $inputtedPath = Join-Path $inputtedPathTrimmed "Content"
-                    }
-
-                    setConfigProperty "gamePath" $inputtedPath
-                }
-                else {
-                    setConfigProperty "newGamePath" $inputtedPathTrimmed
-                }
-
-                break
-            }
-
-            # Get new inputs after message
-            $inputtedPath = Read-Host $pathName
-            $inputtedPathTrimmed = $inputtedPath.trim()
+    while ($continue) {
+        if (!$inputtedPathTrimmed -or !(fileExists $inputtedPathTrimmed)) {
+            if ($inputtedPathTrimmed -eq 'q') { exit }
+            writeToConsole $noPathMsg
         }
+        elseif ((isSamePath $inputtedPathTrimmed)) {
+            if ($inputtedPathTrimmed -eq 'q') { exit }
+            writeToConsole $samePathMsg
+        }
+        # check if user has full control permissions in newgamepath
+        elseif (!(hasPermissions $inputtedPathTrimmed)) {
+            if ($inputtedPathTrimmed -eq 'q') { exit }
+            writeToConsole $noPermissionMsg
+        }
+        else {
+            setConfigProperty "newGamePath" $inputtedPathTrimmed
+            break
+        }
+
+        # Get new inputs after message
+        $inputtedPath = Read-Host $inputMsg
+        $inputtedPathTrimmed = $inputtedPath.trim()
     }
 }
 
@@ -831,27 +828,16 @@ function welcomeScreen() {
     $title = (Get-Content -Raw "header.txt").Replace('x.x.x', $version).Replace('[at]', '@')
 
     writeToConsole $title
-    writeToConsole "`n`tIn order to make the auto-install process as smooth as possible we'll set the path now, `n`tThis can be changed from the options menu." -type -color yellow -bgcolor black
-    writeToConsole "`n`tOnce the path is set, you won't see this screen again on start-up." -type -color yellow -bgcolor black
+    writeToConsole "`n`tIn order to make the auto-install process as smooth as possible we'll set some options now, `n`tThis can be changed from the options menu." -type -color yellow -bgcolor black
+    writeToConsole "`n`tOnce these are set, you won't see this screen again on start-up." -type -color yellow -bgcolor black
 
-    writeToConsole "`n`n`tGamePath:
-    `n`tThe original location installed by xbox app eg. C:\XboxGames\Starfield,
-    `n`tIf you have not set the install folder in 'Options > Install Options' within the Xbox app, `n`tplease do so now and restart the script."
-
-    writeToConsole "`n`n`tNewGamePath:
-    `n`tThe new path that we will copy/hardlink the game files to in order to use SFSE,
-    `n`tThis can be anywhere you choose but Hardlinking cannot be done across drives.
-
-    `tOptions:
-    `n`t`t Hardlinking: `n`n`t`t`tSaves space but will be modified when game updates (or deleted)
-    `n`t`t Copying: `n`n`t`t`tRequires more space but will avoid issues after game updates,
-                    `n`t`t`thas continued to work after updates so far.`n"
+    writeToConsole "`n`tCopying the game files is no longer required as of v1.6.0," -type -color yellow -bgcolor black
+    writeToConsole "`tsfse_loader can now be executed directly in the game folder," -type -color yellow -bgcolor black
+    writeToConsole "`tbut the option is still available via the menus." -type -color yellow -bgcolor black
 
     Pause
-    setGamePaths
     setPythonChoice
     setBypassChoice
-    setFilesChoice
 }
 
 
@@ -860,15 +846,19 @@ if (![System.Convert]::ToBoolean((getConfigProperty "debug"))) {
     $ErrorActionPreference = "Stop"
 }
 
-# Display start message/ set paths if missing/invalid
+# Display start message/ set path if missing/invalid
 $pathsExistAndValid = $True
 
 if (!(testPath (getConfigPath))) {
     $pathsExistAndValid = $False
 }
-elseif (getConfigProperty "gamePath" -and getConfigProperty "newGamePath") {
-    if (!(testPath (getConfigProperty "gamePath")) -or !(testPath (getConfigProperty "newGamePath"))) {
-        $pathsExistAndValid = $False
+else {
+    $gamePathConfig = getConfigProperty "gamePath"
+    $gamePathReg = getStarfieldPath
+
+    if ($gamePathReg -ne $gamePathConfig) {
+        # gamePath doesn't exist, update it
+        setConfigProperty "gamePath" $gamePathReg
     }
 }
 
