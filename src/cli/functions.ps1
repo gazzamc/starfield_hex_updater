@@ -8,7 +8,7 @@ $python = "https://www.python.org/ftp/python/3.11.8/python-3.11.8-embed-amd64.zi
 
 $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
 $powershellVersion = $host.Version.Major
-$version = "1.5.21"
+$version = "1.5.22"
 
 # Paths
 $rootPath = getRootPath
@@ -311,7 +311,7 @@ function cloneRepo() {
             Remove-Item -Force -Recurse $sfsePath
         }
 
-        writeToConsole "`n`t`tCloning SFSE and Checking out CommitID!" -log
+        writeToConsole "`n`t`tCloning SFSE and Checking out CommitID: '$commit'" -log
 
         git clone https://github.com/gazzamc/sfse.git
         Set-Location "sfse"
@@ -369,6 +369,15 @@ function moveSFSEFiles() {
     Set-Location $rootPath
 
     $gamePath = getConfigProperty "newGamePath"
+
+    # Remove any existing sfse files before copying
+    $sfseItems = Get-ChildItem -Path $gamePath | Where-Object { $_.extension -in @(".dll", ".exe") -and ( $_.Name -match 'sfse') }
+
+    if ($sfseItems) {
+        logToFile -Content "Removing Existing SFSE files before copying."
+        $sfseItems | Remove-Item
+    }
+
     writeToConsole "`n`t`tCopying SFSE Files to $gamePath..." -log
 
     $gameVersion = getGameVersion
@@ -601,7 +610,7 @@ function moveGameFiles() {
 
     $choice = getConfigProperty "hardlinkOrCopy"
 
-    if ($choice -ne $null) {
+    if ($null -ne $choice) {
         $type = $choice
     }
     else {
