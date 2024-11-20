@@ -105,6 +105,8 @@ def generate_checksum_file(files, filename, silent):
 
 
 def getPatchedChecksums(silent=False):
+    errMsg = "md5 folder not found in script directory!, re-download folder from repo to continue."
+
     # check that md5 files exists
     md5FolderPath = get_full_path(ospath.abspath(
         os.path.dirname(__file__)), 'md5')
@@ -113,8 +115,7 @@ def getPatchedChecksums(silent=False):
         if not silent:
             print("md5 folder found, looking for md5 file...")
     else:
-        error_msg(
-            "md5 folder not found in script directory!, re-download folder from repo to continue.")
+        error_msg(errMsg)
         sys.exit()
 
     md5FileExists = ospath.exists(get_full_path(md5FolderPath, 'patched.md5'))
@@ -123,8 +124,7 @@ def getPatchedChecksums(silent=False):
         if not silent:
             print("md5 file found, comparing hashes!")
     else:
-        error_msg(
-            "Patched md5 file not found in md5 directory!, re-download file from repo to continue.")
+        error_msg(errMsg)
         sys.exit()
 
     patched_checksums = []
@@ -422,6 +422,11 @@ def patch(path, silent, backup):
 
                 move_file(path_to_file, abs_path, backup, True)
 
+
+def exit_with_msg(msg):
+    error_msg(msg)
+    exit(0)
+
 def main(argv):
     class MODE(str, Enum):
         UPDATE = "update",
@@ -429,7 +434,15 @@ def main(argv):
         PATCH = "patch",
         MD5 = "md5"
 
-    version = "0.2.5"
+    class MSG(str, Enum):
+        NO_PATH_HEX = "No paths provided for generating hex table",
+        NO_FILES_DICT = "No files to update, or dictionary not found",
+        EMPTY_PATH_WRONG_DIR = "Be sure to either run the script within the repo folder or point to the folder using [-p, --path] arguments",
+        NO_FILES_FOUND = "No Files found in provided path",
+        NO_MODE_SELECTED = "No mode selected, use -h, --help for usage",
+        NO_VERSION_COMMIT = "Game Version or CommitID not provided for output file"
+
+    version = "0.2.6"
 
     mode= ''
     path = ''
@@ -504,27 +517,34 @@ def main(argv):
         elif opt in ("-s", "--silent"):
             silent = True
 
+    print("Starfield Hex Updater - Patcher v{0}!".format(version))
+
     if mode == MODE.UPDATE:
-        if dict_file_name == '' or path == '':
-            error_msg("No paths provided for generating hex table")
-            sys.exit()
+        try:
+            dict_file_name
+        except NameError:
+            exit_with_msg(MSG.NO_PATH_HEX.value)
+        else:
+            if dict_file_name == '' or path == '':
+                exit_with_msg(MSG.NO_PATH_HEX.value)
 
         # Get files to update
         files = get_files(path)
         hex_dict = get_dict(dict_file_name)
 
         if len(files) == 0 or hex_dict is None:
-            error_msg("No files to update, or dictionary not found")
-            sys.exit()
+            exit_with_msg(MSG.NO_FILES_DICT.value)
 
         for file in files:
             update(get_full_path(path, file), hex_dict, backup)
 
     elif mode == MODE.GENERATE:
         if path == '' or path2 == '':
-            error_msg("No paths provided for generating hex table")
-            sys.exit()
-        
+            exit_with_msg(MSG.NO_PATH_HEX.value)
+
+        if game_version == '' or commit == '':
+            exit_with_msg(MSG.NO_VERSION_COMMIT.value)
+
         hex_file_name = "hex_table_{0}_{1}.json".format(game_version, commit)
         generate_hex_dict_for_dir(path, path2, hex_file_name, silent)
 
@@ -532,8 +552,7 @@ def main(argv):
         currDirName = ospath.basename(getcwd())
         if path == '' and currDirName != convert([115, 102, 115, 101]):
             # Check if we're in the correct directory
-            error_msg("Be sure to either run the script within the repo folder or point to the folder using [-p, --path] arguments")
-            sys.exit()
+            exit_with_msg(MSG.EMPTY_PATH_WRONG_DIR.value)
         
         patch(path, silent, backup)
 
@@ -541,22 +560,18 @@ def main(argv):
         currDirName = ospath.basename(getcwd())
         if path == '' and currDirName != convert([115, 102, 115, 101]):
             # Check if we're in the correct directory
-            error_msg(
-                "Be sure to either run the script within the repo folder or point to the folder using [-p, --path] arguments")
-            sys.exit()
+            exit_with_msg(MSG.EMPTY_PATH_WRONG_DIR.value)
 
         files = get_files(path, True)
         if len(files) == 0:
-            error_msg(
-                "No Files found in provided path")
-            sys.exit()
+            exit_with_msg(MSG.NO_FILES_DICT.value)
 
         if verify:
             verifyMd5(files, silent)
         else:
             generate_checksum_file(files, filename, silent)
     else:
-        warning_msg("No mode selected, use -h, --help for usage")
+        warning_msg(MSG.NO_MODE_SELECTED.value)
 
 if __name__ == "__main__":
    main(sys.argv[1:])

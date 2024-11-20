@@ -145,7 +145,7 @@ Do {
                 Write-Host "`t"
                 Write-Host "`tCopied/Hardlinked Path: $(getConfigProperty "newGamePath" )"
                 Write-Host "`t"
-                Write-Host "`t[Hardlink = 1, Copy = 2] : $(getConfigProperty "hardlinkOrCopy" )"
+                Write-Host "`t[Copy = 1, Hardlink = 2] : $(getConfigProperty "hardlinkOrCopy" )"
                 Write-Host "`t"
                 Write-Host "`tBypass Prompts: $(getConfigProperty "bypassPrompts" )"
                 Write-Host "`t"
