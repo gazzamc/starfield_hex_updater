@@ -149,6 +149,9 @@ function getConfigProperty() {
         if ($config.$property) {
             return $config.$property.toString()
         }
+        else {
+            return $false
+        }
     }
     else {
         logToFile "config not found - Path: $configPath"

@@ -803,7 +803,7 @@ function setPythonChoice() {
 
 function setFilesChoice() {
     Clear-Host
-    $question = "Hardlink (same drive as original) or Copy Game files? [1/2]"
+    $question = "(2) Hardlink (same drive as original) or (1) Copy Game files? [1/2]"
     $confirmation = Read-Host $question
     while ($confirmation -ne "1" -and $confirmation -ne "2") {
         $confirmation = Read-Host $question

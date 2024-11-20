@@ -222,10 +222,10 @@ Describe "getConfigProperty" {
             Should -Invoke Get-Content -ModuleName utils -Times 1
         }
 
-        It "should return $null if the property does not exist" {
+        It "should return $false if the property does not exist" {
             getConfigProperty "debug" |
 
-            Should -BeNullOrEmpty
+            Should -BeFalse
             Should -Invoke Get-Content -ModuleName utils -Times 1
         }
 
