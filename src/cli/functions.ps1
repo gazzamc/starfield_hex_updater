@@ -533,13 +533,7 @@ function checkForPStools() {
 
 function moveGameEXE() {
     $gamePath = getConfigProperty "gamePath"
-
-    if (sfseRegistryExists) {
-        $newGamePath = $gamePath | Split-Path
-    }
-    else {
-        $newGamePath = getConfigProperty "newGamePath"
-    }
+    $newGamePath = getConfigProperty "newGamePath"
 
     # Check for permissions before copying exe
     if (!(hasPermissions $newGamePath)) {
@@ -588,11 +582,6 @@ function moveGameEXE() {
             # check exe was copied back to starfield install folder
             if (fileExists -Path $gamePath -FileName 'Starfield.exe') {
                 writeToConsole "`n`tCopy of Starfield.exe created in original folder!" -log
-
-                # Clean up moved exe if using registry
-                if (sfseRegistryExists) {
-                    Remove-Item (Join-Path $newGamePath 'Starfield.exe')
-                }
             }
 
             Start-Sleep -Seconds 5
