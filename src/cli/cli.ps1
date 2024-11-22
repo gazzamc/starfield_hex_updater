@@ -76,6 +76,21 @@ Do {
                 switch ($moveGameFilesOption) {
                     1 {
                         Clear-Host
+
+                        $choice = getConfigProperty "hardlinkOrCopy"
+                        $newGamePath = getConfigProperty "newGamePath"
+
+                        if (!$choice -and !$newGamePath) {
+                            setFilesChoice
+                            setGamePath
+                        }
+                        elseif (!$choice) {
+                            setFilesChoice
+                        }
+                        elseif (!$newGamePath) {
+                            setGamePath
+                        }
+
                         moveGameFiles
                         break
                     }
@@ -105,7 +120,7 @@ Do {
                 switch ($setConfigOption) {
                     1 {
                         Clear-Host
-                        setGamePaths
+                        setGamePath
                         break
                     }
                     2 {
@@ -133,6 +148,16 @@ Do {
                         refresh
                         break
                     }
+                    7 {
+                        Clear-Host
+                        if (sfseRegistryExists) {
+                            removeSFSERegistry
+                        }
+                        else {
+                            setSFSERegistry
+                        }
+                        break
+                    }
                     Default {
                     }
                 }
@@ -141,6 +166,8 @@ Do {
                 Clear-Host
                 Write-Host "`n`t Config"
                 Write-Host "`t---------"
+                Write-Host "`tSFSE Enabled: $(sfseRegistryExists)"
+                Write-Host "`t"
                 Write-Host "`tGame Path: $(getConfigProperty "gamePath")"
                 Write-Host "`t"
                 Write-Host "`tCopied/Hardlinked Path: $(getConfigProperty "newGamePath" )"
@@ -157,9 +184,12 @@ Do {
                     1. Set Paths
                     2. Set Bypass Choice
                     3. Set Python Choice
-                    4. Set Game File Choice
+                    4. Set Game Transfer Choice
+                    
                     5. Uninstall Dependencies (Choco Packages only)
                     6. Refresh Environment (If Choco Packages are not detected)
+                    
+                    7. $(if (-Not (sfseRegistryExists)) {"Enable SFSE"} else {"Disable SFSE"})
                     q. Return
                 "
                 $setConfigOption = Read-Host "Choose an option"

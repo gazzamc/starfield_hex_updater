@@ -24,6 +24,7 @@ jobs:
           Write-host $PSVersionTable.PSVersion.Major $PSVersionTable.PSRemotingProtocolVersion.Minor
           Set-PSRepository psgallery -InstallationPolicy trusted
           Install-Module -Name Pester -RequiredVersion 5.6.1 -confirm:$false -Force
+          Install-Module -Name Assert
           Invoke-Pester -Path ./       
         shell: pwsh
 
@@ -36,6 +37,7 @@ jobs:
         Write-host $PSVersionTable.PSVersion.Major $PSVersionTable.PSRemotingProtocolVersion.Minor
         Set-PSRepository psgallery -InstallationPolicy trusted
         Install-Module -Name Pester -RequiredVersion 5.6.1 -Confirm:$false -Force
+        Install-Module -Name Assert
         Invoke-Pester -Path ./
         if ($Error[0].Fullyqualifiederrorid -eq 'PesterAssertionFailed') {exit 1}    
       shell: powershell

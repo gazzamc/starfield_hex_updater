@@ -28,6 +28,11 @@ Be vigilant of the hex table name `hex_table_{game_version}_{commit_id}.json`, i
 
 * As of `v1.5.10`, when setting the newGamePath, the permissions will be checked to ensure there's less issues when moving the Starfield executable.
 
+* As of `v1.6.0`:
+ - The script will now auto find the game install path and update the config
+ - SFSE can now be launched via winstore shortcut without the need to move files/exe to bypass permissions
+  - This option can be enabled/disabled in the script options, if you want to revert to vanilla
+
 ### Misc
 
 * Added a script to auto generate the hex table using the Address Libraries
