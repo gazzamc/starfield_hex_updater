@@ -289,6 +289,26 @@ function refresh() {
     }
 }
 
+function isSamePath() {
+    param (
+        [Parameter(Mandatory)]
+        [string]$path
+    )
+
+    $gamePath = (getConfigProperty "gamePath")
+
+    if (!($gamePath)) {
+        $gamePath = getStarfieldPath
+        $gamePathSymLink = getStarfieldPath -symlink
+    }
+
+    if ($gamePath.Contains($path) -or ($gamePathSymLink -and $gamePathSymLink.Contains($path))) {
+        return $true
+    }
+
+    return $false
+}
+
 function findRegistryKeys() {
     param (
         [Parameter(Mandatory)]
@@ -388,7 +408,7 @@ function getStarfieldPath() {
                 $trimmedPath = $gameRoot.Values[0].replace("\\?\", "")
 
                 if ($symlink) {
-                    return (Get-Item $trimmedPath).Target | Split-Path
+                    return (Get-Item $trimmedPath).Target
                 }
                 else {
                     return  $trimmedPath
@@ -489,4 +509,9 @@ function removeSFSERegistry() {
             Remove-Item $sfseExePath
         }
     }
+}
+
+function setSFSEPath() {
+    $gamePathReg = getStarfieldPath -symlink
+    setConfigProperty "gamePath" $gamePathReg
 }

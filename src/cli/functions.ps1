@@ -588,6 +588,11 @@ function moveGameEXE() {
             # check exe was copied back to starfield install folder
             if (fileExists -Path $gamePath -FileName 'Starfield.exe') {
                 writeToConsole "`n`tCopy of Starfield.exe created in original folder!" -log
+
+                # Clean up moved exe if using registry
+                if (sfseRegistryExists) {
+                    Remove-Item (Join-Path $newGamePath 'Starfield.exe')
+                }
             }
 
             Start-Sleep -Seconds 5
@@ -621,19 +626,10 @@ function moveGameFiles() {
 
     $choice = getConfigProperty "hardlinkOrCopy"
 
-    if ($null -ne $choice) {
+    if ($choice) {
         $type = $choice
     }
-    else {
-        $type = Read-Host -Prompt "
-        1. Copy Files
-        2. Hardlink Files (Does not work across drives)
-        q. Return
 
-        Choose the type of operation"
-    }
-
-    Clear-Host
 
     # Get path of game install and new location for files
     $gamePath = getConfigProperty "gamePath"
@@ -719,25 +715,6 @@ function setGamePath() {
     $noPathMsg = "`n`tPath inputted does not exist, please check that it exists! [q to exit]"
     $noPermissionMsg = "`n`tYou do not have the correct permissions for the path inputted, please use another! [q to exit]"
     $samePathMsg = "`n`tThe Gamepath and NewGamePath cannot be the same! [q to exit]"
-
-    function isSamePath() {
-        param (
-            [string]$path
-        )
-
-        $gamePath = (getConfigProperty "gamePath")
-
-        if ($null -eq $gamePath) {
-            $gamePath = getStarfieldPath
-            $gamePathSymLink = getStarfieldPath -symlink
-        }
-
-        if ($path.Contains($gamePath) -or $path.Contains($gamePathSymLink)) {
-            return $true
-        }
-
-        return $false
-    }
 
     $continue = $true;
     $inputMsg = "`n`tNewGamePath"
@@ -854,14 +831,14 @@ if (!(testPath (getConfigPath))) {
 }
 else {
     $gamePathConfig = getConfigProperty "gamePath"
-    $gamePathReg = getStarfieldPath
+    $gamePathReg = getStarfieldPath -symlink
 
     if ($gamePathReg -ne $gamePathConfig) {
-        # gamePath doesn't exist, update it
-        setConfigProperty "gamePath" $gamePathReg
+        setSFSEPath
     }
 }
 
 if (!$pathsExistAndValid) {
     welcomeScreen
+    setSFSEPath
 }

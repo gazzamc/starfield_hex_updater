@@ -76,6 +76,21 @@ Do {
                 switch ($moveGameFilesOption) {
                     1 {
                         Clear-Host
+
+                        $choice = getConfigProperty "hardlinkOrCopy"
+                        $newGamePath = getConfigProperty "newGamePath"
+
+                        if (!$choice -and !$newGamePath) {
+                            setFilesChoice
+                            setGamePath
+                        }
+                        elseif (!$choice) {
+                            setFilesChoice
+                        }
+                        elseif (!$newGamePath) {
+                            setGamePath
+                        }
+
                         moveGameFiles
                         break
                     }

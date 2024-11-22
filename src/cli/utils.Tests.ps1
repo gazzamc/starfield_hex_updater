@@ -351,7 +351,7 @@ Describe "findRegistryKeys" {
             Should -Invoke logToFile -ModuleName utils -Times 1
 
             # Remove global variable
-            Remove-Variable -name LogPath -Scope Global
+            Remove-Variable -Name LogPath -Scope Global
         }
     }
 }
@@ -426,7 +426,7 @@ Describe "findRegistryValues" {
             Should -Invoke logToFile -ModuleName utils -Times 1
 
             # Remove global variable
-            Remove-Variable -name LogPath -Scope Global
+            Remove-Variable -Name LogPath -Scope Global
         }
     }
 }
@@ -548,7 +548,7 @@ Describe "getStarfieldPath" {
         It "should return the symlink path when pass symlink parameter" {
             getStarfieldPath -symlink |
 
-            Should -Be 'symlink'
+            Should -Be 'symlink/path'
             Should -Invoke getStarfieldPackage -ModuleName utils -Times 1
             Should -Invoke findRegistryKeys -ModuleName utils -Times 1
             Should -Invoke findRegistryValues -ModuleName utils -Times 1
@@ -764,6 +764,95 @@ Describe "setSFSERegistry" {
             Should -Invoke Test-Path -ModuleName utils -Times 0
             Should -Invoke Copy-Item -ModuleName utils -Times 0
             Should -Invoke Set-ItemProperty -ModuleName utils -Times 0
+        }
+    }
+}
+
+Describe "isSamePath" {
+    BeforeAll {        
+        $moduleFunctions = (Get-Module -ListAvailable $modulePath).ExportedFunctions.Keys
+        Mock -ModuleName utils -CommandName 'getStarfieldPath'
+        Mock -ModuleName utils -CommandName Split-Path -MockWith { return }
+    }
+
+    It "should have a isSamePath function" {
+        $moduleFunctions | Should -Contain 'isSamePath'
+    }
+
+    Context "parameters" {
+        It "should have an optional parameter named key" {
+            Get-Command isSamePath | Should -HaveParameter path -Type string
+            Get-Command isSamePath | Should -HaveParameter path -Mandatory:$true
+        }
+    }
+
+    Context "functionality" {
+        It "should return $true if the path is the same" {
+            Mock -ModuleName utils -CommandName 'getConfigProperty' -MockWith { return "path/to/check" }
+            
+            isSamePath "path/to/check" |
+            
+            Should -BeTrue
+            Should -Invoke getStarfieldPath -ModuleName utils -Times 0
+            Should -Invoke getConfigProperty -ModuleName utils -Times 1
+        }
+
+        It "should return $true if the path is the parent directory" {
+            Mock -ModuleName utils -CommandName 'getConfigProperty' -MockWith { return "path/to/check" }
+            
+            isSamePath "path/to/" |
+            
+            Should -BeTrue
+            Should -Invoke getStarfieldPath -ModuleName utils -Times 0
+            Should -Invoke getConfigProperty -ModuleName utils -Times 1
+        }
+
+        It "should return $true if the path is the same (config unset)" {
+            Mock -ModuleName utils -CommandName 'getConfigProperty' -MockWith { return $false }
+            Mock -ModuleName utils -CommandName 'getStarfieldPath' -MockWith { return "path/to/check" }
+            Mock -ModuleName utils -CommandName 'getStarfieldPath' -ParameterFilter { $symlink -eq $true } -MockWith { return $true }
+            
+            isSamePath "path/to/check" |
+            
+            Should -BeTrue
+            Should -Invoke getStarfieldPath -ModuleName utils -Times 2
+            Should -Invoke getConfigProperty -ModuleName utils -Times 1
+        }
+
+        It "should return $true if the path is the parent directory (config unset)" {
+            Mock -ModuleName utils -CommandName 'getConfigProperty' -MockWith { return $false }
+            Mock -ModuleName utils -CommandName 'getStarfieldPath' -MockWith { return "path/to/check" }
+            Mock -ModuleName utils -CommandName 'getStarfieldPath' -ParameterFilter { $symlink -eq $true } -MockWith { return $true }
+            
+            isSamePath "path/to" |
+            
+            Should -BeTrue
+            Should -Invoke getStarfieldPath -ModuleName utils -Times 2
+            Should -Invoke getConfigProperty -ModuleName utils -Times 1
+        }
+
+        It "should return $true if the path is the same as symlink" {
+            Mock -ModuleName utils -CommandName 'getConfigProperty' -MockWith { return $false }
+            Mock -ModuleName utils -CommandName 'getStarfieldPath' -MockWith { return "" }
+            Mock -ModuleName utils -CommandName 'getStarfieldPath' -ParameterFilter { $symlink -eq $true } -MockWith { return "path/to/check" }
+            
+            isSamePath "path/to/check" |
+            
+            Should -BeTrue
+            Should -Invoke getStarfieldPath -ModuleName utils -Times 2
+            Should -Invoke getConfigProperty -ModuleName utils -Times 1
+        }
+
+        It "should return $true if the path is the symlink parent directory " {
+            Mock -ModuleName utils -CommandName 'getConfigProperty' -MockWith { return $false }
+            Mock -ModuleName utils -CommandName 'getStarfieldPath' -MockWith { return "" }
+            Mock -ModuleName utils -CommandName 'getStarfieldPath' -ParameterFilter { $symlink -eq $true } -MockWith { return "path/to/check" }
+            
+            isSamePath "path/to" |
+            
+            Should -BeTrue
+            Should -Invoke getStarfieldPath -ModuleName utils -Times 2
+            Should -Invoke getConfigProperty -ModuleName utils -Times 1
         }
     }
 }
