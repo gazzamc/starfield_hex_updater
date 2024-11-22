@@ -381,6 +381,10 @@ Describe "findRegistryValues" {
             Get-Command findRegistryValues | Should -HaveParameter value -Type String
             Get-Command findRegistryValues | Should -HaveParameter value -Mandatory:$false
         }
+        It "should have an optional parameter named returnFirstVal" {
+            Get-Command findRegistryValues | Should -HaveParameter returnFirstVal -Type switch
+            Get-Command findRegistryValues | Should -HaveParameter returnFirstVal -Mandatory:$false
+        }
     }
 
     Context "functionality" {
@@ -398,6 +402,14 @@ Describe "findRegistryValues" {
             $result = findRegistryValues "fake\registry\path" "key2"
             
             Assert-Equivalent -Actual $result -Expected $expected
+            Should -Invoke Get-ItemProperty -ModuleName utils -Times 1
+            Should -Invoke Test-Path -ModuleName utils -Times 1
+        }
+
+        It "should return a single value when passing returnValOnly" {
+            findRegistryValues "fake\registry\path" "key2" -returnFirstVal |
+            
+            Should -eq "value2"
             Should -Invoke Get-ItemProperty -ModuleName utils -Times 1
             Should -Invoke Test-Path -ModuleName utils -Times 1
         }
@@ -509,16 +521,11 @@ Describe "getStarfieldPath" {
     BeforeAll {
         $moduleFunctions = (Get-Module -ListAvailable $modulePath).ExportedFunctions.Keys
         
-        $obj = [hashtable]@{
-            key1 = "\\?\value1";
-        }
-
         $symObj = [PSCustomObject]@{Target = 'symlink/path' };
 
         Mock -ModuleName utils -CommandName 'getStarfieldPackage' -MockWith { return $True }
         Mock -ModuleName utils -CommandName 'findRegistryKeys' -MockWith { return $True }
-        Mock -ModuleName utils -CommandName 'findRegistryValues' -MockWith { return $obj }
-        Mock -ModuleName utils -CommandName 'findRegistryValues' -MockWith { return $obj }
+        Mock -ModuleName utils -CommandName 'findRegistryValues' -MockWith { return "\\?\value1" }
         
         Mock -ModuleName utils Get-Item -MockWith { return $symObj }
         Mock -ModuleName utils Split-Path -ParameterFilter { $Path -eq $symObj.Target } -MockWith { return $symObj.Target | Split-Path }
@@ -607,6 +614,7 @@ Describe "sfseRegistryExists" {
         Mock -ModuleName utils -CommandName 'getRegConfigPath' -MockWith { return $True }
         Mock -ModuleName utils -CommandName 'Test-Path' -MockWith { return $True }
         Mock -ModuleName utils -CommandName 'logToFile'
+        Mock -ModuleName utils -CommandName 'findRegistryValues'
     }
 
     It "should have a sfseRegistryExists function" {
@@ -614,15 +622,30 @@ Describe "sfseRegistryExists" {
     }
 
     Context "functionality" {
-        It "should return $true if exist" {
+        It "should return $true if the registry exist and has been updated" {
+            Mock -ModuleName utils -CommandName 'findRegistryValues' -MockWith { return "sfse_loader.exe" }
+
             sfseRegistryExists |
 
             Should -BeTrue
             Should -Invoke logToFile -ModuleName utils -Times 0
             Should -Invoke getRegConfigPath -ModuleName utils -Times 1
+            Should -Invoke findRegistryValues -ModuleName utils -Times 1
         }
 
-        It "should return $false and write to log if it does NOT exist" {
+        It "should return $false if the registry exists and has been not been updated" {
+            Mock -ModuleName utils -CommandName 'findRegistryValues' -MockWith { return "starfield.exe" }
+
+            sfseRegistryExists |
+
+            Should -BeFalse
+            Should -Invoke logToFile -ModuleName utils -Times 0
+            Should -Invoke getRegConfigPath -ModuleName utils -Times 1
+            Should -Invoke findRegistryValues -ModuleName utils -Times 1
+        } 
+
+        It "should return $false if the registry does not exist and write to log" {
+            Mock -ModuleName utils -CommandName 'findRegistryValues' -MockWith { return $False }
             Mock -ModuleName utils -CommandName 'Test-Path' -MockWith { return $False }
 
             sfseRegistryExists |
@@ -630,6 +653,7 @@ Describe "sfseRegistryExists" {
             Should -BeFalse
             Should -Invoke logToFile -ModuleName utils -Times 1
             Should -Invoke getRegConfigPath -ModuleName utils -Times 1
+            Should -Invoke findRegistryValues -ModuleName utils -Times 0
         }
     }
 }
@@ -708,7 +732,6 @@ Describe "setSFSERegistry" {
         Mock -ModuleName utils -CommandName 'backupGameReg'
         Mock -ModuleName utils -CommandName 'logToFile'
         
-        Mock -ModuleName utils -CommandName 'Copy-Item'
         Mock -ModuleName utils -CommandName 'Set-ItemProperty'
         Mock -ModuleName utils -CommandName 'Test-Path' -MockWith { return $True }
     }
@@ -729,9 +752,8 @@ Describe "setSFSERegistry" {
             Should -Invoke getRegConfigPath -ModuleName utils -Times 1
             Should -Invoke sfseRegistryExists -ModuleName utils -Times 1
             Should -Invoke backupGameReg -ModuleName utils -Times 1
-            Should -Invoke Test-Path -ModuleName utils -Times 2
+            Should -Invoke Test-Path -ModuleName utils -Times 1
 
-            Should -Invoke Copy-Item -ModuleName utils -Times 1
             Should -Invoke Set-ItemProperty -ModuleName utils -Times 1
             Should -Invoke logToFile -ModuleName utils -Times 1 
         }
@@ -747,7 +769,6 @@ Describe "setSFSERegistry" {
 
             Should -Invoke backupGameReg -ModuleName utils -Times 0
             Should -Invoke Test-Path -ModuleName utils -Times 0
-            Should -Invoke Copy-Item -ModuleName utils -Times 0
             Should -Invoke Set-ItemProperty -ModuleName utils -Times 0
         }
 
@@ -762,7 +783,6 @@ Describe "setSFSERegistry" {
 
             Should -Invoke backupGameReg -ModuleName utils -Times 0
             Should -Invoke Test-Path -ModuleName utils -Times 0
-            Should -Invoke Copy-Item -ModuleName utils -Times 0
             Should -Invoke Set-ItemProperty -ModuleName utils -Times 0
         }
     }

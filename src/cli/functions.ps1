@@ -702,7 +702,6 @@ function autoInstall() {
     buildRepo
     setSFSERegistry
     moveSFSEFiles
-    moveGameEXE
 
     Clear-Host
     writeToConsole "`n`tYou're ready to start using SFSE mods!"
@@ -805,12 +804,17 @@ function welcomeScreen() {
     $title = (Get-Content -Raw "header.txt").Replace('x.x.x', $version).Replace('[at]', '@')
 
     writeToConsole $title
-    writeToConsole "`n`tIn order to make the auto-install process as smooth as possible we'll set some options now, `n`tThis can be changed from the options menu." -type -color yellow -bgcolor black
+    writeToConsole "`n`tIn order to make the auto-install process as smooth as possible we'll set some options now, `n`tthis can be changed from the options menu." -type -color yellow -bgcolor black
     writeToConsole "`n`tOnce these are set, you won't see this screen again on start-up." -type -color yellow -bgcolor black
 
-    writeToConsole "`n`tCopying the game files is no longer required as of v1.6.0," -type -color yellow -bgcolor black
-    writeToConsole "`tsfse_loader can now be executed directly in the game folder," -type -color yellow -bgcolor black
-    writeToConsole "`tbut the option is still available via the menus." -type -color yellow -bgcolor black
+    writeToConsole "`n`tCopying the game files, executable to bypass permissions is no longer required to launch SFSE as of v1.6.0," -type -color yellow -bgcolor black
+    writeToConsole "`tAs is setting the game install path manually, this will be automatically set for you." -type -color yellow -bgcolor black
+
+    writeToConsole "`n`tSFSE will be enabled by default when using the 'auto' option," -type -color yellow -bgcolor black
+    writeToConsole "`tthis will allow you to launch SFSE via the winstore shortcut directly." -type -color yellow -bgcolor black
+
+    writeToConsole "`n`tYou can enable/disable this option via the options menu, when you want to play vanilla." -type -color green -bgcolor black
+    writeToConsole "`n"
 
     Pause
     setPythonChoice
@@ -831,7 +835,7 @@ if (!(testPath (getConfigPath))) {
 }
 else {
     $gamePathConfig = getConfigProperty "gamePath"
-    $gamePathReg = getStarfieldPath -symlink
+    $gamePathReg = getStarfieldPath
 
     if ($gamePathReg -ne $gamePathConfig) {
         setSFSEPath

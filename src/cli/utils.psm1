@@ -297,7 +297,7 @@ function isSamePath() {
 
     $gamePath = (getConfigProperty "gamePath")
 
-    if (!($gamePath)) {
+    if (!$gamePath) {
         $gamePath = getStarfieldPath
         $gamePathSymLink = getStarfieldPath -symlink
     }
@@ -334,7 +334,8 @@ function findRegistryValues() {
     param (
         [Parameter(Mandatory)]
         [String] $path,
-        [String] $value
+        [String] $value,
+        [Switch] $returnFirstVal
     )
 
     if (!(Test-Path -Path $path)) {
@@ -357,7 +358,13 @@ function findRegistryValues() {
     else {
         $hashtable = @{}
         $result.psobject.properties | ForEach-Object { $hashtable[$_.Name] = $_.Value }
-        return $hashtable
+
+        if ($returnFirstVal) {
+            return $hashtable.Values[0]
+        }
+        else {
+            return $hashtable
+        }
     }
 }
 
@@ -402,10 +409,10 @@ function getStarfieldPath() {
 
         if ($gameRootKey) {
             $gameRootPath = Join-Path $uniqueKeyPath $gameRootKey
-            $gameRoot = findRegistryValues -path $gameRootPath -value "Root"
+            $gameRoot = findRegistryValues -path $gameRootPath -value "Root" -returnFirstVal
 
             if ($gameRoot) {
-                $trimmedPath = $gameRoot.Values[0].replace("\\?\", "")
+                $trimmedPath = $gameRoot.replace("\\?\", "")
 
                 if ($symlink) {
                     return (Get-Item $trimmedPath).Target
@@ -438,10 +445,15 @@ function getRegConfigPath() {
 function sfseRegistryExists() {
     $starfieldConfigPath = getRegConfigPath
     if ($starfieldConfigPath) {
-        $sfseExePath = Join-Path (Join-Path $starfieldConfigPath "Executable") '00000001'
+        $sfseExePath = Join-Path (Join-Path $starfieldConfigPath "Executable") '00000000'
         if (!(Test-Path -Path $sfseExePath)) {
-            logToFile -Content "SFSE registry entry does not exist!"
+            logToFile -Content "Starfield executable registry entry does not exist!"
             return $false
+        }
+
+        $value = findRegistryValues -path $sfseExePath -value "Name" -returnFirstVal
+        if ($value -ne "sfse_loader.exe") {
+            return $false;
         }
         else {
             return $true
@@ -456,9 +468,8 @@ function backupGameReg() {
 
     $starfieldConfigPath = getRegConfigPath
     if ($starfieldConfigPath) {
-        $gameVersionVal = findRegistryValues -path $starfieldConfigPath -value "Version"
-        if ($gameVersionVal) {
-            $version = $gameVersionVal.Values[0]
+        $version = findRegistryValues -path $starfieldConfigPath -value "Version" -returnFirstVal
+        if ($version) {
             $regFileName = "$version.reg"
 
             if (!(Test-Path -Path (Join-Path $regBkPath $regFileName))) {
@@ -479,18 +490,13 @@ function setSFSERegistry() {
     $starfieldConfigPath = getRegConfigPath
     if (!(sfseRegistryExists) -and $starfieldConfigPath) {
         $gameExePath = Join-Path (Join-Path $starfieldConfigPath "Executable") '00000000'
-        $sfseExePath = Join-Path (Join-Path $starfieldConfigPath "Executable") '00000001'
 
         # Backup reg if not already
         backupGameReg
 
         if ((Test-Path -Path $gameExePath)) {
-            Copy-Item $gameExePath $sfseExePath
-
-            if (Test-Path -Path $sfseExePath) {
-                Set-ItemProperty -Path $sfseExePath -Name "Name" -Value "sfse_loader.exe"
-                logToFile -Content "SFSE registry added successfully!"
-            }
+            Set-ItemProperty -Path $gameExePath -Name "Name" -Value "sfse_loader.exe"
+            logToFile -Content "SFSE registry added successfully!"
         }
     }
     else {
@@ -501,17 +507,17 @@ function setSFSERegistry() {
 function removeSFSERegistry() {
     $starfieldConfigPath = getRegConfigPath
     if ($starfieldConfigPath) {
-        $sfseExePath = Join-Path (Join-Path $starfieldConfigPath "Executable") '00000001'
-        if (!(Test-Path -Path $sfseExePath)) {
-            logToFile -Content "SFSE registry entry does not exist!"
+        $gameExePath = Join-Path (Join-Path $starfieldConfigPath "Executable") '00000000'
+        if (!(Test-Path -Path $gameExePath)) {
+            logToFile -Content "Starfield executable registry entry does not exist!"
         }
         else {
-            Remove-Item $sfseExePath
+            Set-ItemProperty -Path $gameExePath -Name "Name" -Value "Starfield.exe"
         }
     }
 }
 
 function setSFSEPath() {
-    $gamePathReg = getStarfieldPath -symlink
+    $gamePathReg = getStarfieldPath
     setConfigProperty "gamePath" $gamePathReg
 }

@@ -166,7 +166,7 @@ Do {
                 Clear-Host
                 Write-Host "`n`t Config"
                 Write-Host "`t---------"
-                Write-Host "`tRegistry Bypass: $(sfseRegistryExists)"
+                Write-Host "`tSFSE Enabled: $(sfseRegistryExists)"
                 Write-Host "`t"
                 Write-Host "`tGame Path: $(getConfigProperty "gamePath")"
                 Write-Host "`t"
@@ -185,9 +185,11 @@ Do {
                     2. Set Bypass Choice
                     3. Set Python Choice
                     4. Set Game Transfer Choice
+                    
                     5. Uninstall Dependencies (Choco Packages only)
                     6. Refresh Environment (If Choco Packages are not detected)
-                    7. $(if (-Not (sfseRegistryExists)) {"Add Registry Bypass"} else {"Remove Registry Bypass"})
+                    
+                    7. $(if (-Not (sfseRegistryExists)) {"Enable SFSE"} else {"Disable SFSE"})
                     q. Return
                 "
                 $setConfigOption = Read-Host "Choose an option"
