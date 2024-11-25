@@ -39,6 +39,12 @@ Do {
                     }
                     4 {
                         Clear-Host
+                        if (!(sfseRegistryExists)) {
+                            $newGamePath = getConfigProperty "newGamePath"
+                            if (!($newGamePath)) {
+                                setGamePath
+                            }
+                        }
                         moveSFSEFiles
                         break
                     }
@@ -96,6 +102,14 @@ Do {
                     }
                     2 {
                         Clear-Host
+
+                        if (!(sfseRegistryExists)) {
+                            $newGamePath = getConfigProperty "newGamePath"
+                            if (!($newGamePath)) {
+                                setGamePath
+                            }
+                        }
+
                         moveGameEXE
                         break
                     }
