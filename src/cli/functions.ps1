@@ -8,7 +8,7 @@ $python = "https://www.python.org/ftp/python/3.11.8/python-3.11.8-embed-amd64.zi
 
 $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
 $powershellVersion = $host.Version.Major
-$version = "1.6.0"
+$version = "1.6.1"
 
 # Paths
 $rootPath = getRootPath

@@ -1,5 +1,19 @@
 Import-Module (Join-Path $PSScriptRoot functions.ps1)
 
+$sfseEnabledMsg = "
+`n`tDisable 'SFSE Enabled' option (7) in the options menu to manually move files, 
+`n`tby default SFSE files will be moved to original game install folder 
+`n`tand will be enabled when starting via xbox app or shortcut."
+
+function promptUserPathNotExist() {
+    if (!(sfseRegistryExists)) {
+        $newGamePath = getConfigProperty "newGamePath"
+        if (!($newGamePath)) {
+            setGamePath
+        }
+    }
+}
+
 Do {
     switch ($mainMenuOption) {
         1 {
@@ -39,6 +53,7 @@ Do {
                     }
                     4 {
                         Clear-Host
+                        promptUserPathNotExist
                         moveSFSEFiles
                         break
                     }
@@ -62,40 +77,36 @@ Do {
         }
         5 {
             Clear-Host
+
+            if (sfseRegistryExists) {
+                writeToConsole $sfseEnabledMsg -type -color yellow
+                Pause
+                break
+            }
+
             Write-Host
             "
-            Due to security permissions SFSE cannot be injected into the Starfield.exe
-            from within it's original installation folder, to bypass this issue
-            we need to link/copy the game files to a place that gives the user full control.
-
-            `n`t`tCopy Files - Additional space required, but will not break when the game updates (Time limited).
-            `n`t`tHardlink - Saves space, but certain files will be modified when the game updates.
+            `n`t`tCopy Files - Additional space required.
+            `n`t`tHardlink - Saves space, but can only be used on same drive as the game install.
             "
 
             Do {
                 switch ($moveGameFilesOption) {
                     1 {
                         Clear-Host
-
                         $choice = getConfigProperty "hardlinkOrCopy"
-                        $newGamePath = getConfigProperty "newGamePath"
 
-                        if (!$choice -and !$newGamePath) {
-                            setFilesChoice
-                            setGamePath
-                        }
-                        elseif (!$choice) {
+                        if (!$choice) {
                             setFilesChoice
                         }
-                        elseif (!$newGamePath) {
-                            setGamePath
-                        }
 
+                        promptUserPathNotExist
                         moveGameFiles
                         break
                     }
                     2 {
                         Clear-Host
+                        promptUserPathNotExist
                         moveGameEXE
                         break
                     }
