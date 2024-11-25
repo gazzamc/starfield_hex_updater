@@ -3,7 +3,7 @@ Import-Module (Join-Path $PSScriptRoot functions.ps1)
 $sfseEnabledMsg = "
 `n`tDisable 'SFSE Enabled' option (7) in the options menu to manually move files, 
 `n`tby default SFSE files will be moved to original game install folder 
-`n`tand will be enabled by when starting via xbox app or shortcut."
+`n`tand will be enabled when starting via xbox app or shortcut."
 
 function promptUserPathNotExist() {
     if (!(sfseRegistryExists)) {
