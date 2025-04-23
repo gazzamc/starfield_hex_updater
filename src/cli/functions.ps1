@@ -8,7 +8,7 @@ $python = "https://www.python.org/ftp/python/3.11.8/python-3.11.8-embed-amd64.zi
 
 $progsToInstall = New-Object System.Collections.Generic.List[System.Object]
 $powershellVersion = $host.Version.Major
-$version = "1.6.1"
+$version = "1.6.2"
 
 # Paths
 $rootPath = getRootPath
@@ -52,7 +52,7 @@ function installProg() {
         }
         "cmake" {
             writeToConsole "`n`t`tInstalling CMake..." -log
-            Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -ArgumentList "-command choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y --force | Out-File $LogPath -Append -Encoding UTF8"
+            Start-Process -Wait -WindowStyle Hidden -Verb RunAs $poweshellExe -ArgumentList "-command choco install cmake --version=3.31.6 --installargs 'ADD_CMAKE_TO_PATH=System' -y --force | Out-File $LogPath -Append -Encoding UTF8"
             Break
         }
         "python" {
