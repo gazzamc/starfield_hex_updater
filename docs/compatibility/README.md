@@ -2,7 +2,7 @@
 
     Any SFSE Mod utilizing the Address Library should work on this version of SFSE. 
 
-    If the mods has updated for Starfield `v1.14.74` then it should be good, 
+    If the mods has updated for Starfield `v1.15.216` then it should be good, 
     otherwise get in contact with me and I'll add it to the incompatible list below.
 
     **NOTE** 
@@ -18,7 +18,7 @@
 
 #
 
-### Updated as of Starfield `v1.14.74`
+### Updated as of Starfield `v1.15.216`
 
 Incompatible Info:
 
@@ -36,13 +36,21 @@ Incompatible Info:
 
 
 #### A
+
+* [Auto Unlock SFSE](https://www.nexusmods.com/starfield/mods/5571)
+
 #### B
 
 * [Baka Achievement Enabler](https://www.nexusmods.com/starfield/mods/658)
+* [Baka Quit Game Fix](https://www.nexusmods.com/starfield/mods/1662)
 
 #### C
 #### D
 #### E
+
+
+* [Enemy Friendly Fire](https://www.nexusmods.com/starfield/mods/614)
+
 #### F
 #### G
 #### H
@@ -57,6 +65,9 @@ Incompatible Info:
 #### Q
 #### R
 #### S
+
+* [Smart Aiming](https://www.nexusmods.com/starfield/mods/1302)
+
 #### T
 #### U
 #### V
@@ -65,12 +76,13 @@ Incompatible Info:
 #### Y
 #### Z
 
+* [Zero Weight](https://www.nexusmods.com/starfield/mods/3475)
+
 
 # Incompatible
 
 #### A
 
-* ***** [Auto Unlock SFSE](https://www.nexusmods.com/starfield/mods/5571)
 * ** [ADS FOV Removed](https://www.nexusmods.com/starfield/mods/2192)
 * \* [Auto Recent Save Load](https://www.nexusmods.com/starfield/mods/2962)
 
@@ -78,7 +90,6 @@ Incompatible Info:
 
 * **** [Baka Disable My Games Folder](https://www.nexusmods.com/starfield/mods/1599)
 * ***** [Baka Quick Full Saves](https://www.nexusmods.com/starfield/mods/1750)
-* **** [Baka Quit Game Fix](https://www.nexusmods.com/starfield/mods/1662)
 * ***** [BetterConsole - Console Replacer and MOD Menu](https://www.nexusmods.com/starfield/mods/3683)
 
 #### C
@@ -96,7 +107,6 @@ Incompatible Info:
 
 #### E
 
-* ***** [Enemy Friendly Fire](https://www.nexusmods.com/starfield/mods/614)
 * ***** [Extended Activation and NPC Interaction Distance](https://www.nexusmods.com/starfield/mods/6260)
 
 #### F
@@ -138,7 +148,6 @@ Incompatible Info:
 #### S
 
 * ***** [Scanner Closest Path Highlighted (Scanner Path Improvements)](https://www.nexusmods.com/starfield/mods/6924)
-* ***** [Smart Aiming](https://www.nexusmods.com/starfield/mods/1302)
 * ***** [Simple Offence Suppression](https://www.nexusmods.com/starfield/mods/4456)
 * ***** [SlowerThanLight - Fly in a star system](https://www.nexusmods.com/starfield/mods/3541)
 * ***** [Starfield Community Patch](https://www.nexusmods.com/starfield/mods/1)
@@ -154,8 +163,6 @@ Incompatible Info:
 #### X
 #### Y
 #### Z
-
-* ***** [Zero Weight](https://www.nexusmods.com/starfield/mods/3475)
 
 # Obsolete 
 

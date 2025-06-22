@@ -290,11 +290,11 @@ def generate_hex_dict_for_dir(path1, path2, filename, silent):
 
 def patch(path, silent, backup):
     files_to_patch = [
-        convert([
-            80, 108, 117, 103, 
-            105, 110, 77, 97, 
-            110, 97, 103, 101, 
-            114, 46, 99, 112, 112]), 
+        # convert([ # No need to patch the address lib filename this release
+        #     80, 108, 117, 103,
+        #     105, 110, 77, 97,
+        #     110, 97, 103, 101,
+        #     114, 46, 99, 112, 112]),
         convert([
             73, 100, 101, 110, 116, 
             105, 102, 121, 69, 88, 
@@ -328,7 +328,7 @@ def patch(path, silent, backup):
                         line_count = len(lines)
                         already_patched = False
 
-                        if file == files_to_patch[2]:
+                        if file == files_to_patch[1]:
                             # Check if already patched
                             if line_count != 386:
                                     already_patched = True
@@ -349,7 +349,7 @@ def patch(path, silent, backup):
                                             )
                                         lines.insert(347, new_line)
 
-                        if file == files_to_patch[1]:
+                        if file == files_to_patch[0]:
                             # Check if already patched
                             if line_count != 487:
                                 if str(lines[326]).startswith('//'):
@@ -376,44 +376,44 @@ def patch(path, silent, backup):
                                         new_line = "//{}".format(old_line)
                                         lines.insert(idx, new_line)
 
-                        if file == files_to_patch[0]:
-                            # Check if already patched
-                            if str(lines[398]).startswith('//'):
-                                already_patched = True
-                            else:
-                                for idx, line in enumerate(lines):
-                                    if idx == 398:
-                                        old_line = lines.pop(idx)
-                                        new_line = "//{}".format(old_line)
-                                        lines.insert(idx, new_line)
+                        # if file == files_to_patch[0]:
+                        #     # Check if already patched
+                        #     if str(lines[398]).startswith('//'):
+                        #         already_patched = True
+                        #     else:
+                        #         for idx, line in enumerate(lines):
+                        #             if idx == 398:
+                        #                 old_line = lines.pop(idx)
+                        #                 new_line = "//{}".format(old_line)
+                        #                 lines.insert(idx, new_line)
 
-                                    if idx == 401:
-                                        old_line = lines.pop(idx)
-                                        new_line = line.replace(
-                                            convert([
-                                                45, 37, 100, 45, 
-                                                37, 100, 45, 37, 
-                                                100, 45, 37, 100, 
-                                                37, 115
-                                                ]), 
-                                            convert([
-                                                45, 37, 100, 45, 37, 
-                                                100, 45, 37, 100, 45, 
-                                                37, 100, 45, 37, 100
-                                            ])
-                                            )
-                                        lines.insert(idx, new_line)
+                        #             if idx == 401:
+                        #                 old_line = lines.pop(idx)
+                        #                 new_line = line.replace(
+                        #                     convert([
+                        #                         45, 37, 100, 45,
+                        #                         37, 100, 45, 37,
+                        #                         100, 45, 37, 100,
+                        #                         37, 115
+                        #                         ]),
+                        #                     convert([
+                        #                         45, 37, 100, 45, 37,
+                        #                         100, 45, 37, 100, 45,
+                        #                         37, 100, 45, 37, 100
+                        #                     ])
+                        #                     )
+                        #                 lines.insert(idx, new_line)
 
-                                    elif idx == 405:
-                                        old_line = lines.pop(idx)
-                                        new_line = line.replace(
-                                            convert([
-                                                98, 117, 105, 108, 100, 
-                                                84, 121, 112, 101
-                                                ]), 
-                                            convert([49])
-                                            )
-                                        lines.insert(idx, new_line)
+                        #             elif idx == 405:
+                        #                 old_line = lines.pop(idx)
+                        #                 new_line = line.replace(
+                        #                     convert([
+                        #                         98, 117, 105, 108, 100,
+                        #                         84, 121, 112, 101
+                        #                         ]),
+                        #                     convert([49])
+                        #                     )
+                        #                 lines.insert(idx, new_line)
 
                         if not silent and already_patched:
                             warning_msg("{} already patched".format(file))            
@@ -442,7 +442,7 @@ def main(argv):
         NO_MODE_SELECTED = "No mode selected, use -h, --help for usage",
         NO_VERSION_COMMIT = "Game Version or CommitID not provided for output file"
 
-    version = "0.2.6"
+    version = "0.2.7"
 
     mode= ''
     path = ''
