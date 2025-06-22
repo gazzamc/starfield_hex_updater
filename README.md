@@ -15,6 +15,8 @@ Be vigilant of the hex table name `hex_table_{game_version}_{commit_id}.json`, i
 
 ## Notes
 
+* For Starfield `v1.15.216` (and maybe beyond), you'll need a patched address library as a windows version was not released via nexus mods, this can be found on my discord.
+
 ### Patcher
 * As of `v0.1.3` the script can patch without providing the path, if placed in the root of the SFSE repo folder.
 
