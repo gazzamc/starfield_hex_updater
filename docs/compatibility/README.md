@@ -18,7 +18,7 @@
 
 #
 
-### Updated as of Starfield `v1.15.216`
+### Updated as of Starfield `v1.15.222`
 
 Incompatible Info:
 
@@ -36,21 +36,10 @@ Incompatible Info:
 
 
 #### A
-
-* [Auto Unlock SFSE](https://www.nexusmods.com/starfield/mods/5571)
-
 #### B
-
-* [Baka Achievement Enabler](https://www.nexusmods.com/starfield/mods/658)
-* [Baka Quit Game Fix](https://www.nexusmods.com/starfield/mods/1662)
-
 #### C
 #### D
 #### E
-
-
-* [Enemy Friendly Fire](https://www.nexusmods.com/starfield/mods/614)
-
 #### F
 #### G
 #### H
@@ -65,9 +54,6 @@ Incompatible Info:
 #### Q
 #### R
 #### S
-
-* [Smart Aiming](https://www.nexusmods.com/starfield/mods/1302)
-
 #### T
 #### U
 #### V
@@ -76,18 +62,19 @@ Incompatible Info:
 #### Y
 #### Z
 
-* [Zero Weight](https://www.nexusmods.com/starfield/mods/3475)
-
 
 # Incompatible
 
 #### A
 
 * ** [ADS FOV Removed](https://www.nexusmods.com/starfield/mods/2192)
+* **** [Auto Unlock SFSE](https://www.nexusmods.com/starfield/mods/5571)
 * \* [Auto Recent Save Load](https://www.nexusmods.com/starfield/mods/2962)
 
 #### B
 
+* ***** [Baka Achievement Enabler](https://www.nexusmods.com/starfield/mods/658)
+* ***** [Baka Quit Game Fix](https://www.nexusmods.com/starfield/mods/1662)
 * **** [Baka Disable My Games Folder](https://www.nexusmods.com/starfield/mods/1599)
 * ***** [Baka Quick Full Saves](https://www.nexusmods.com/starfield/mods/1750)
 * ***** [BetterConsole - Console Replacer and MOD Menu](https://www.nexusmods.com/starfield/mods/3683)
@@ -107,6 +94,7 @@ Incompatible Info:
 
 #### E
 
+* ***** [Enemy Friendly Fire](https://www.nexusmods.com/starfield/mods/614)
 * ***** [Extended Activation and NPC Interaction Distance](https://www.nexusmods.com/starfield/mods/6260)
 
 #### F
@@ -152,6 +140,7 @@ Incompatible Info:
 * ***** [SlowerThanLight - Fly in a star system](https://www.nexusmods.com/starfield/mods/3541)
 * ***** [Starfield Community Patch](https://www.nexusmods.com/starfield/mods/1)
 * ***** [Sprint Stuttering Fix](https://www.nexusmods.com/starfield/mods/884)
+* ***** [Smart Aiming](https://www.nexusmods.com/starfield/mods/1302)
 
 #### T
 #### U
@@ -163,6 +152,8 @@ Incompatible Info:
 #### X
 #### Y
 #### Z
+
+* ***** [Zero Weight](https://www.nexusmods.com/starfield/mods/3475)
 
 # Obsolete 
 
