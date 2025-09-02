@@ -1,9 +1,9 @@
 .vscode
 sfse/
-PSTools/
-python/
 logs/
-vswhere.exe
 config.json
 __cmake_systeminformation
 reg/
+tools/
+!/tools/hex_table_generator.py
+!/tools/README.md
